@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchSettings, updateSetting, fetchWebsiteContent, updateWebsiteContent } from '../../services/supabaseService';
 
 export default function WebTextos() {
+  const navigate = useNavigate();
   const [settings, setSettings] = useState({
     titleEs: '', titleEn: '',
     subtitleEs: '', subtitleEn: '',
@@ -84,12 +86,12 @@ export default function WebTextos() {
         updateSetting('maintenance_mode', settings.maintenanceMode, 'boolean'),
         updateSetting('meta_description_es', settings.metaEs),
         updateSetting('meta_description_en', settings.metaEn),
-        updateWebsiteContent('home_hero_title', { content_es: settings.titleEs, content_en: settings.titleEn }),
-        updateWebsiteContent('home_hero_desc', { content_es: settings.subtitleEs, content_en: settings.subtitleEn }),
-        updateWebsiteContent('about_hero_title', { content_es: settings.aboutHeroTitleEs, content_en: settings.aboutHeroTitleEn }),
-        updateWebsiteContent('about_hero_desc', { content_es: settings.aboutHeroDescEs, content_en: settings.aboutHeroDescEn }),
-        updateWebsiteContent('about_story_title', { content_es: settings.aboutStoryTitleEs, content_en: settings.aboutStoryTitleEn }),
-        updateWebsiteContent('about_story_text_1', { content_es: settings.aboutText1Es, content_en: settings.aboutText1En })
+        updateWebsiteContent('home_hero_title', { page: 'home', content_es: settings.titleEs, content_en: settings.titleEn }),
+        updateWebsiteContent('home_hero_desc', { page: 'home', content_es: settings.subtitleEs, content_en: settings.subtitleEn }),
+        updateWebsiteContent('about_hero_title', { page: 'about', content_es: settings.aboutHeroTitleEs, content_en: settings.aboutHeroTitleEn }),
+        updateWebsiteContent('about_hero_desc', { page: 'about', content_es: settings.aboutHeroDescEs, content_en: settings.aboutHeroDescEn }),
+        updateWebsiteContent('about_story_title', { page: 'about', content_es: settings.aboutStoryTitleEs, content_en: settings.aboutStoryTitleEn }),
+        updateWebsiteContent('about_story_text_1', { page: 'about', content_es: settings.aboutText1Es, content_en: settings.aboutText1En })
       ]);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -131,8 +133,8 @@ export default function WebTextos() {
           borderColor: settings.maintenanceMode ? '#fecaca' : '#e2e8f0',
           background: settings.maintenanceMode ? '#fff5f5' : '#ffffff'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, color: settings.maintenanceMode ? '#b91c1c' : '#0f172a' }}>
                 {settings.maintenanceMode ? '⚠️ Modo Mantenimiento ACTIVO' : 'Modo Mantenimiento'}
               </div>
@@ -140,10 +142,33 @@ export default function WebTextos() {
                 Cuando está activo, los clientes verán una pantalla de aviso.
               </div>
             </div>
-            <label className="premium-switch">
-              <input type="checkbox" checked={settings.maintenanceMode} onChange={(e) => handleToggleMaintenance(e.target.checked)} />
-              <span className="premium-slider" />
-            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+              {settings.maintenanceMode && (
+                <button
+                  onClick={() => {
+                    sessionStorage.setItem('maintenance_preview', 'true');
+                    navigate('/');
+                  }}
+                  style={{
+                    background: '#0f172a',
+                    color: 'white',
+                    border: 'none',
+                    padding: '7px 14px',
+                    borderRadius: 6,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  👁️ Ver vista previa
+                </button>
+              )}
+              <label className="premium-switch">
+                <input type="checkbox" checked={settings.maintenanceMode} onChange={(e) => handleToggleMaintenance(e.target.checked)} />
+                <span className="premium-slider" />
+              </label>
+            </div>
           </div>
         </div>
 
