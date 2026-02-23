@@ -13,13 +13,13 @@ export default function Privacy() {
     <>
       <SEO title={L.privacyTitle} description={L.privacyDesc} />
       <Navbar />
-      <div className="policy-page">
-        <div className="policy-page-hero policy-hero-legal">
-          <div className="section-eyebrow legal-eyebrow">{L.docs}</div>
-          <h1 className="policy-page-title">{L.privacyTitle}</h1>
-          <p style={{ fontSize: 13, color: '#6B7E94', marginTop: 8 }}>{L.lastUpdate}</p>
+      <div className="w-full min-h-screen bg-white">
+        <div className="grid place-items-center py-12 px-4 bg-gray-50 border-b border-gray-200">
+          <div className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-4">{L.docs}</div>
+          <h1 className="text-5xl md:text-6xl font-serif font-bold text-navy mb-6">{L.privacyTitle}</h1>
+          <p className="text-xs text-gray-500 mt-2">{L.lastUpdate}</p>
         </div>
-        <div className="policy-content">
+        <div className="max-w-3xl mx-auto px-4 py-12">
           <p>En <strong>Illa Pancha Ribadeo</strong> (en adelante, «nosotros») nos comprometemos a proteger tu privacidad. Esta política explica qué datos personales recopilamos, para qué los usamos y cuáles son tus derechos al respecto, de conformidad con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD).</p>
 
           <h2>1. Responsable del tratamiento</h2>
@@ -71,6 +71,29 @@ export default function Privacy() {
 
           <h2>8. Cambios en esta política</h2>
           <p>Podemos actualizar esta política para adaptarla a cambios legales o en nuestros servicios. Publicaremos la versión vigente siempre en esta página con la fecha de última actualización.</p>
+          <style>{`
+            .policy-content p {
+              @apply text-gray-700 leading-relaxed mb-4;
+            }
+            .policy-content h2 {
+              @apply font-serif text-2xl font-bold text-navy mb-4 mt-8;
+            }
+            .policy-content h2:first-of-type {
+              @apply mt-0;
+            }
+            .policy-content ul {
+              @apply list-disc list-inside text-gray-700 leading-relaxed ml-4 mb-4;
+            }
+            .policy-content li {
+              @apply text-gray-700 leading-relaxed mb-2;
+            }
+            .policy-content strong {
+              @apply font-bold text-slate-900;
+            }
+            .policy-content a {
+              @apply text-teal hover:underline;
+            }
+          `}</style>
         </div>
       </div>
       <Footer />

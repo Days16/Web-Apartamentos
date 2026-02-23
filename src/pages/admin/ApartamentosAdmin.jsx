@@ -434,7 +434,7 @@ export default function ApartamentosAdmin() {
   if (editing) {
     return (
       <>
-        <div className="main-header" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}>
+        <div className="flex items-center justify-between pb-6 mb-6 px-8 pt-8" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
               style={{
@@ -822,13 +822,14 @@ export default function ApartamentosAdmin() {
                         />
                       </div>
                     </div>
+
                     <div>
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: SECONDARY_COLOR, marginBottom: 8 }}>
                         Días de cancelación gratis
                       </label>
                       <input
                         type="number"
-                        value={formData.cancellation_days !== undefined ? formData.cancellation_days : 14}
+                        value={formData.cancellation_days !== undefined && formData.cancellation_days !== null ? formData.cancellation_days : 14}
                         onChange={(e) => handleInputChange('cancellation_days', parseInt(e.target.value) || 0)}
                         style={{
                           width: '100%',
@@ -840,13 +841,14 @@ export default function ApartamentosAdmin() {
                         min="0"
                       />
                     </div>
+
                     <div>
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: SECONDARY_COLOR, marginBottom: 8 }}>
                         % Depósito inicial
                       </label>
                       <input
                         type="number"
-                        value={formData.deposit_percentage !== undefined ? formData.deposit_percentage : 50}
+                        value={formData.deposit_percentage !== undefined && formData.deposit_percentage !== null ? formData.deposit_percentage : 50}
                         onChange={(e) => handleInputChange('deposit_percentage', parseInt(e.target.value) || 0)}
                         style={{
                           width: '100%',
@@ -1460,7 +1462,7 @@ export default function ApartamentosAdmin() {
   // ─── LISTADO DE APARTAMENTOS ─────────────────────────────────────────
   return (
     <>
-      <div className="main-header" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="flex items-center justify-between pb-6 mb-8 px-8 pt-8" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}>
         <div>
           <div style={{ fontSize: 28, fontWeight: 700, color: SECONDARY_COLOR }}>
             Apartamentos

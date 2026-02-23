@@ -25,65 +25,63 @@ export default function Sync() {
 
   return (
     <>
-      <div className="main-header">
+      <div className="flex items-center justify-between pb-6 mb-8 px-8 pt-8 border-b-2 border-gray-200">
         <div>
-          <div className="main-title">Sincronización iCal</div>
-          <div className="main-sub">
+          <div className="text-2xl font-bold text-gray-800">Sincronización iCal</div>
+          <div className="text-gray-500 text-sm mt-1">
             Sync automático cada 30 min · Última vez: {lastSync}
           </div>
         </div>
         <button
-          className="action-btn"
+          className={`px-4 py-2 text-white rounded font-medium transition-colors ${syncing ? 'bg-slate-500 cursor-not-allowed' : 'bg-[#1a5f6e] hover:bg-opacity-90 cursor-pointer'}`}
           onClick={handleSync}
           disabled={syncing}
-          style={{ background: syncing ? '#64748b' : undefined }}
         >
           {syncing ? '⟳ Sincronizando...' : 'Sincronizar todo ahora'}
         </button>
       </div>
 
-      <div className="main-body">
+      <div className="px-8 pb-8">
         {/* Aviso error */}
-        <div style={{ background: '#FDE8E8', border: '1px solid rgba(192,57,43,0.15)', padding: '12px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
-          <span style={{ color: '#C0392B', fontWeight: 600 }}>⚠</span>
-          <span style={{ color: '#8B1A1A' }}>
+        <div className="bg-red-50 border border-red-200/50 p-3 mb-4 rounded flex items-center gap-3 text-sm">
+          <span className="text-red-700 font-semibold">⚠</span>
+          <span className="text-red-900">
             <strong>Apt. Illa Pancha · Booking.com:</strong> URL de iCal caducada. Es necesario renovarla desde el panel de Booking para evitar dobles reservas.
           </span>
-          <a href="/admin/ical" style={{ marginLeft: 'auto', color: '#C0392B', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
+          <a href="/admin/ical" className="ml-auto text-red-700 text-xs font-bold tracking-widest uppercase hover:underline">
             Solucionar →
           </a>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden text-sm">
           {syncData.map((s, i) => (
             <div
               key={i}
-              className="table-row"
-              style={{ gridTemplateColumns: '1.5fr 2fr 2fr auto', gap: 24, alignItems: 'center' }}
+              className="grid grid-cols-[1.5fr_2fr_2fr_auto] gap-6 items-center px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
             >
-              <div style={{ fontWeight: 500, fontSize: 13, color: '#0f172a' }}>{s.apt}</div>
+              <div className="font-medium text-slate-900">{s.apt}</div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#64748b' }}>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500">
                   Booking.com
                 </span>
-                <span style={{ fontSize: 12, color: s.bk.startsWith('Error') ? '#C0392B' : '#334155' }}>
+                <span className={`text-xs ${s.bk.startsWith('Error') ? 'text-red-600' : 'text-slate-700'}`}>
                   {s.bk}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#64748b' }}>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500">
                   Airbnb
                 </span>
-                <span style={{ fontSize: 12, color: '#334155' }}>{s.ab}</span>
+                <span className="text-xs text-slate-700">{s.ab}</span>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span className={`badge ${s.ok ? 'badge-green' : 'badge-red'}`}>
+              <div className="flex gap-2 items-center">
+                <span className={`px-2 py-0.5 rounded text-[11px] font-medium uppercase tracking-wider ${s.ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                   {s.ok ? 'OK' : 'Error'}
                 </span>
-                <button className="action-btn action-btn-outline" style={{ padding: '4px 12px', fontSize: 10 }}>
+                <button className="px-3 py-1 border border-gray-300 text-gray-700 rounded hover:bg-gray-100 transition-colors text-xs font-medium">
                   Sync
                 </button>
               </div>
@@ -92,27 +90,27 @@ export default function Sync() {
         </div>
 
         {/* Ayuda */}
-        <div style={{ marginTop: 24, background: '#f8fafc', padding: 24 }}>
-          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: '#0f172a', marginBottom: 8 }}>
+        <div className="mt-6 bg-slate-50 p-6 rounded-lg">
+          <div className="font-serif text-xl text-slate-900 mb-2">
             ¿Cómo funciona la sincronización?
           </div>
-          <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.7, marginBottom: 12 }}>
+          <p className="text-sm text-slate-600 leading-relaxed mb-4">
             Nuestra web importa los calendarios iCal de Booking.com y Airbnb cada 30 minutos para bloquear automáticamente las fechas ya reservadas. También puedes sincronizar manualmente en cualquier momento.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#64748b', marginBottom: 6 }}>
+              <div className="text-[11px] font-bold tracking-widest uppercase text-slate-500 mb-1.5">
                 Importación (Booking/Airbnb → Tu web)
               </div>
-              <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.6 }}>
+              <div className="text-sm text-slate-700 leading-relaxed">
                 Cada 30 min se descarga el .ics de cada plataforma y se bloquean esas fechas en tu calendario.
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#64748b', marginBottom: 6 }}>
+              <div className="text-[11px] font-bold tracking-widest uppercase text-slate-500 mb-1.5">
                 Exportación (Tu web → Booking/Airbnb)
               </div>
-              <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.6 }}>
+              <div className="text-sm text-slate-700 leading-relaxed">
                 Tu web genera URLs iCal para cada apartamento que debes configurar en Booking y Airbnb.
               </div>
             </div>

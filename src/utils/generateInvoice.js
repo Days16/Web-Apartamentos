@@ -1,16 +1,19 @@
 import jsPDF from 'jspdf';
-import { fetchAllApartments, fetchAllExtras } from '../services/supabaseService';
+import { fetchAllApartments, fetchAllExtras, fetchSettings } from '../services/supabaseService';
 
 export default async function generateInvoice(reservation) {
-  const [apartments, extras] = await Promise.all([
-    fetchAllApartments(), fetchAllExtras()
+  const [apartments, extras, settings] = await Promise.all([
+    fetchAllApartments(), fetchAllExtras(), fetchSettings()
   ]);
 
   const siteSettings = {
-    cleaningFee: 40,
+    cleaningFee: 0,
     site_address: 'Ribadeo, Lugo, Galicia',
-    site_email: 'info@illapancha.com',
-    site_phone: '+34 982 XX XX XX'
+    site_email: settings?.site_email || 'info@illapancha.com',
+    site_phone: settings?.site_phone || '+34 982 XX XX XX',
+    cancelDays: settings?.cancellation_free_days || 14,
+    depositPct: settings?.payment_deposit_percentage || 50,
+    taxPct: settings?.tax_percentage || 10
   };
 
   const doc = new jsPDF();
@@ -160,12 +163,13 @@ export default async function generateInvoice(reservation) {
   doc.line(margin, y, 190, y);
   y += 6;
 
-  const deposit = reservation.deposit || Math.round((reservation.total || 840) * 0.5);
+  const depositPct = siteSettings.depositPct;
+  const deposit = reservation.deposit || Math.round((reservation.total || 840) * (depositPct / 100));
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(...darkGray);
-  doc.text('Deposito con tarjeta (50%) — Cobrado al reservar:', margin, y);
+  doc.text(`Deposito con tarjeta (${depositPct}%) — Cobrado al reservar:`, margin, y);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...blue);
   doc.text(deposit + ' EUR  ✓ Pagado', 175, y, { align: 'right' });
@@ -174,7 +178,7 @@ export default async function generateInvoice(reservation) {
   doc.setFont('helvetica', 'normal');
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...darkGray);
-  doc.text('Resto en efectivo (50%) — A pagar al llegar:', margin, y);
+  doc.text(`Resto en efectivo (${100 - depositPct}%) — A pagar al llegar:`, margin, y);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(138, 138, 138);
   doc.text(deposit + ' EUR  ⏳ Pendiente', 175, y, { align: 'right' });
@@ -186,7 +190,7 @@ export default async function generateInvoice(reservation) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(139, 94, 10);
-  doc.text('Cancelación gratuita hasta 14 días antes del check-in.', margin + 4, y + 6);
+  doc.text(`Cancelación gratuita hasta ${siteSettings.cancelDays} días antes del check-in.`, margin + 4, y + 6);
   doc.text('Pasado ese plazo se aplicará la política de cancelación indicada en los Términos y Condiciones.', margin + 4, y + 12);
   y += 24;
 

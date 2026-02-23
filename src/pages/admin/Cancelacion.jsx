@@ -51,23 +51,23 @@ export default function Cancelacion() {
 
   return (
     <>
-      <div className="main-header">
+      <div className="pl-6 pr-6 py-6 border-b border-gray-200 bg-white">
         <div>
-          <div className="main-title">Política de cancelación</div>
-          <div className="main-sub">Configura el reembolso del depósito</div>
+          <div className="text-2xl font-bold text-navy">Política de cancelación</div>
+          <div className="text-sm text-gray-600 mt-1">Configura el reembolso del depósito</div>
         </div>
       </div>
 
-      <div className="main-body">
-        <div className="card" style={{ padding: 32, maxWidth: 600, marginBottom: 16 }}>
-          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 22, color: '#0f172a', marginBottom: 6 }}>
+      <div className="p-6 bg-gray-50">
+        <div className="bg-white border border-gray-200 rounded-lg p-8 max-w-3xl mb-4">
+          <div className="font-serif text-xl text-navy mb-1.5">
             Días para cancelar con reembolso
           </div>
-          <div style={{ fontSize: 13, color: '#64748b', marginBottom: 28 }}>
+          <div className="text-xs text-slate-600 mb-7">
             Si el huésped cancela antes de este periodo, recupera el 100% del depósito
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 28 }}>
+          <div className="flex items-center gap-6 mb-7">
             <input
               type="range"
               className="slider"
@@ -76,46 +76,46 @@ export default function Cancelacion() {
               value={cancelDays}
               onChange={e => setCancelDays(+e.target.value)}
             />
-            <div style={{ textAlign: 'center', flexShrink: 0 }}>
-              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 52, fontWeight: 300, color: '#0f172a', lineHeight: 1 }}>
+            <div className="text-center flex-shrink-0">
+              <div className="font-serif text-5xl text-navy leading-none">
                 {cancelDays}
               </div>
-              <div style={{ fontSize: 12, color: '#64748b' }}>días</div>
+              <div className="text-xs text-slate-600">días</div>
             </div>
           </div>
 
-          <div className="policy-preview">
-            <div className="policy-box policy-box-green">
-              <div className="policy-box-label">Cancela con más de {cancelDays} días</div>
-              <div className="policy-box-value">100% reembolso</div>
+          <div className="grid grid-cols-2 gap-1">
+            <div className="bg-green-50 p-6">
+              <div className="text-xs font-bold text-green-700 mb-2">Cancela con más de {cancelDays} días</div>
+              <div className="font-serif text-2xl text-green-900">100% reembolso</div>
             </div>
-            <div className="policy-box policy-box-red">
-              <div className="policy-box-label">Cancela con menos de {cancelDays} días</div>
-              <div className="policy-box-value">Sin reembolso</div>
+            <div className="bg-red-50 p-6">
+              <div className="text-xs font-bold text-red-700 mb-2">Cancela con menos de {cancelDays} días</div>
+              <div className="font-serif text-2xl text-red-900">Sin reembolso</div>
             </div>
           </div>
 
-          <div style={{ background: '#FEF0D0', padding: 16, marginTop: 20, fontSize: 12, color: '#8B5E0A', lineHeight: 1.6 }}>
+          <div className="bg-amber-50 p-4 mt-5 text-xs text-amber-900 leading-relaxed">
             ⚠️ Esta política se muestra al cliente antes de confirmar el pago. Los cambios solo aplican a nuevas reservas.
           </div>
         </div>
       </div>
 
-      <div className="save-bar">
-        <span className="save-bar-hint">Política global: se aplicará a todos los apartamentos.</span>
-        <button className="action-btn" onClick={handleSave} disabled={saving} style={{ opacity: saving ? 0.7 : 1 }}>
+      <div className="fixed bottom-0 right-0 left-0 bg-white border-t border-gray-200 py-4 px-6 flex justify-between items-center z-50">
+        <span className="text-xs text-gray-600">Política global: se aplicará a todos los apartamentos.</span>
+        <button className="px-4 py-2 rounded-lg font-semibold transition-all cursor-pointer border-0 bg-teal-600 text-white hover:bg-teal-700" onClick={handleSave} disabled={saving} style={{ opacity: saving ? 0.7 : 1 }}>
           {saving ? 'Guardando...' : 'Guardar política'}
         </button>
       </div>
 
       {/* NOTIFICACIONES */}
       {success && (
-        <div style={{ position: 'fixed', bottom: 80, right: 24, background: '#4CAF50', color: '#fff', padding: '12px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, zIndex: 1001, animation: 'slideIn 0.3s ease-out' }}>
+        <div className="fixed bottom-20 right-6 bg-green-500 text-white px-5 py-3 rounded-lg text-xs font-semibold z-[1001]">
           {success}
         </div>
       )}
       {error && (
-        <div style={{ position: 'fixed', bottom: 80, right: 24, background: '#f44', color: '#fff', padding: '12px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, zIndex: 1001, animation: 'slideIn 0.3s ease-out' }}>
+        <div className="fixed bottom-20 right-6 bg-red-500 text-white px-5 py-3 rounded-lg text-xs font-semibold z-[1001]">
           ✗ {error}
         </div>
       )}

@@ -22,7 +22,7 @@
         "realOpinions": "Real<br /><em>opinions</em>",
         "verifiedReviews": "4.9 ★ · +220 verified reviews",
         "bookNowNoComm": "Book now no commission",
-        "freeCancel14": "Free cancellation · 14 days before"
+        "freeCancelDays": "Free cancellation · {days} days before"
     },
     "apartments": {
         "eyebrow": "Full collection",
@@ -88,7 +88,6 @@
     },
     "booking": {
         "steps": [
-            "Dates",
             "Details",
             "Extras",
             "Pay",
@@ -137,8 +136,7 @@
         "deposited": "Deposited",
         "cashRest": "Remainder on arrival",
         "onArrival": "on arrival",
-        "extrasSelected": "selected",
-        "extraSelected": "selected",
+        "taxesLabel": "Taxes & fees",
         "title0": "Choose your dates",
         "title1": "Your details",
         "title2": "Extras",
@@ -168,6 +166,7 @@
         "availability": "Availability",
         "howToGet": "How to get here",
         "faq": "FAQ",
+        "myReservation": "My Booking",
         "accessCol": "Access",
         "management": "Management panel",
         "admin": "Administration",

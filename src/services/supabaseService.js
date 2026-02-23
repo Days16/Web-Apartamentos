@@ -446,3 +446,50 @@ export async function submitContactMessage(message) {
   if (error) throw error;
   return data;
 }
+
+// ─── REGLAS DE RESERVA (MIN STAY) ──────────────────────────────────────────
+export async function fetchMinStayRules() {
+  const { data, error } = await supabase
+    .from('min_stay_rules')
+    .select('*')
+    .order('start_date');
+
+  if (error) {
+    console.error('Error fetching min stay rules:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function addMinStayRule(rule) {
+  const { data, error } = await supabase
+    .from('min_stay_rules')
+    .insert([rule])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateMinStayRule(id, updates) {
+  const { data, error } = await supabase
+    .from('min_stay_rules')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteMinStayRule(id) {
+  const { error } = await supabase
+    .from('min_stay_rules')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return true;
+}

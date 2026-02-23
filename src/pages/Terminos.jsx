@@ -3,23 +3,28 @@ import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import { useLang } from '../contexts/LangContext';
 import { useT } from '../i18n/translations';
+import { useSettings } from '../contexts/SettingsContext';
 
 export default function Terminos() {
   const { lang } = useLang();
+  const { settings } = useSettings();
   const T = useT(lang);
   const L = T.legal;
+
+  const cancelDays = settings?.cancellation_free_days || 14;
+  const depositPct = settings?.payment_deposit_percentage || 50;
 
   return (
     <>
       <SEO title={L.termsTitle} description={L.termsDesc} />
       <Navbar />
-      <div className="policy-page">
-        <div className="policy-page-hero policy-hero-legal">
-          <div className="section-eyebrow legal-eyebrow">{L.docs}</div>
-          <h1 className="policy-page-title">{L.termsTitle}</h1>
-          <p style={{ fontSize: 13, color: '#6B7E94', marginTop: 8 }}>{L.lastUpdate}</p>
+      <div className="w-full min-h-screen bg-white">
+        <div className="grid place-items-center py-12 px-4 bg-gray-50 border-b border-gray-200">
+          <div className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-4">{L.docs}</div>
+          <h1 className="text-5xl md:text-6xl font-serif font-bold text-navy mb-6">{L.termsTitle}</h1>
+          <p className="text-xs text-gray-500 mt-2">{L.lastUpdate}</p>
         </div>
-        <div className="policy-content">
+        <div className="max-w-3xl mx-auto px-4 py-12">
           <p>Estos Términos y Condiciones regulan la contratación de servicios de alojamiento turístico ofrecidos por <strong>Illa Pancha Ribadeo</strong> (en adelante, «el Propietario» o «nosotros») a través del sitio web <strong>illapancha.com</strong>. Al realizar una reserva, el cliente (en adelante, «el Huésped») acepta expresamente los presentes términos.</p>
 
           <h2>1. Identificación del prestador</h2>
@@ -36,7 +41,7 @@ export default function Terminos() {
           <ul>
             <li>Cumplimenta el formulario de reserva con sus datos personales.</li>
             <li>Selecciona las fechas y el apartamento deseado.</li>
-            <li>Abona el depósito del 50% del importe total mediante tarjeta de crédito o débito a través de la pasarela de pago segura (Stripe).</li>
+            <li>Abona el depósito del {depositPct}% del importe total mediante tarjeta de crédito o débito a través de la pasarela de pago segura (Stripe).</li>
             <li>Recibe la confirmación de reserva por correo electrónico.</li>
           </ul>
           <p>La reserva no se considerará confirmada hasta la recepción del email de confirmación. El Propietario se reserva el derecho a rechazar cualquier reserva en caso de indisponibilidad u otras circunstancias justificadas, en cuyo caso se devolverá íntegramente el depósito abonado.</p>
@@ -44,17 +49,17 @@ export default function Terminos() {
           <h2>4. Precios y forma de pago</h2>
           <p>Los precios indicados en la web incluyen el IVA aplicable y la limpieza final del apartamento. Se aplica el siguiente modelo de pago:</p>
           <ul>
-            <li><strong>50% del total:</strong> cobrado mediante tarjeta en el momento de la reserva.</li>
-            <li><strong>50% restante:</strong> abonado en efectivo a la llegada al apartamento.</li>
+            <li><strong>{depositPct}% del total:</strong> cobrado mediante tarjeta en el momento de la reserva.</li>
+            <li><strong>{100 - depositPct}% restante:</strong> abonado en efectivo a la llegada al apartamento.</li>
           </ul>
           <p>Los precios de los extras o servicios adicionales se detallan en el proceso de reserva y se abonan junto con el depósito inicial.</p>
 
           <h2>5. Política de cancelación</h2>
           <p>Las condiciones de cancelación son las siguientes:</p>
           <ul>
-            <li><strong>Más de 14 días antes del check-in:</strong> cancelación gratuita con devolución completa del depósito.</li>
-            <li><strong>Entre 7 y 14 días antes del check-in:</strong> se retiene el 50% del depósito abonado.</li>
-            <li><strong>Menos de 7 días antes del check-in:</strong> se retiene el 100% del depósito abonado.</li>
+            <li><strong>Más de {cancelDays} días antes del check-in:</strong> cancelación gratuita con devolución completa del depósito.</li>
+            <li><strong>Entre {Math.round(cancelDays / 2)} y {cancelDays} días antes del check-in:</strong> se retiene el 50% del depósito abonado.</li>
+            <li><strong>Menos de {Math.round(cancelDays / 2)} días antes del check-in:</strong> se retiene el 100% del depósito abonado.</li>
           </ul>
           <p>En caso de fuerza mayor debidamente acreditada (hospitalización, fallecimiento de familiar directo, etc.), el Propietario estudiará cada caso individualmente.</p>
 
@@ -91,6 +96,29 @@ export default function Terminos() {
 
           <h2>12. Legislación aplicable y jurisdicción</h2>
           <p>Estos términos se rigen por la legislación española. Para la resolución de cualquier controversia, las partes se someten, con renuncia expresa a cualquier otro fuero, a los Juzgados y Tribunales de Lugo (Galicia, España). Para conflictos de consumo, el Huésped también puede recurrir a la plataforma europea de resolución en línea de litigios: <strong>ec.europa.eu/consumers/odr</strong>.</p>
+          <style>{`
+            .policy-content p {
+              @apply text-gray-700 leading-relaxed mb-4;
+            }
+            .policy-content h2 {
+              @apply font-serif text-2xl font-bold text-navy mb-4 mt-8;
+            }
+            .policy-content h2:first-of-type {
+              @apply mt-0;
+            }
+            .policy-content ul {
+              @apply list-disc list-inside text-gray-700 leading-relaxed ml-4 mb-4;
+            }
+            .policy-content li {
+              @apply text-gray-700 leading-relaxed mb-2;
+            }
+            .policy-content strong {
+              @apply font-bold text-slate-900;
+            }
+            .policy-content a {
+              @apply text-teal hover:underline;
+            }
+          `}</style>
         </div>
       </div>
       <Footer />

@@ -85,26 +85,25 @@ export default function Mensajes() {
   if (selected) {
     return (
       <>
-        <div className="main-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="flex items-center justify-between pb-6 mb-8 px-8 pt-8 border-b-2 border-gray-200">
+          <div className="flex items-center gap-3">
             <button
-              className="action-btn action-btn-outline"
-              style={{ padding: '6px 14px' }}
+              className="px-3 py-1.5 text-sm font-medium border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
               onClick={() => setSelected(null)}
             >
               ← Volver
             </button>
             <div>
-              <div className="main-title">{selected.name}</div>
-              <div className="main-sub">{selected.email}</div>
+              <div className="text-2xl font-bold text-gray-800">{selected.name}</div>
+              <div className="text-gray-500 text-sm mt-1">{selected.email}</div>
             </div>
           </div>
         </div>
-        <div className="main-body">
-          <div className="card" style={{ padding: 32, maxWidth: 720 }}>
+        <div className="px-8 pb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 max-w-3xl">
             {/* MENSAJE ORIGINAL */}
-            <div style={{ background: '#f8fafc', padding: '20px 24px', marginBottom: 20, borderRadius: 4 }}>
-              <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+            <div className="bg-slate-50 p-6 mb-6 rounded-md">
+              <div className="text-xs text-slate-500 mb-2">
                 {new Date(selected.created_at).toLocaleDateString('es-ES', {
                   day: '2-digit',
                   month: '2-digit',
@@ -113,16 +112,16 @@ export default function Mensajes() {
                   minute: '2-digit'
                 })} · {selected.email}
               </div>
-              <div style={{ fontSize: 15, color: '#0f172a', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+              <div className="text-[15px] text-slate-900 leading-relaxed whitespace-pre-wrap break-words">
                 {selected.message}
               </div>
             </div>
 
             {/* RESPUESTA ANTERIOR */}
             {selected.replied && selected.reply_content && (
-              <div style={{ background: '#e8f5e9', padding: '20px 24px', marginBottom: 20, borderLeft: '3px solid #4caf50', borderRadius: 4 }}>
-                <div style={{ fontSize: 11, color: '#1b5e20', marginBottom: 8, fontWeight: 600 }}>Tu respuesta</div>
-                <div style={{ fontSize: 14, color: '#1b5e20', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+              <div className="bg-green-50 p-6 mb-6 border-l-4 border-green-500 rounded-md">
+                <div className="text-xs text-green-800 mb-2 font-semibold">Tu respuesta</div>
+                <div className="text-sm text-green-800 leading-relaxed whitespace-pre-wrap break-words">
                   {selected.reply_content}
                 </div>
               </div>
@@ -131,27 +130,26 @@ export default function Mensajes() {
             {/* RESPONDER */}
             {!selected.replied && (
               <>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: '#0f172a', marginBottom: 16 }}>
+                <div className="font-serif text-xl text-slate-900 mb-4">
                   Responder
                 </div>
                 <textarea
-                  className="form-control form-textarea"
+                  className="w-full px-4 py-3 border border-gray-300 rounded mb-3 text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
                   placeholder="Escribe tu respuesta..."
                   rows={5}
                   value={reply}
                   onChange={e => { setReply(e.target.value); setError(''); }}
-                  style={{ marginBottom: 12 }}
                 />
-                {error && <div style={{ fontSize: 12, color: '#d32f2f', marginBottom: 12 }}>{error}</div>}
-                <div style={{ display: 'flex', gap: 8 }}>
+                {error && <div className="text-xs text-red-600 mb-3">{error}</div>}
+                <div className="flex gap-3">
                   <button
-                    className="action-btn"
+                    className="px-5 py-2 bg-[#1a5f6e] text-white rounded font-medium hover:bg-opacity-90 transition-colors text-sm text-center"
                     onClick={handleSendReply}
                   >
                     Enviar respuesta
                   </button>
                   <button
-                    className="action-btn action-btn-outline"
+                    className="px-5 py-2 border border-gray-300 text-gray-700 rounded font-medium hover:bg-gray-50 transition-colors text-sm text-center"
                     onClick={() => setSelected(null)}
                   >
                     Cancelar
@@ -167,68 +165,55 @@ export default function Mensajes() {
 
   return (
     <>
-      <div className="main-header">
+      <div className="flex items-center justify-between pb-6 mb-8 px-8 pt-8 border-b-2 border-gray-200">
         <div>
-          <div className="main-title">Mensajes</div>
-          <div className="main-sub">{unreadCount} sin leer</div>
+          <div className="text-2xl font-bold text-gray-800">Mensajes</div>
+          <div className="text-gray-500 text-sm mt-1">{unreadCount} sin leer</div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="flex gap-2">
           {['all', 'unread', 'replied'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={f === filter ? 'action-btn' : 'action-btn action-btn-outline'}
-              style={{ padding: '6px 14px', fontSize: 12 }}
+              className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${f === filter ? 'bg-[#1a5f6e] text-white' : 'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
             >
               {f === 'all' ? 'Todos' : f === 'unread' ? 'Sin leer' : 'Respondidos'}
             </button>
           ))}
         </div>
       </div>
-      <div className="main-body">
-        <div className="card">
+      <div className="px-8 pb-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           {loading ? (
-            <div style={{ padding: 40, textAlign: 'center', color: '#999' }}>Cargando...</div>
+            <div className="p-10 text-center text-gray-400">Cargando...</div>
           ) : messages.length === 0 ? (
-            <div style={{ padding: 40, textAlign: 'center', color: '#999' }}>
+            <div className="p-10 text-center text-gray-400">
               No hay mensajes
             </div>
           ) : (
             messages.map(m => (
               <div
                 key={m.id}
-                className="table-row"
-                style={{
-                  gridTemplateColumns: '40px 1fr auto',
-                  gap: 16,
-                  background: m.status === 'unread' ? '#f8fafc' : '',
-                  cursor: 'pointer'
-                }}
+                className={`grid grid-cols-[40px_1fr_auto] gap-4 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center ${m.status === 'unread' ? 'bg-slate-50' : ''}`}
                 onClick={() => handleSelectMessage(m)}
               >
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: '#f1f5f9', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, fontWeight: 700, color: '#334155',
-                  flexShrink: 0
-                }}>
+                <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-700 flex-shrink-0">
                   {m.name[0]}
                 </div>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                    <span style={{ fontSize: 13, fontWeight: m.status === 'unread' ? 600 : 400, color: '#0f172a' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-[13px] text-slate-900 ${m.status === 'unread' ? 'font-bold' : 'font-normal'}`}>
                       {m.name}
                     </span>
-                    <span style={{ fontSize: 11, color: '#64748b' }}>{m.email}</span>
-                    {m.apartment_slug && <span className="badge badge-gray">{m.apartment_slug}</span>}
-                    {m.status === 'unread' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#D4A843', flexShrink: 0 }} />}
+                    <span className="text-[11px] text-slate-500">{m.email}</span>
+                    {m.apartment_slug && <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium uppercase tracking-wider">{m.apartment_slug}</span>}
+                    {m.status === 'unread' && <div className="w-1.5 h-1.5 rounded-full bg-[#D4A843] flex-shrink-0" />}
                   </div>
-                  <div style={{ fontSize: 12, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 500 }}>
+                  <div className="text-xs text-slate-600 overflow-hidden text-ellipsis whitespace-nowrap max-w-[500px]">
                     {m.message}
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: '#cbd5e1', whiteSpace: 'nowrap' }}>
+                <div className="text-[11px] text-slate-300 whitespace-nowrap">
                   {new Date(m.created_at).toLocaleDateString('es-ES')}
                 </div>
               </div>

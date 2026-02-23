@@ -14,21 +14,20 @@ export default function CookieBanner() {
   };
 
   return (
-    <div className="cookie-banner">
-      <div className="cookie-banner-text">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white py-4 px-6 flex flex-col md:flex-row items-center justify-between gap-4 z-50 shadow-lg">
+      <div className="text-sm leading-relaxed flex-1">
         Usamos cookies propias y de terceros para mejorar tu experiencia y analizar el tráfico.{' '}
-        <Link to="/cookies" className="cookie-banner-text a">Más información →</Link>
+        <Link to="/cookies" className="text-gold hover:opacity-80 transition-opacity">Más información →</Link>
       </div>
-      <div className="cookie-banner-actions">
+      <div className="flex gap-3">
         <button
-          className="btn-outline"
-          style={{ borderColor: 'rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.55)', fontSize: 11 }}
+          className="border border-white/25 text-white/55 text-xs bg-transparent px-4 py-2 rounded hover:opacity-80 transition-opacity cursor-pointer"
           onClick={() => accept(false)}
         >
           Solo esenciales
         </button>
         <button
-          style={{ background: '#D4A843', color: '#0f172a', border: 'none', padding: '9px 20px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+          className="bg-gold text-navy border-0 px-5 py-2 text-xs font-bold tracking-widest uppercase cursor-pointer hover:opacity-90 transition-all"
           onClick={() => accept(true)}
         >
           Aceptar todas

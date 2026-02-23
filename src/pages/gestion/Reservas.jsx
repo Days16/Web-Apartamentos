@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { formatDateShort, formatPrice } from '../../utils/format';
 import { getReservations, getApartmentBySlug, getExtras, markCashPaid, updateReservationStatus, deleteReservation, confirmAndMarkPaid } from '../../services/dataService';
 import generateInvoice from '../../utils/generateInvoice';
@@ -35,6 +36,9 @@ const srcBadge = {
 };
 
 export default function Reservas() {
+  const [searchParams] = useSearchParams();
+  const initialId = searchParams.get('id');
+
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,6 +80,17 @@ export default function Reservas() {
       }
       setApartmentData(apartments);
       setReservations(reservationsData);
+
+      // Si venimos con un ID de reserva, seleccionarla automáticamente
+      if (initialId) {
+        const target = reservationsData.find(r => r.id === initialId);
+        if (target) {
+          setSelectedId(initialId);
+          setSelectedReservation(target);
+          // Si hay filtros, cambiarlos a 'all' para asegurar que se vea
+          setFilter('all');
+        }
+      }
     } catch (err) {
       console.error('Error cargando datos:', err);
       setError('Error cargando reservas. Intenta recargar la página.');
@@ -223,10 +238,10 @@ export default function Reservas() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: COLORS.gray }}>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Cargando reservas...</div>
-          <div style={{ fontSize: 12, color: '#999' }}>Conectando con Supabase...</div>
+      <div className="flex items-center justify-center min-h-[500px] text-slate-900">
+        <div className="text-center">
+          <div className="text-lg font-semibold mb-3">Cargando reservas...</div>
+          <div className="text-xs text-gray-500">Conectando con base de datos...</div>
         </div>
       </div>
     );
@@ -234,10 +249,10 @@ export default function Reservas() {
 
   if (error && !selectedId) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: COLORS.error }}>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>⚠️ {error}</div>
-          <button onClick={fetchData} style={{ padding: '8px 16px', background: COLORS.blue, color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+      <div className="flex items-center justify-center min-h-[500px] text-red-600">
+        <div className="text-center">
+          <div className="text-lg font-semibold mb-3">⚠️ {error}</div>
+          <button onClick={fetchData} className="px-4 py-2 bg-[#1a5f6e] text-white rounded hover:bg-opacity-90 transition-colors font-medium text-sm">
             Reintentar
           </button>
         </div>
@@ -257,55 +272,33 @@ export default function Reservas() {
     };
 
     return (
-      <div style={{ background: '#fff' }}>
+      <div className="bg-white">
         {/* Header */}
-        <div style={{
-          borderBottom: '1px solid #e0e0e0',
-          padding: '24px',
-          background: '#f9f9f9',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="border-b border-gray-200 p-6 bg-slate-50">
+          <div className="flex justify-between items-start flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => {
                   setSelectedId(null);
                   setSelectedReservation(null);
                 }}
-                style={{
-                  background: 'transparent',
-                  border: `1px solid ${COLORS.blue}`,
-                  color: COLORS.blue,
-                  padding: '8px 14px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 500,
-                }}
+                className="px-3.5 py-2 bg-white border border-[#1a5f6e] text-[#1a5f6e] rounded font-medium text-xs hover:bg-[#1a5f6e] hover:text-white transition-colors"
               >
                 ← Volver
               </button>
               <div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.gray, marginBottom: 4 }}>
+                <div className="text-2xl font-bold text-slate-900 mb-1">
                   Reserva {selectedReservation.id}
                 </div>
-                <div style={{ fontSize: 14, color: '#666' }}>{selectedReservation.guest}</div>
+                <div className="text-sm text-gray-500">{selectedReservation.guest}</div>
               </div>
             </div>
 
             {/* Botones de acción */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <div className="flex gap-2 flex-wrap justify-end">
               <button
                 onClick={handleGeneratePDF}
-                style={{
-                  background: 'transparent',
-                  border: `1px solid ${COLORS.blue}`,
-                  color: COLORS.blue,
-                  padding: '8px 14px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 500,
-                }}
+                className="px-3.5 py-2 bg-white border border-[#1a5f6e] text-[#1a5f6e] rounded font-medium text-xs hover:bg-[#1a5f6e] hover:text-white transition-colors"
               >
                 ↓ PDF Factura
               </button>
@@ -314,17 +307,7 @@ export default function Reservas() {
                 <button
                   onClick={() => handleMarkCashPaid(selectedReservation.id)}
                   disabled={saving}
-                  style={{
-                    background: COLORS.success,
-                    border: 'none',
-                    color: 'white',
-                    padding: '8px 14px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    opacity: saving ? 0.6 : 1,
-                  }}
+                  className="px-3.5 py-2 bg-[#1a5f6e] text-white rounded font-medium text-xs hover:bg-opacity-90 transition-colors disabled:opacity-60"
                 >
                   {saving ? '⏳ Guardando...' : '✓ Marcar como pagado'}
                 </button>
@@ -334,68 +317,28 @@ export default function Reservas() {
                 <button
                   onClick={() => handleConfirmAndMarkPaid(selectedReservation.id)}
                   disabled={saving}
-                  style={{
-                    background: COLORS.success,
-                    border: 'none',
-                    color: 'white',
-                    padding: '8px 14px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    opacity: saving ? 0.6 : 1,
-                  }}
+                  className="px-3.5 py-2 bg-[#1a5f6e] text-white rounded font-medium text-xs hover:bg-opacity-90 transition-colors disabled:opacity-60"
                 >
                   {saving ? '⏳ Procesando...' : '✓ Confirmar y Marcar Pagado'}
                 </button>
               )}
 
               {getStatusOptions().length > 0 && (
-                <div style={{ position: 'relative', display: 'inline-block' }}>
+                <div className="relative inline-block">
                   <button
                     onClick={() => setConfirmAction(confirmAction ? null : 'changeStatus')}
-                    style={{
-                      background: 'transparent',
-                      border: `1px solid ${COLORS.yellow}`,
-                      color: COLORS.yellow,
-                      padding: '8px 14px',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: 12,
-                      fontWeight: 500,
-                    }}
+                    className="px-3.5 py-2 bg-white border border-[#D4A843] text-[#D4A843] rounded font-medium text-xs hover:bg-[#D4A843] hover:text-white transition-colors"
                   >
                     Cambiar estado ▼
                   </button>
                   {confirmAction === 'changeStatus' && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      right: 0,
-                      background: 'white',
-                      border: `1px solid ${COLORS.yellow}`,
-                      borderRadius: '4px',
-                      marginTop: 4,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                      zIndex: 10,
-                    }}>
+                    <div className="absolute top-full right-0 bg-white border border-[#D4A843] rounded mt-1 shadow-md z-10 w-40 overflow-hidden">
                       {getStatusOptions().map(status => (
                         <button
                           key={status}
                           onClick={() => handleStatusChange(selectedReservation.id, status)}
                           disabled={saving}
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            textAlign: 'left',
-                            padding: '8px 14px',
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            color: COLORS.gray,
-                            opacity: saving ? 0.6 : 1,
-                          }}
+                          className="block w-full text-left px-4 py-2 text-xs text-slate-800 hover:bg-slate-50 disabled:opacity-60 transition-colors"
                         >
                           • {statusLabels[status]}
                         </button>
@@ -408,17 +351,7 @@ export default function Reservas() {
               <button
                 onClick={() => handleDeleteReservation(selectedReservation.id)}
                 disabled={saving}
-                style={{
-                  background: 'transparent',
-                  border: `1px solid ${COLORS.error}`,
-                  color: COLORS.error,
-                  padding: '8px 14px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 500,
-                  opacity: saving ? 0.6 : 1,
-                }}
+                className="px-3.5 py-2 bg-white border border-red-600 text-red-600 rounded font-medium text-xs hover:bg-red-600 hover:text-white transition-colors disabled:opacity-60"
               >
                 {saving ? '⏳...' : '🗑 Eliminar'}
               </button>
@@ -427,20 +360,20 @@ export default function Reservas() {
         </div>
 
         {/* Contenido */}
-        <div style={{ padding: '24px' }}>
+        <div className="p-6">
           {error && (
-            <div style={{ background: 'rgba(192, 57, 43, 0.1)', border: `1px solid ${COLORS.error}`, color: COLORS.error, padding: '12px 16px', borderRadius: '4px', marginBottom: 16, fontSize: 12 }}>
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-4 text-xs">
               {error}
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Detalles de la reserva */}
-            <div style={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', background: '#fafafa' }}>
-              <div style={{ background: COLORS.blue, color: 'white', padding: '16px', fontSize: 14, fontWeight: 600 }}>
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-slate-50">
+              <div className="bg-[#1a5f6e] text-white px-4 py-3 text-sm font-semibold">
                 Detalles de la reserva
               </div>
-              <div style={{ padding: '16px' }}>
+              <div className="p-4">
                 {[
                   ['Referencia', selectedReservation.id],
                   ['Huésped', selectedReservation.guest],
@@ -452,50 +385,24 @@ export default function Reservas() {
                   ['Noches', selectedReservation.nights],
                   ['Origen', srcBadge[selectedReservation.source]?.[0] || selectedReservation.source],
                 ].map(([label, value], i) => (
-                  <div key={i} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '10px 0',
-                    borderBottom: i < 8 ? '1px solid #ddd' : 'none',
-                    fontSize: 13,
-                  }}>
-                    <span style={{ color: '#666' }}>{label}</span>
-                    <span style={{ fontWeight: 500, color: COLORS.gray }}>{value}</span>
+                  <div key={i} className={`flex justify-between py-2.5 text-[13px] ${i < 8 ? 'border-b border-gray-200' : ''}`}>
+                    <span className="text-gray-500">{label}</span>
+                    <span className="font-medium text-slate-900">{value}</span>
                   </div>
                 ))}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '10px 0',
-                  fontSize: 13,
-                }}>
-                  <span style={{ color: '#666' }}>Estado</span>
-                  <div style={{
-                    ...statusBadgeColors[selectedReservation.status],
-                    padding: '4px 12px',
-                    borderRadius: '4px',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    border: `1px solid ${statusBadgeColors[selectedReservation.status].border}`,
-                  }}>
+                <div className="flex justify-between py-2.5 text-[13px]">
+                  <span className="text-gray-500">Estado</span>
+                  <div className={`px-3 py-1 rounded text-xs font-semibold ${selectedReservation.status === 'confirmed' ? 'bg-[#1a5f6e]/10 text-[#1a5f6e] border border-[#1a5f6e]/30' :
+                    selectedReservation.status === 'pending' ? 'bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/30' :
+                      'bg-[#C0392B]/10 text-[#C0392B] border border-[#C0392B]/30'
+                    }`}>
                     {statusLabels[selectedReservation.status]}
                   </div>
                 </div>
                 {daysInfo && (
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '10px 0',
-                    fontSize: 13,
-                    marginTop: 8,
-                    paddingTop: '12px',
-                    borderTop: '1px solid #ddd',
-                  }}>
-                    <span style={{ color: '#666' }}>Próximo evento</span>
-                    <span style={{
-                      fontWeight: 600,
-                      color: daysInfo.type === 'upcoming' ? COLORS.blue : daysInfo.type === 'today' ? COLORS.warning : '#999',
-                    }}>
+                  <div className="flex justify-between py-2.5 text-[13px] mt-2 pt-3 border-t border-gray-200">
+                    <span className="text-gray-500">Próximo evento</span>
+                    <span className={`font-semibold ${daysInfo.type === 'upcoming' ? 'text-[#1a5f6e]' : daysInfo.type === 'today' ? 'text-[#D4A843]' : 'text-gray-400'}`}>
                       {daysInfo.text}
                     </span>
                   </div>
@@ -504,43 +411,25 @@ export default function Reservas() {
             </div>
 
             {/* Pagos */}
-            <div style={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', background: '#fafafa' }}>
-              <div style={{ background: COLORS.blue, color: 'white', padding: '16px', fontSize: 14, fontWeight: 600 }}>
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-slate-50">
+              <div className="bg-[#1a5f6e] text-white px-4 py-3 text-sm font-semibold">
                 Resumen de pagos
               </div>
-              <div style={{ padding: '16px' }}>
+              <div className="p-4">
                 {[
                   ['Total reserva', formatPrice(selectedReservation.total)],
                   ...(selectedReservation.extrasTotal > 0 ? [['Extras incluidos', formatPrice(selectedReservation.extrasTotal)]] : []),
                   ['Depósito (50%)', `${formatPrice(selectedReservation.deposit)} · ${selectedReservation.status === 'confirmed' ? '✓ Cobrado' : '---'}`],
                   ['Pago al llegar (50%)', `${formatPrice(selectedReservation.deposit)} · ${selectedReservation.cashPaid ? '✓ Recibido' : 'Pendiente'}`],
                 ].map(([label, value], i) => (
-                  <div key={i} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '10px 0',
-                    borderBottom: i < 3 ? '1px solid #ddd' : 'none',
-                    fontSize: 13,
-                  }}>
-                    <span style={{ color: '#666' }}>{label}</span>
-                    <span style={{
-                      fontWeight: 500,
-                      color: value.includes('Cobrado') || value.includes('Recibido') ? COLORS.success : value.includes('Pendiente') ? COLORS.yellow : COLORS.gray,
-                    }}>
+                  <div key={i} className={`flex justify-between py-2.5 text-[13px] ${i < 3 ? 'border-b border-gray-200' : ''}`}>
+                    <span className="text-gray-500">{label}</span>
+                    <span className={`font-medium ${value.includes('Cobrado') || value.includes('Recibido') ? 'text-[#1a5f6e]' : value.includes('Pendiente') ? 'text-[#D4A843]' : 'text-slate-900'}`}>
                       {value}
                     </span>
                   </div>
                 ))}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '12px 0',
-                  marginTop: 8,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  borderTop: '2px solid #ddd',
-                  color: COLORS.gray,
-                }}>
+                <div className="flex justify-between py-3 mt-2 text-sm font-bold border-t-2 border-gray-200 text-slate-900">
                   <span>Total cobrado</span>
                   <span>{formatPrice(selectedReservation.cashPaid || selectedReservation.status !== 'confirmed' ? selectedReservation.total : selectedReservation.deposit)}</span>
                 </div>
@@ -550,23 +439,15 @@ export default function Reservas() {
 
           {/* Extras */}
           {selectedReservation.extras && selectedReservation.extras.length > 0 && (
-            <div style={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', background: '#fafafa', marginBottom: 24, padding: 16 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.gray, marginBottom: 12 }}>
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-slate-50 mb-6 p-4">
+              <div className="text-sm font-semibold text-slate-900 mb-3">
                 Extras contratados
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <div className="flex flex-wrap gap-2">
                 {selectedReservation.extras.map(extraId => {
                   const extra = extrasData.find(e => e.id === extraId);
                   return extra ? (
-                    <div key={extraId} style={{
-                      padding: '6px 12px',
-                      background: 'rgba(26, 95, 110, 0.1)',
-                      border: `1px solid ${COLORS.blue}`,
-                      borderRadius: '4px',
-                      fontSize: 12,
-                      color: COLORS.blue,
-                      fontWeight: 500,
-                    }}>
+                    <div key={extraId} className="px-3 py-1.5 bg-[#1a5f6e]/10 border border-[#1a5f6e] rounded text-xs text-[#1a5f6e] font-medium">
                       {extra.name} {extra.price > 0 ? `· ${formatPrice(extra.price)}` : '· Gratis'}
                     </div>
                   ) : null;
@@ -577,15 +458,11 @@ export default function Reservas() {
 
           {/* Información del apartamento */}
           {apt && (
-            <div style={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', background: '#fafafa', padding: 16 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.gray, marginBottom: 12 }}>
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-slate-50 p-4">
+              <div className="text-sm font-semibold text-slate-900 mb-3">
                 Apartamento
               </div>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                gap: 12,
-              }}>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {[
                   ['Nombre', apt.name],
                   ['Capacidad', apt.cap],
@@ -595,8 +472,8 @@ export default function Reservas() {
                   ['Estancia mínima', `${apt.minStay} noches`],
                 ].map(([label, value], i) => (
                   <div key={i}>
-                    <div style={{ fontSize: 11, color: '#999', marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray }}>{value}</div>
+                    <div className="text-[11px] text-gray-500 mb-1">{label}</div>
+                    <div className="text-[13px] font-semibold text-slate-900">{value}</div>
                   </div>
                 ))}
               </div>
@@ -609,65 +486,39 @@ export default function Reservas() {
 
   // Vista de lista
   return (
-    <div style={{ background: '#fff' }}>
+    <div className="bg-white">
       {/* Header */}
-      <div style={{
-        borderBottom: '1px solid #e0e0e0',
-        padding: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        background: '#f9f9f9',
-      }}>
+      <div className="border-b border-gray-200 p-6 flex justify-between items-center bg-slate-50">
         <div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: COLORS.gray, marginBottom: 4 }}>Reservas</div>
-          <div style={{ fontSize: 14, color: '#666' }}>{filtered.length} reserva{filtered.length !== 1 ? 's' : ''} {filter !== 'all' && `(${statusLabels[filter]})`}</div>
+          <div className="text-3xl font-bold text-slate-900 mb-1">Reservas</div>
+          <div className="text-sm text-gray-500">{filtered.length} reserva{filtered.length !== 1 ? 's' : ''} {filter !== 'all' && `(${statusLabels[filter]})`}</div>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="flex gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
-            style={{
-              background: '#1a5f6e',
-              color: 'white',
-              border: 'none',
-              padding: '10px 16px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 600,
-            }}
+            className="bg-[#1a5f6e] text-white px-4 py-2.5 rounded font-semibold text-[13px] hover:bg-opacity-90 transition-colors"
           >
             + Nueva reserva manual
           </button>
           <button
             onClick={handleExportExcel}
             disabled={filtered.length === 0}
-            style={{
-              background: COLORS.blue,
-              color: 'white',
-              border: 'none',
-              padding: '10px 16px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 600,
-              opacity: filtered.length === 0 ? 0.6 : 1,
-            }}
+            className="bg-[#1a5f6e] text-white px-4 py-2.5 rounded font-semibold text-[13px] hover:bg-opacity-90 transition-colors disabled:opacity-60"
           >
             ↓ Exportar Excel
           </button>
         </div>
       </div>
 
-      <div style={{ padding: '24px' }}>
+      <div className="p-6">
         {error && (
-          <div style={{ background: 'rgba(192, 57, 43, 0.1)', border: `1px solid ${COLORS.error}`, color: COLORS.error, padding: '12px 16px', borderRadius: '4px', marginBottom: 16, fontSize: 12 }}>
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-4 text-xs">
             {error}
           </div>
         )}
 
         {/* Filtros */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {[
             { id: 'all', label: 'Todas' },
             { id: 'pending', label: 'Pendientes' },
@@ -677,16 +528,10 @@ export default function Reservas() {
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              style={{
-                padding: '8px 16px',
-                background: filter === f.id ? COLORS.blue : 'transparent',
-                color: filter === f.id ? 'white' : COLORS.gray,
-                border: filter === f.id ? 'none' : `1px solid #ddd`,
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: filter === f.id ? 600 : 500,
-              }}
+              className={`px-4 py-2 rounded text-[13px] transition-colors whitespace-nowrap ${filter === f.id
+                ? 'bg-[#1a5f6e] text-white font-semibold border border-transparent'
+                : 'bg-transparent text-slate-700 font-medium border border-[#ddd] hover:bg-slate-50'
+                }`}
             >
               {f.label}
             </button>
@@ -695,41 +540,28 @@ export default function Reservas() {
 
         {/* Tabla */}
         {filtered.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '48px 24px',
-            color: '#999',
-          }}>
-            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: COLORS.gray }}>
+          <div className="text-center py-12 px-6 text-gray-500">
+            <div className="text-base font-semibold mb-2 text-slate-800">
               No hay reservas
             </div>
-            <div style={{ fontSize: 13 }}>
+            <div className="text-[13px]">
               {filter !== 'all' ? `No hay reservas ${statusLabels[filter].toLowerCase()}` : 'Carga un archivo o crea una reserva manual'}
             </div>
           </div>
         ) : (
-          <div style={{
-            border: '1px solid #e0e0e0',
-            borderRadius: '8px',
-            overflow: 'auto',
-            background: '#fff',
-          }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: 13,
-            }}>
-              <thead style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+          <div className="border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
+            <table className="w-full border-collapse text-[13px]">
+              <thead className="bg-slate-50 border-b-2 border-gray-200">
                 <tr>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: COLORS.gray }}>Ref.</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: COLORS.gray }}>Huésped</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: COLORS.gray }}>Apartamento</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: COLORS.gray }}>Fechas</th>
-                  <th style={{ padding: '12px', textAlign: 'center', fontWeight: 600, color: COLORS.gray }}>Noches</th>
-                  <th style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: COLORS.gray }}>Total</th>
-                  <th style={{ padding: '12px', textAlign: 'center', fontWeight: 600, color: COLORS.gray }}>Estado</th>
-                  <th style={{ padding: '12px', textAlign: 'center', fontWeight: 600, color: COLORS.gray }}>Pago</th>
-                  <th style={{ padding: '12px', textAlign: 'center', fontWeight: 600, color: COLORS.gray }}>Info</th>
+                  <th className="p-3 text-left font-semibold text-slate-700">Ref.</th>
+                  <th className="p-3 text-left font-semibold text-slate-700">Huésped</th>
+                  <th className="p-3 text-left font-semibold text-slate-700">Apartamento</th>
+                  <th className="p-3 text-left font-semibold text-slate-700">Fechas</th>
+                  <th className="p-3 text-center font-semibold text-slate-700">Noches</th>
+                  <th className="p-3 text-right font-semibold text-slate-700">Total</th>
+                  <th className="p-3 text-center font-semibold text-slate-700">Estado</th>
+                  <th className="p-3 text-center font-semibold text-slate-700">Pago</th>
+                  <th className="p-3 text-center font-semibold text-slate-700">Info</th>
                 </tr>
               </thead>
               <tbody>
@@ -738,51 +570,44 @@ export default function Reservas() {
                   return (
                     <tr
                       key={i}
-                      style={{
-                        borderBottom: '1px solid #e0e0e0',
-                        cursor: 'pointer',
-                        background: i % 2 === 0 ? '#fff' : '#f9f9f9',
-                      }}
+                      className={`border-b border-gray-200 cursor-pointer ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-slate-100 transition-colors`}
                       onClick={() => handleSelectReservation(r)}
                     >
-                      <td style={{ padding: '12px', fontFamily: 'monospace', fontSize: 12, color: '#999' }}>{r.id}</td>
-                      <td style={{ padding: '12px' }}>
-                        <div style={{ fontWeight: 500, color: COLORS.gray }}>{r.guest}</div>
-                        <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{r.email}</div>
+                      <td className="p-3 font-mono text-[11px] text-gray-500">{r.id}</td>
+                      <td className="p-3">
+                        <div className="font-medium text-slate-800">{r.guest}</div>
+                        <div className="text-[11px] text-gray-400 mt-0.5">{r.email}</div>
                       </td>
-                      <td style={{ padding: '12px', color: COLORS.gray }}>{r.apt}</td>
-                      <td style={{ padding: '12px', fontSize: 12, color: '#666' }}>
+                      <td className="p-3 text-slate-700">{r.apt}</td>
+                      <td className="p-3 text-[12px] text-gray-600 whitespace-nowrap">
                         {r.checkin} → {r.checkout}
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'center', fontWeight: 500, color: COLORS.gray }}>{r.nights}</td>
-                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: COLORS.gray }}>{r.total} €</td>
-                      <td style={{ padding: '12px', textAlign: 'center' }}>
-                        <div style={{
-                          ...statusBadgeColors[r.status],
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: 11,
-                          fontWeight: 600,
-                          border: `1px solid ${statusBadgeColors[r.status].border}`,
-                          display: 'inline-block',
-                        }}>
+                      <td className="p-3 text-center font-medium text-slate-700">{r.nights}</td>
+                      <td className="p-3 text-right font-semibold text-slate-800 whitespace-nowrap">{r.total} €</td>
+                      <td className="p-3 text-center">
+                        <div className={`px-2 py-1 rounded text-[11px] font-semibold inline-block ${r.status === 'confirmed' ? 'bg-[#1a5f6e]/10 text-[#1a5f6e] border border-[#1a5f6e]/30' :
+                          r.status === 'pending' ? 'bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/30' :
+                            'bg-[#C0392B]/10 text-[#C0392B] border border-[#C0392B]/30'
+                          }`}>
                           {statusLabels[r.status]}
                         </div>
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <td className="p-3 text-center">
                         {r.cashPaid ? (
-                          <div style={{ color: COLORS.success, fontWeight: 600, fontSize: 12 }}>✓</div>
+                          <div className="text-[#1a5f6e] font-semibold text-sm">✓</div>
                         ) : r.status === 'confirmed' ? (
-                          <div style={{ color: COLORS.yellow, fontWeight: 600, fontSize: 12 }}>50%</div>
+                          <div className="text-[#D4A843] font-semibold text-xs">50%</div>
                         ) : (
-                          <div style={{ color: '#999', fontSize: 12 }}>—</div>
+                          <div className="text-gray-400 text-xs">—</div>
                         )}
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: COLORS.blue, fontSize: 12 }}>
+                      <td className="p-3 text-center text-[12px]">
                         {daysInfo ? (
-                          <div style={{ fontWeight: 500 }}>{daysInfo.text}</div>
+                          <div className={`font-medium ${daysInfo.type === 'upcoming' ? 'text-[#1a5f6e]' : daysInfo.type === 'today' ? 'text-[#D4A843]' : 'text-gray-400'}`}>
+                            {daysInfo.text}
+                          </div>
                         ) : (
-                          <div style={{ color: '#999' }}>—</div>
+                          <div className="text-gray-400">—</div>
                         )}
                       </td>
                     </tr>

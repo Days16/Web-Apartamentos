@@ -4,10 +4,10 @@ import { fetchAllReservations, fetchApartments, fetchAllMessages } from '../../s
 import { formatPrice } from '../../utils/format';
 
 const srcBadge = {
-  web: ['badge-green', 'Web'],
-  booking: ['badge-blue', 'Booking'],
-  airbnb: ['badge-red', 'Airbnb'],
-  manual: ['badge-yellow', 'Manual'],
+  web: ['bg-[#1a5f6e] text-white', 'Web'],
+  booking: ['bg-blue-100 text-blue-800', 'Booking'],
+  airbnb: ['bg-red-100 text-red-800', 'Airbnb'],
+  manual: ['bg-yellow-100 text-yellow-800', 'Manual'],
 };
 
 export default function Dashboard() {
@@ -105,67 +105,65 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="main-header">
+      <div className="flex items-center justify-between pb-6 mb-8 px-8 pt-8 border-b-2 border-gray-200">
         <div>
-          <div className="main-title">Dashboard</div>
-          <div className="main-sub">{formattedTodayCap}</div>
+          <div className="text-2xl font-bold text-gray-800">Dashboard</div>
+          <div className="text-gray-500 text-sm mt-1">{formattedTodayCap}</div>
         </div>
-        <button className="action-btn" onClick={() => navigate('/gestion/reservas')}>
+        <button className="bg-[#1a5f6e] text-white px-4 py-2 rounded font-medium hover:bg-opacity-90 transition-colors" onClick={() => navigate('/gestion/reservas')}>
           + Nueva reserva manual
         </button>
       </div>
 
-      <div className="main-body">
-        {loading && <div style={{ marginBottom: 20 }}>Actualizando datos reales...</div>}
+      <div className="px-8 pb-8">
+        {loading && <div className="mb-5 text-gray-500">Actualizando datos reales...</div>}
         {/* KPIs */}
-        <div className="kpi-grid">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
             { l: 'Check-ins y outs hoy', v: checkinsoutsTodayCount, s: checkinsToday.length > 0 ? `${checkinsToday.length} entradas / ${checkoutsToday.length} salidas` : 'Sin movimiento hoy', accent: true },
             { l: 'Reservas esta semana', v: bookingsThisWeek.length.toString(), s: 'creadas en los últimos 7 días', accent: false },
             { l: 'Ingresos mes actual', v: formatPrice(incomeThisMonth), s: 'reservas con check-in en este mes', accent: false },
             { l: 'Ocupación hoy', v: occupancyText, s: 'sobre los apartamentos activos', accent: true },
           ].map((k, i) => (
-            <div key={i} className={`kpi ${k.accent ? 'kpi-accent' : ''}`}>
-              <div className="kpi-label">{k.l}</div>
-              <div className="kpi-value">{k.v}</div>
-              <div className="kpi-sub">{k.s}</div>
+            <div key={i} className={`bg-white p-6 rounded-lg shadow-sm border border-gray-200 ${k.accent ? 'border-l-4 border-l-[#1a5f6e]' : ''}`}>
+              <div className="text-sm font-medium text-gray-500 mb-1">{k.l}</div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">{k.v}</div>
+              <div className="text-xs text-gray-400">{k.s}</div>
             </div>
           ))}
         </div>
 
         {/* GRID INFERIOR */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
           {/* Check-ins hoy */}
-          <div className="card">
-            <div className="card-header">
-              <div className="card-title">Check-ins y check-outs hoy</div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <div className="text-lg font-semibold text-gray-900">Check-ins y check-outs hoy</div>
               <button
-                className="action-btn action-btn-outline"
-                style={{ fontSize: 10, padding: '4px 12px' }}
+                className="text-xs px-3 py-1 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
                 onClick={() => navigate('/gestion/reservas')}
               >
                 Ver todas
               </button>
             </div>
-            <div className="card-body">
+            <div>
               {(checkinsToday.length > 0 || checkoutsToday.length > 0) ? [...checkinsToday, ...checkoutsToday].slice(0, 5).map((r, i) => (
                 <div
                   key={i}
-                  className="table-row"
-                  style={{ gridTemplateColumns: '1fr 1fr auto', gap: 12 }}
+                  className="grid grid-cols-[1fr_1fr_auto] gap-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
                   onClick={() => navigate('/gestion/reservas')}
                 >
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: '#0f172a' }}>{r.guest_name || r.guest}</div>
-                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{r.apartment_slug || r.apt} · {r.nights} noches</div>
+                    <div className="text-sm font-medium text-slate-900">{r.guest_name || r.guest}</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">{r.apartment_slug || r.apt} · {r.nights} noches</div>
                   </div>
-                  <div style={{ fontSize: 12, color: '#475569' }}>{r.check_in || r.checkin} → {r.check_out || r.checkout}</div>
-                  <span className={`badge ${r.status === 'confirmed' ? 'badge-green' : 'badge-yellow'}`}>
+                  <div className="text-xs text-slate-600">{r.check_in || r.checkin} → {r.check_out || r.checkout}</div>
+                  <span className={`px-2.5 py-1 rounded text-[11px] font-medium ${r.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                     {r.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                   </span>
                 </div>
               )) : (
-                <div style={{ padding: 20, textAlign: 'center', color: '#64748b', fontSize: 14 }}>
+                <div className="p-5 text-center text-slate-500 text-sm">
                   No hay entradas ni salidas para hoy.
                 </div>
               )}
@@ -173,50 +171,47 @@ export default function Dashboard() {
           </div>
 
           {/* Ocupación */}
-          <div className="card">
-            <div className="card-header">
-              <div className="card-title">Ocupación por apartamento</div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="text-lg font-semibold text-gray-900">Ocupación por apartamento</div>
             </div>
-            <div style={{ padding: '20px 24px' }}>
+            <div className="p-6">
               {apartments.length > 0 ? apartments.map(apt => {
-                // Calcular % de ocupacion en el ultimo mes para el apartamento
                 const lastMonth = new Date();
                 lastMonth.setMonth(today.getMonth() - 1);
                 const aptReservations = confirmed.filter(r => (r.apartment_slug || r.aptSlug) === apt.slug);
-                // Placeholder de % realista basado en el nombre y las reservas mock para este ejemplo
                 const p = aptReservations.length > 0 ? Math.min(100, aptReservations.length * 15 + 10) : Math.floor(Math.random() * 40 + 20);
 
                 return (
-                  <div key={apt.slug} style={{ marginBottom: 12 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                      <span style={{ color: '#334155' }}>{apt.name}</span>
-                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{p}%</span>
+                  <div key={apt.slug} className="mb-3">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-700">{apt.name}</span>
+                      <span className="font-semibold text-slate-900">{p}%</span>
                     </div>
-                    <div style={{ background: 'rgba(15,23,42,0.08)', height: 3 }}>
-                      <div style={{ background: '#1a5f6e', height: 3, width: `${p}%`, transition: 'width 0.5s' }} />
+                    <div className="bg-slate-100 h-1 rounded-full overflow-hidden">
+                      <div className="bg-[#1a5f6e] h-full transition-all duration-500" style={{ width: `${p}%` }} />
                     </div>
                   </div>
                 );
               }) : (
-                <div style={{ padding: '0 20px', color: '#64748b', fontSize: 13 }}>No hay apartamentos activos.</div>
+                <div className="px-5 text-slate-500 text-sm">No hay apartamentos activos.</div>
               )}
             </div>
           </div>
         </div>
 
         {/* Últimas reservas */}
-        <div className="card" style={{ marginTop: 16 }}>
-          <div className="card-header">
-            <div className="card-title">Últimas reservas</div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div className="text-lg font-semibold text-gray-900">Últimas reservas</div>
             <button
-              className="action-btn action-btn-outline"
-              style={{ fontSize: 10, padding: '4px 12px' }}
+              className="text-xs px-3 py-1 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
               onClick={() => navigate('/gestion/reservas')}
             >
               Ver todas
             </button>
           </div>
-          <div className="table-head" style={{ gridTemplateColumns: '80px 1.5fr 1fr 1fr 100px 100px 100px' }}>
+          <div className="grid grid-cols-[80px_1.5fr_1fr_1fr_100px_100px_100px] px-6 py-3 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
             {['Ref', 'Huésped', 'Apartamento', 'Fechas', 'Total', 'Origen', 'Estado'].map(h => (
               <div key={h}>{h}</div>
             ))}
@@ -224,60 +219,63 @@ export default function Dashboard() {
           {reservations.length > 0 ? reservations.slice(0, 5).map((r, i) => (
             <div
               key={i}
-              className="table-row"
-              style={{ gridTemplateColumns: '80px 1.5fr 1fr 1fr 100px 100px 100px' }}
+              className="grid grid-cols-[80px_1.5fr_1fr_1fr_100px_100px_100px] px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center text-sm"
               onClick={() => navigate('/gestion/reservas')}
             >
-              <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#64748b' }}>{r.id.split('-').pop() || r.id}</div>
-              <div style={{ fontWeight: 500, fontSize: 13 }}>{r.guest_name || r.guest}</div>
-              <div style={{ fontSize: 13, color: '#334155' }}>{r.apartment_slug || r.apt}</div>
-              <div style={{ fontSize: 12, color: '#64748b' }}>{r.check_in || r.checkin} → {r.check_out || r.checkout}</div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{formatPrice(r.total_price || r.total)}</div>
-              <span className={`badge ${srcBadge[r.source || 'web']?.[0] || 'badge-yellow'}`}>{srcBadge[r.source || 'web']?.[1] || r.source || 'Web'}</span>
-              <span className={`badge ${r.status === 'confirmed' ? 'badge-green' : r.status === 'pending' ? 'badge-yellow' : 'badge-red'}`}>
-                {r.status === 'confirmed' ? 'Confirmada' : r.status === 'pending' ? 'Pendiente' : 'Cancelada'}
-              </span>
+              <div className="font-mono text-[11px] text-slate-500">{r.id.split('-').pop() || r.id}</div>
+              <div className="font-medium text-gray-900 text-[13px]">{r.guest_name || r.guest}</div>
+              <div className="text-[13px] text-slate-700">{r.apartment_slug || r.apt}</div>
+              <div className="text-xs text-slate-500">{r.check_in || r.checkin} → {r.check_out || r.checkout}</div>
+              <div className="text-[13px] font-semibold">{formatPrice(r.total_price || r.total)}</div>
+              <div>
+                <span className={`px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap ${srcBadge[r.source || 'web']?.[0] || 'bg-yellow-100 text-yellow-800'}`}>
+                  {srcBadge[r.source || 'web']?.[1] || r.source || 'Web'}
+                </span>
+              </div>
+              <div>
+                <span className={`px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap ${r.status === 'confirmed' ? 'bg-green-100 text-green-800' : r.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                  {r.status === 'confirmed' ? 'Confirmada' : r.status === 'pending' ? 'Pendiente' : 'Cancelada'}
+                </span>
+              </div>
             </div>
           )) : (
-            <div style={{ padding: 20, textAlign: 'center', color: '#64748b', fontSize: 14 }}>
+            <div className="p-5 text-center text-slate-500 text-sm">
               No hay reservas.
             </div>
           )}
         </div>
 
         {/* Estado sync */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
-          <div className="card" style={{ padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <div className="card-title">Sincronización iCal</div>
-              <span className="badge badge-green">Todo OK</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex justify-between items-center mb-3">
+              <div className="text-lg font-semibold text-gray-900">Sincronización iCal</div>
+              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">Todo OK</span>
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Última sincronización: hace 4 minutos</div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>Próxima: en 26 minutos</div>
+            <div className="text-xs text-slate-500 mb-1">Última sincronización: hace 4 minutos</div>
+            <div className="text-xs text-slate-500">Próxima: en 26 minutos</div>
             <button
-              className="action-btn action-btn-outline"
-              style={{ marginTop: 12, width: '100%', fontSize: 10 }}
+              className="mt-4 w-full text-xs px-3 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors font-medium"
               onClick={() => navigate('/gestion/sync')}
             >
               Ver detalles de sync
             </button>
           </div>
-          <div className="card" style={{ padding: 20 }}>
-            <div style={{ marginBottom: 12 }}>
-              <div className="card-title">Mensajes sin leer</div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="mb-3">
+              <div className="text-lg font-semibold text-gray-900">Mensajes sin leer</div>
             </div>
-            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 48, fontWeight: 300, color: '#0f172a', lineHeight: 1, marginBottom: 4 }}>
+            <div className="font-serif text-5xl font-light text-slate-900 leading-none mb-1">
               {messages.length}
             </div>
             {messages.length > 0 && (
-              <div style={{ fontSize: 12, color: '#64748b' }}>
+              <div className="text-xs text-slate-500">
                 {messages.slice(0, 2).map(m => m.name).join(' · ')}
                 {messages.length > 2 && ' ...'}
               </div>
             )}
             <button
-              className="action-btn"
-              style={{ marginTop: 12, width: '100%', fontSize: 10, background: '#1a5f6e' }}
+              className="mt-4 w-full text-xs px-3 py-2 bg-[#1a5f6e] text-white rounded hover:bg-opacity-90 transition-colors font-medium"
               onClick={() => navigate('/gestion/mensajes')}
             >
               Ver mensajes

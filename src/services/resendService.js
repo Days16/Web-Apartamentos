@@ -18,6 +18,7 @@ export async function sendBookingConfirmation(reservation) {
         total: reservation.total || reservation.total_price,
         deposit: reservation.deposit || reservation.deposit_paid,
         reservationId: reservation.id || reservation.reservationId,
+        portalUrl: `${window.location.origin}/mi-reserva`,
       },
     });
 
@@ -26,7 +27,7 @@ export async function sendBookingConfirmation(reservation) {
       throw new Error(error.message || 'Error al enviar email');
     }
 
-    console.log('Email sent successfully:', data);
+    //console.log('Email sent successfully:', data);
     return {
       success: true,
       messageId: data?.id,
@@ -74,7 +75,8 @@ export async function sendContactReply(data) {
       body: {
         guestEmail: data.guestEmail,
         guestName: data.guestName,
-        subject: 'Re: Tu consulta en Illa Pancha Ribadeo',
+        subject: data.subject || 'Re: Tu consulta en Illa Pancha Ribadeo',
+        replyText: data.replyText
       },
     });
 

@@ -22,7 +22,7 @@
         "realOpinions": "Opiniones<br /><em>reales</em>",
         "verifiedReviews": "4.9 ★ · +220 opiniones verificadas",
         "bookNowNoComm": "Reservar ahora sin comisión",
-        "freeCancel14": "Cancelación gratuita · 14 días antes"
+        "freeCancelDays": "Cancelación gratuita · {days} días antes"
     },
     "apartments": {
         "eyebrow": "Colección completa",
@@ -74,7 +74,7 @@
         "minStayWarn": "Estancia mínima:",
         "noCommission": "Sin comisiones · Cancelación gratuita hasta",
         "daysBefore": "días antes",
-        "depositNow": "con tarjeta al reservar",
+        "depositPct": "con tarjeta al reservar",
         "cashArrival": "en efectivo al llegar",
         "available": "Disponible",
         "occupied": "Ocupado",
@@ -88,7 +88,6 @@
     },
     "booking": {
         "steps": [
-            "Fechas",
             "Datos",
             "Extras",
             "Pagar",
@@ -135,10 +134,8 @@
         "checkin": "Entrada",
         "checkout": "Salida",
         "deposited": "Depositado",
-        "cashRest": "Resto al llegar",
-        "onArrival": "al llegar",
-        "extrasSelected": "seleccionados",
-        "extraSelected": "seleccionado",
+        "totalCharge": "Cargo total",
+        "taxesLabel": "Impuestos y tasas",
         "title0": "Elige tus fechas",
         "title1": "Tus datos",
         "title2": "Extras",
@@ -168,6 +165,7 @@
         "availability": "Disponibilidad",
         "howToGet": "Cómo llegar",
         "faq": "FAQ",
+        "myReservation": "Mi Reserva",
         "accessCol": "Acceso",
         "management": "Panel gestión",
         "admin": "Administración",

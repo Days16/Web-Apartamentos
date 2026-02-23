@@ -87,54 +87,53 @@ export default function ManualBookingModal({ onClose, onSuccess }) {
     };
 
     return (
-        <div className="booking-overlay" onClick={e => e.target === e.currentTarget && onClose()} style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: '#fff', borderRadius: 8, width: '100%', maxWidth: 500, overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-                <div style={{ padding: '20px 24px', background: '#1a5f6e', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: 18, fontWeight: 600 }}>Nueva Reserva Manual</div>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]" onClick={e => e.target === e.currentTarget && onClose()}>
+            <div className="bg-white rounded-lg w-full max-w-md shadow-xl overflow-hidden">
+                <div className="px-6 py-5 bg-teal text-white flex justify-between items-center">
+                    <div className="text-lg font-semibold">Nueva Reserva Manual</div>
+                    <button onClick={onClose} className="bg-transparent border-0 text-white cursor-pointer hover:opacity-80">
                         <Ico d={paths.close} size={20} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ padding: 24 }}>
-                    {error && <div style={{ background: '#fee', color: '#c00', padding: 12, borderRadius: 4, marginBottom: 16, fontSize: 13 }}>{error}</div>}
+                <form onSubmit={handleSubmit} className="p-6">
+                    {error && <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm">{error}</div>}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="form-label" style={{ fontSize: 12 }}>Nombre del huésped *</label>
+                            <label className="form-label">Nombre del huésped *</label>
                             <input
-                                className="form-input"
+                                className={`form-input ${validationErrors.name ? 'border-red-500' : ''}`}
                                 value={form.name}
                                 onChange={e => {
                                     setForm(f => ({ ...f, name: e.target.value }));
                                     if (validationErrors.name) setValidationErrors(p => ({ ...p, name: null }));
                                 }}
-                                style={{ borderColor: validationErrors.name ? '#f44' : '#ddd' }}
                                 required
                             />
-                            {validationErrors.name && <div style={{ color: '#f44', fontSize: 10, marginTop: 4 }}>{validationErrors.name}</div>}
+                            {validationErrors.name && <div className="text-red-500 text-xs mt-1">{validationErrors.name}</div>}
                         </div>
                         <div>
-                            <label className="form-label" style={{ fontSize: 12 }}>Teléfono</label>
+                            <label className="form-label">Teléfono</label>
                             <input className="form-input" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: 16 }}>
-                        <label className="form-label" style={{ fontSize: 12 }}>Email</label>
+                    <div className="mb-4">
+                        <label className="form-label">Email</label>
                         <input type="email" className="form-input" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
                     </div>
 
-                    <div style={{ marginBottom: 16 }}>
-                        <label className="form-label" style={{ fontSize: 12 }}>Apartamento *</label>
+                    <div className="mb-4">
+                        <label className="form-label">Apartamento *</label>
                         <select className="form-input" value={form.aptSlug} onChange={e => setForm(f => ({ ...f, aptSlug: e.target.value }))}>
                             {apartments.map(a => <option key={a.slug} value={a.slug}>{a.name}</option>)}
                         </select>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="form-label" style={{ fontSize: 12, color: validationErrors.dates ? '#f44' : 'inherit' }}>Fecha de Entrada *</label>
+                            <label className={`form-label ${validationErrors.dates ? 'text-red-500' : ''}`}>Fecha de Entrada *</label>
                             <DatePicker
                                 selected={form.checkin}
                                 onChange={d => {
@@ -142,13 +141,12 @@ export default function ManualBookingModal({ onClose, onSuccess }) {
                                     setValidationErrors(p => ({ ...p, dates: null }));
                                 }}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-input"
-                                style={{ borderColor: validationErrors.dates ? '#f44' : '#ddd' }}
+                                className={`form-input ${validationErrors.dates ? 'border-red-500' : ''}`}
                                 placeholderText="Entrada"
                             />
                         </div>
                         <div>
-                            <label className="form-label" style={{ fontSize: 12, color: validationErrors.dates ? '#f44' : 'inherit' }}>Fecha de Salida *</label>
+                            <label className={`form-label ${validationErrors.dates ? 'text-red-500' : ''}`}>Fecha de Salida *</label>
                             <DatePicker
                                 selected={form.checkout}
                                 onChange={d => {
@@ -156,49 +154,47 @@ export default function ManualBookingModal({ onClose, onSuccess }) {
                                     setValidationErrors(p => ({ ...p, dates: null }));
                                 }}
                                 dateFormat="dd/MM/yyyy"
-                                className="form-input"
-                                style={{ borderColor: validationErrors.dates ? '#f44' : '#ddd' }}
+                                className={`form-input ${validationErrors.dates ? 'border-red-500' : ''}`}
                                 placeholderText="Salida"
                                 minDate={form.checkin}
                             />
                         </div>
-                        {validationErrors.dates && <div style={{ color: '#f44', fontSize: 10, gridColumn: 'span 2' }}>{validationErrors.dates}</div>}
+                        {validationErrors.dates && <div className="text-red-500 text-xs col-span-2">{validationErrors.dates}</div>}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="form-label" style={{ fontSize: 12 }}>Precio Total *</label>
+                            <label className="form-label">Precio Total *</label>
                             <input
                                 type="number"
                                 step="0.01"
-                                className="form-input"
+                                className={`form-input ${validationErrors.price ? 'border-red-500' : ''}`}
                                 min="1"
                                 value={form.price}
                                 onChange={e => {
                                     setForm(f => ({ ...f, price: e.target.value }));
                                     if (validationErrors.price) setValidationErrors(p => ({ ...p, price: null }));
                                 }}
-                                style={{ borderColor: validationErrors.price ? '#f44' : '#ddd' }}
                                 required
                             />
-                            {validationErrors.price && <div style={{ color: '#f44', fontSize: 10, marginTop: 4 }}>{validationErrors.price}</div>}
+                            {validationErrors.price && <div className="text-red-500 text-xs mt-1">{validationErrors.price}</div>}
                         </div>
                         <div>
-                            <label className="form-label" style={{ fontSize: 12 }}>Depósito Pagado</label>
+                            <label className="form-label">Depósito Pagado</label>
                             <input type="number" step="0.01" className="form-input" min="0" value={form.deposit} onChange={e => setForm(f => ({ ...f, deposit: e.target.value }))} />
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
                         <div>
-                            <label className="form-label" style={{ fontSize: 12 }}>Estado</label>
+                            <label className="form-label">Estado</label>
                             <select className="form-input" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
                                 <option value="confirmed">Confirmada</option>
                                 <option value="pending">Pendiente</option>
                             </select>
                         </div>
                         <div>
-                            <label className="form-label" style={{ fontSize: 12 }}>Origen</label>
+                            <label className="form-label">Origen</label>
                             <select className="form-input" value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))}>
                                 <option value="manual">Manual (Teléfono/Email)</option>
                                 <option value="booking">Booking.com</option>
@@ -207,11 +203,11 @@ export default function ManualBookingModal({ onClose, onSuccess }) {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                        <button type="button" onClick={onClose} className="action-btn action-btn-outline" style={{ padding: '8px 16px' }} disabled={loading}>
+                    <div className="flex gap-3 justify-end">
+                        <button type="button" onClick={onClose} className="border border-gray-300 text-slate-900 px-4 py-1.5 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50" disabled={loading}>
                             Cancelar
                         </button>
-                        <button type="submit" className="action-btn" style={{ background: '#1a5f6e', color: 'white', padding: '8px 16px', border: 'none' }} disabled={loading}>
+                        <button type="submit" className="px-4 py-1.5 bg-teal text-white rounded-lg font-semibold hover:bg-teal-700 transition-all disabled:opacity-50" disabled={loading}>
                             {loading ? 'Guardando...' : 'Crear Reserva'}
                         </button>
                     </div>

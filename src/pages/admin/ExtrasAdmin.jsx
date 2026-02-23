@@ -134,7 +134,7 @@ export default function ExtrasAdmin() {
     const isNew = editing === 'new';
     return (
       <>
-        <div className="main-header" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}>
+        <div className="flex items-center justify-between pb-6 mb-8 px-8 pt-8" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
               style={{
@@ -384,7 +384,7 @@ export default function ExtrasAdmin() {
   // Listado de extras
   return (
     <>
-      <div className="main-header" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}>
+      <div className="flex items-center justify-between pb-6 mb-8 px-8 pt-8" style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}>
         <div>
           <div style={{ fontSize: 28, fontWeight: 700, color: SECONDARY_COLOR }}>
             Extras y servicios

@@ -1,13 +1,21 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 export default function PreviewBanner() {
     const [active, setActive] = useState(false);
+    const { user } = useAuth();
+    const { settings } = useSettings();
     const navigate = useNavigate();
 
     useEffect(() => {
-        setActive(sessionStorage.getItem('maintenance_preview') === 'true');
-    }, []);
+        const isMaintenanceOn = settings?.maintenance_mode === true;
+        const isPreviewSession = sessionStorage.getItem('maintenance_preview') === 'true';
+        const isAdmin = !!user;
+
+        setActive(isMaintenanceOn && (isPreviewSession || isAdmin));
+    }, [user, settings]);
 
     if (!active) return null;
 
@@ -17,47 +25,19 @@ export default function PreviewBanner() {
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: '#0f172a',
-            color: 'white',
-            padding: '12px 24px',
-            borderRadius: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-            zIndex: 9999,
-            fontFamily: "'Inter', sans-serif",
-            border: '1px solid rgba(255,255,255,0.1)'
-        }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px' }}>👁️</span>
-                <span style={{ fontSize: '13px', fontWeight: '500', letterSpacing: '0.02em' }}>
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-navy text-white px-6 py-3 rounded-full flex items-center gap-4 shadow-2xl z-[9999] border border-white/10">
+            <div className="flex items-center gap-2">
+                <span className="text-lg">👁️</span>
+                <span className="text-xs font-medium tracking-tight">
                     MODO VISTA PREVIA ACTIVO
                 </span>
             </div>
 
-            <div style={{ width: '1px', height: '16px', background: 'rgba(255,255,255,0.2)' }} />
+            <div className="w-px h-4 bg-white/20" />
 
             <button
                 onClick={handleExit}
-                style={{
-                    background: '#b91c1c',
-                    color: 'white',
-                    border: 'none',
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => e.target.style.background = '#991b1b'}
-                onMouseOut={(e) => e.target.style.background = '#b91c1c'}
+                className="bg-red-700 text-white border-0 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer hover:bg-red-800 transition-all"
             >
                 Salir y Volver al Panel
             </button>

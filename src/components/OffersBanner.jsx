@@ -132,114 +132,46 @@ export default function OffersBanner() {
     return (
         <div
             ref={bannerRef}
-            style={{
-                background: 'linear-gradient(90deg, #0f172a 0%, #1a5f6e 100%)',
-                color: '#fff',
-                padding: '12px 48px',
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '14px',
-                fontWeight: '500',
-                minHeight: '48px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-            }}>
+            className="fixed top-0 left-0 right-0 z-[1000] bg-gradient-to-r from-navy to-teal text-white px-12 py-3 flex items-center justify-center text-sm font-medium min-h-12 shadow-md">
 
             {/* Sliding Container */}
             <div
                 key={currentIndex}
-                className={offers.length > 1 ? 'offer-slide' : ''}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    gap: '16px',
-                    width: '100%',
-                    maxWidth: '1200px'
-                }}
+                className={`flex flex-wrap items-center justify-center gap-4 w-full max-w-5xl pr-8 md:pr-4 ${offers.length > 1 ? 'offer-slide' : ''}`}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                        background: '#D4A843',
-                        color: '#0f172a',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        fontWeight: '800',
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }}>
+                <div className="flex items-center gap-2.5">
+                    <div className="bg-white/20 text-white px-2 py-1 rounded text-xs font-black tracking-widest uppercase flex items-center gap-1 shadow-sm">
                         <Ico d={paths.star} size={12} />
                         {t('OFERTA', 'OFFER')}
                     </div>
 
-                    <span style={{ fontWeight: 600, letterSpacing: '0.02em' }}>
+                    <span className="font-semibold tracking-tight">
                         {title}
                     </span>
 
                     {offer.discount_percentage > 0 && (
-                        <span style={{
-                            color: '#D4A843',
-                            fontWeight: 800,
-                            fontSize: '16px'
-                        }}>
+                        <span className="text-white font-black text-base">
                             -{offer.discount_percentage}%
                         </span>
                     )}
                 </div>
 
                 {!offer.discount_code && (
-                    <div style={{
-                        background: 'rgba(76, 175, 80, 0.2)',
-                        border: '1px solid #4CAF50',
-                        color: '#fff',
-                        padding: '4px 12px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                    }}>
+                    <div className="bg-white/10 border border-white/30 text-white px-3 py-1 rounded-md text-xs font-bold flex items-center gap-1.5">
                         <Ico d={paths.check} size={14} />
                         {t('DESCUENTO APLICADO', 'DISCOUNT APPLIED')}
                     </div>
                 )}
 
                 {offer.discount_code && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ opacity: 0.8, fontSize: '13px' }}>
+                    <div className="flex items-center gap-2">
+                        <span className="opacity-80 text-sm">
                             {t('Usa el código:', 'Use code:')}
                         </span>
                         <button
                             onClick={() => handleApplyDiscount(offer)}
                             title={t('Aplicar y copiar código', 'Apply and copy code')}
-                            style={{
-                                background: activeDiscount?.id === offer.id ? '#4CAF50' : 'rgba(255, 255, 255, 0.1)',
-                                border: `1px ${activeDiscount?.id === offer.id ? 'solid' : 'dashed'} rgba(255, 255, 255, 0.4)`,
-                                color: '#fff',
-                                padding: '4px 12px',
-                                borderRadius: '6px',
-                                fontFamily: 'monospace',
-                                fontSize: '15px',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                transition: 'all 0.2s ease',
-                                animation: activeDiscount?.id === offer.id ? 'none' : 'pulseGlow 2s infinite'
-                            }}
+                            className={`px-3 py-1 rounded-md font-mono text-sm font-bold cursor-pointer flex items-center gap-1.5 transition-all ${activeDiscount?.id === offer.id ? 'bg-white/30 border border-solid border-white/50' : 'bg-white/10 border border-dashed border-white/40 hover:bg-white/20 hover:border-white/100 pulseGlow'}`}
                             onMouseEnter={(e) => {
                                 if (activeDiscount?.id !== offer.id) {
                                     e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
@@ -255,13 +187,13 @@ export default function OffersBanner() {
                         >
                             {offer.discount_code}
                             {activeDiscount?.id === offer.id ? (
-                                <span style={{ color: '#fff' }}><Ico d={paths.check} size={14} /></span>
+                                <span className="text-white"><Ico d={paths.check} size={14} /></span>
                             ) : (
-                                <span style={{ opacity: 0.7 }}><Ico d={paths.copy} size={14} /></span>
+                                <span className="opacity-70"><Ico d={paths.copy} size={14} /></span>
                             )}
                         </button>
                         {copied && (
-                            <span style={{ fontSize: '11px', color: '#4CAF50', fontWeight: 'bold', position: 'absolute', transform: 'translateY(-20px) translateX(200px)' }}>
+                            <span className="absolute text-xs font-bold text-white -translate-y-5 transform">
                                 {t('¡Copiado!', 'Copied!')}
                             </span>
                         )}
@@ -271,17 +203,11 @@ export default function OffersBanner() {
 
             {/* Pagination Dots */}
             {offers.length > 1 && (
-                <div style={{ position: 'absolute', bottom: '4px', display: 'flex', gap: '4px' }}>
+                <div className="absolute bottom-1 flex gap-1">
                     {offers.map((_, idx) => (
                         <div
                             key={idx}
-                            style={{
-                                width: '4px',
-                                height: '4px',
-                                borderRadius: '50%',
-                                background: idx === currentIndex ? '#D4A843' : 'rgba(255, 255, 255, 0.3)',
-                                transition: 'background 0.3s'
-                            }}
+                            className={`w-1 h-1 rounded-full transition-colors ${idx === currentIndex ? 'bg-white' : 'bg-white/30'}`}
                         />
                     ))}
                 </div>
@@ -293,27 +219,13 @@ export default function OffersBanner() {
                     setClosed(true);
                     removeDiscount(); // User wants it removed if banner is gone
                 }}
-                style={{
-                    position: 'absolute',
-                    right: '16px',
-                    background: 'rgba(255,255,255,0.1)',
-                    border: 'none',
-                    color: '#fff',
-                    cursor: 'pointer',
-                    padding: '6px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: 0.6,
-                    transition: 'all 0.2s'
-                }}
+                className="absolute right-4 bg-white/10 border-0 text-white rounded-full p-1.5 flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-white/20 transition-all cursor-pointer"
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = 1;
+                    e.currentTarget.style.opacity = '1';
                     e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
                 }}
                 onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = 0.6;
+                    e.currentTarget.style.opacity = '0.6';
                     e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
                 }}
             >

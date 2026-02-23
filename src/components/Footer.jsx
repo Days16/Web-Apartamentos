@@ -15,86 +15,95 @@ export default function Footer() {
   };
 
   return (
-    <footer className="footer">
-      <div className="footer-main">
-        <div className="footer-brand">
-          <span className="footer-logo">Illa Pancha</span>
-          <p className="footer-tagline">{F.tagline}</p>
-          <div className="footer-contact-item">
-            <Ico d={paths.phone} size={13} color="rgba(255,255,255,0.4)" />
-            <span>+34 982 XXX XXX</span>
+    <footer className="bg-navy text-gray-300">
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+          {/* Brand Section */}
+          <div>
+            <span className="text-2xl font-serif font-bold text-white block mb-4">Illa Pancha</span>
+            <p className="text-sm text-gray-400 mb-6">{F.tagline}</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Ico d={paths.phone} size={13} color="rgba(255,255,255,0.4)" />
+                <span className="text-sm">+34 982 XXX XXX</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Ico d={paths.mail} size={13} color="rgba(255,255,255,0.4)" />
+                <span className="text-sm">info@illapancha.com</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Ico d={paths.map} size={13} color="rgba(255,255,255,0.4)" />
+                <span className="text-sm">Ribadeo, Lugo, Galicia</span>
+              </div>
+            </div>
           </div>
-          <div className="footer-contact-item">
-            <Ico d={paths.mail} size={13} color="rgba(255,255,255,0.4)" />
-            <span>info@illapancha.com</span>
-          </div>
-          <div className="footer-contact-item">
-            <Ico d={paths.map} size={13} color="rgba(255,255,255,0.4)" />
-            <span>Ribadeo, Lugo, Galicia</span>
-          </div>
-        </div>
 
-        {/* Apartments Section */}
-        <div className="footer-col">
-          <button
-            className={`footer-col-title footer-col-toggle${expandedSection === 'apartments' ? ' expanded' : ''}`}
-            onClick={() => toggleSection('apartments')}
-            aria-expanded={expandedSection === 'apartments'}
-          >
-            {T.nav.apartments}
-            <span className="footer-toggle-icon">+</span>
-          </button>
-          <div className={`footer-col-content${expandedSection === 'apartments' ? ' expanded' : ''}`}>
-            {['Cantábrico', 'Ribadeo', 'Illa Pancha', 'Eo', 'Castro'].map(name => (
-              <Link key={name} to="/apartamentos" className="footer-link">Apt. {name}</Link>
-            ))}
-            <Link to="/apartamentos" className="footer-link">{T.home.viewAll}</Link>
+          {/* Apartments Section */}
+          <div>
+            <button
+              className="w-full text-left font-semibold text-white cursor-pointer flex justify-between items-center hover:text-teal transition-colors md:pb-2 md:border-0"
+              onClick={() => toggleSection('apartments')}
+              aria-expanded={expandedSection === 'apartments'}
+            >
+              {T.nav.apartments}
+              <span className={`text-lg transition-transform md:hidden ${expandedSection === 'apartments' ? 'rotate-45' : ''}`}>+</span>
+            </button>
+            <div className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'apartments' ? 'max-h-64 mt-3' : 'md:mt-4'}`}>
+              {['Cantábrico', 'Ribadeo', 'Illa Pancha', 'Eo', 'Castro'].map(name => (
+                <Link key={name} to="/apartamentos" className="text-gray-300 hover:text-teal transition-colors text-sm">Apt. {name}</Link>
+              ))}
+              <Link to="/apartamentos" className="text-gray-300 hover:text-teal transition-colors text-sm">{T.home.viewAll}</Link>
+            </div>
           </div>
-        </div>
 
-        {/* Info Section */}
-        <div className="footer-col">
-          <button
-            className={`footer-col-title footer-col-toggle${expandedSection === 'info' ? ' expanded' : ''}`}
-            onClick={() => toggleSection('info')}
-            aria-expanded={expandedSection === 'info'}
-          >
-            {F.infoCol}
-            <span className="footer-toggle-icon">+</span>
-          </button>
-          <div className={`footer-col-content${expandedSection === 'info' ? ' expanded' : ''}`}>
-            <Link to="/nosotros" className="footer-link">{F.about}</Link>
-            <Link to="/contacto" className="footer-link">{F.contact}</Link>
-            <Link to="/apartamentos" className="footer-link">{F.availability}</Link>
-            <span className="footer-link">{F.howToGet}</span>
-            <span className="footer-link">{F.faq}</span>
+          {/* Info Section */}
+          <div>
+            <button
+              className="w-full text-left font-semibold text-white cursor-pointer flex justify-between items-center hover:text-teal transition-colors md:pb-2 md:border-0"
+              onClick={() => toggleSection('info')}
+              aria-expanded={expandedSection === 'info'}
+            >
+              {F.infoCol}
+              <span className={`text-lg transition-transform md:hidden ${expandedSection === 'info' ? 'rotate-45' : ''}`}>+</span>
+            </button>
+            <div className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'info' ? 'max-h-64 mt-3' : 'md:mt-4'}`}>
+              <Link to="/nosotros" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.about}</Link>
+              <Link to="/contacto" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.contact}</Link>
+              <Link to="/apartamentos" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.availability}</Link>
+              <Link to="/mi-reserva" className="text-teal font-semibold hover:text-white transition-colors text-sm">{F.myReservation} ↗</Link>
+              <span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">{F.howToGet}</span>
+              <span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">{F.faq}</span>
+            </div>
           </div>
-        </div>
 
-        {/* Book On Section */}
-        <div className="footer-col">
-          <button
-            className={`footer-col-title footer-col-toggle${expandedSection === 'book' ? ' expanded' : ''}`}
-            onClick={() => toggleSection('book')}
-            aria-expanded={expandedSection === 'book'}
-          >
-            {F.bookOn}
-            <span className="footer-toggle-icon">+</span>
-          </button>
-          <div className={`footer-col-content${expandedSection === 'book' ? ' expanded' : ''}`}>
-            <span className="footer-link">Booking.com ↗</span>
-            <span className="footer-link">Airbnb ↗</span>
+          {/* Book On Section */}
+          <div>
+            <button
+              className="w-full text-left font-semibold text-white cursor-pointer flex justify-between items-center hover:text-teal transition-colors md:pb-2 md:border-0"
+              onClick={() => toggleSection('book')}
+              aria-expanded={expandedSection === 'book'}
+            >
+              {F.bookOn}
+              <span className={`text-lg transition-transform md:hidden ${expandedSection === 'book' ? 'rotate-45' : ''}`}>+</span>
+            </button>
+            <div className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'book' ? 'max-h-64 mt-3' : 'md:mt-4'}`}>
+              <span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">Booking.com ↗</span>
+              <span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">Airbnb ↗</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="footer-bottom">
-        <span className="footer-rights">{F.rights}</span>
-        <div className="footer-legal">
-          <Link to="/terminos">{F.terms}</Link>
-          <Link to="/privacidad">{F.privacy}</Link>
-          <Link to="/proteccion-datos">{F.dataProtection}</Link>
-          <Link to="/cookies">{F.cookies}</Link>
+      {/* Footer Bottom */}
+      <div className="border-t border-gray-700 px-4 py-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center flex-col md:flex-row gap-4">
+          <span className="text-xs text-gray-500">{F.rights}</span>
+          <div className="flex gap-6 flex-wrap justify-center md:justify-end">
+            <Link to="/terminos" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.terms}</Link>
+            <Link to="/privacidad" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.privacy}</Link>
+            <Link to="/proteccion-datos" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.dataProtection}</Link>
+            <Link to="/cookies" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.cookies}</Link>
+          </div>
         </div>
       </div>
     </footer>

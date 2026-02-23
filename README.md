@@ -134,7 +134,7 @@ Tablas principales:
 | `website_content` | Textos editables del CMS (bilingüe) |
 | `site_pages` | Páginas legales editables |
 
-El script SQL completo está en [`docs/SCRIPT_SUPABASE_COMPLETO.sql`](docs/SCRIPT_SUPABASE_COMPLETO.sql).
+El script SQL completo consolidado está en [`docs/database_schema_completo.sql`](docs/database_schema_completo.sql). Este archivo incluye todas las tablas, vistas, políticas RLS y datos iniciales necesarios para levantar el proyecto desde cero.
 
 ---
 

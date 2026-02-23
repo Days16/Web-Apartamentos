@@ -33,7 +33,7 @@ export function formatDateNumeric(dateStr) {
  */
 export function toInputDate(date) {
   const d = date instanceof Date ? date : new Date(date);
-  return d.toISOString().split('T')[0];
+  return dateToStr(d);
 }
 
 /**

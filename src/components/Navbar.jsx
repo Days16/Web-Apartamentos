@@ -63,22 +63,22 @@ export default function Navbar({ onOpenBooking }) {
 
   return (
     <nav 
-      className="nav" 
+      className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white" 
       ref={navRef}
-      style={{ boxShadow: scrolled ? '0 2px 20px rgba(15,23,42,0.08)' : 'none' }}
+      style={{ boxShadow: scrolled ? '0 2px 20px rgba(15,23,42,0.08)' : 'none', transition: 'box-shadow 0.3s' }}
     >
-      <Link to="/" className="nav-logo">Illa Pancha</Link>
+      <Link to="/" className="text-2xl font-serif font-bold text-navy">Illa Pancha</Link>
 
       {/* Links - escritorio y menú móvil */}
-      <div className={`nav-links${mobileOpen ? ' mobile-active' : ''}`}>
-        <Link to="/apartamentos" className={`nav-link ${isActive('/apartamentos') ? 'active' : ''}`}>
+      <div className={`flex flex-col md:flex-row md:items-center md:gap-8 absolute md:relative top-16 md:top-0 left-0 md:left-auto right-0 md:right-auto w-full md:w-auto bg-white md:bg-transparent px-6 md:px-0 py-4 md:py-0 border-b md:border-0 transition-all duration-300 ${mobileOpen ? 'max-h-64 opacity-100' : 'md:max-h-full md:opacity-100 max-h-0 opacity-0 overflow-hidden md:overflow-visible'}`}>
+        <Link to="/apartamentos" className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/apartamentos') ? 'text-teal border-b-2 border-teal' : ''}`}>
           {T.nav.apartments}
         </Link>
-        <Link to="/nosotros" className={`nav-link ${isActive('/nosotros') ? 'active' : ''}`}>
+        <Link to="/nosotros" className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/nosotros') ? 'text-teal border-b-2 border-teal' : ''}`}>
           {T.nav.ribadeo}
         </Link>
         <span 
-          className="nav-link" 
+          className="py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium cursor-pointer" 
           onClick={() => {
             setMobileOpen(false);
             if (location.pathname === '/nosotros') {
@@ -95,31 +95,31 @@ export default function Navbar({ onOpenBooking }) {
         >
           {T.nav.experiences}
         </span>
-        <Link to="/contacto" className={`nav-link ${isActive('/contacto') ? 'active' : ''}`}>
+        <Link to="/contacto" className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/contacto') ? 'text-teal border-b-2 border-teal' : ''}`}>
           {T.nav.contact}
         </Link>
 
         {/* Botón reservar visible solo en el menú móvil */}
-        <button className="btn-primary nav-book-in-menu" onClick={handleBook}>
+        <button className="md:hidden bg-teal text-white px-5 py-3 rounded hover:bg-teal-600 transition-all font-semibold mt-2 w-full" onClick={handleBook}>
           {T.nav.book}
         </button>
       </div>
 
-      <div className="nav-actions">
+      <div className="flex items-center gap-4 md:gap-6">
         <button
-          className={`nav-lang ${lang === 'ES' ? 'active' : ''}`}
+          className={`text-sm font-semibold transition-colors ${lang === 'ES' ? 'text-teal' : 'text-navy'}`}
           onClick={() => setLang('ES')}
           aria-label="Español"
         >ES</button>
-        <span style={{ color: 'rgba(15,23,42,0.2)', fontSize: 11 }} aria-hidden="true">|</span>
+        <span className="text-gray-300" aria-hidden="true">|</span>
         <button
-          className={`nav-lang ${lang === 'EN' ? 'active' : ''}`}
+          className={`text-sm font-semibold transition-colors ${lang === 'EN' ? 'text-teal' : 'text-navy'}`}
           onClick={() => setLang('EN')}
           aria-label="English"
         >EN</button>
 
         <button 
-          className="btn-primary nav-book-visible" 
+          className="hidden md:inline-block bg-teal text-white px-6 py-2 rounded hover:bg-teal-600 transition-all font-semibold" 
           onClick={handleBook}
           aria-label={T.nav.book}
         >
@@ -128,15 +128,15 @@ export default function Navbar({ onOpenBooking }) {
 
         {/* Hamburger - solo visible en móvil */}
         <button
-          className={`hamburger${mobileOpen ? ' active' : ''}`}
+          className="md:hidden flex flex-col gap-1.5 ml-4"
           onClick={() => setMobileOpen(o => !o)}
           aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
         >
-          <span />
-          <span />
-          <span />
+          <span className={`w-6 h-0.5 bg-navy transition-all transform origin-center ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
+          <span className={`w-6 h-0.5 bg-navy transition-all ${mobileOpen ? 'opacity-0' : ''}`} />
+          <span className={`w-6 h-0.5 bg-navy transition-all transform origin-center ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
         </button>
       </div>
     </nav>

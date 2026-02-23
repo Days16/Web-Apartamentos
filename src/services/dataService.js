@@ -11,9 +11,15 @@ export async function getApartments() {
       .from('apartments')
       .select('*')
       .order('price', { ascending: true });
-    if (error || !data || data.length === 0) return [];
+
+    if (error) {
+      console.error('ERROR Supabase getApartments:', error);
+      return [];
+    }
+    if (!data || data.length === 0) return [];
     return data.map(normalizeApartment);
-  } catch {
+  } catch (err) {
+    console.error('CATCH getApartments:', err);
     return [];
   }
 }
@@ -48,10 +54,30 @@ export async function getReservations() {
       .from('reservations')
       .select('*')
       .order('created_at', { ascending: false });
-    if (error || !data || data.length === 0) return [];
+
+    if (error) {
+      console.error('ERROR Supabase getReservations:', error);
+      return [];
+    }
+    if (!data || data.length === 0) return [];
     return data.map(normalizeReservation);
-  } catch {
+  } catch (err) {
+    console.error('CATCH getReservations:', err);
     return [];
+  }
+}
+
+export async function getReservationById(id) {
+  try {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error || !data) return null;
+    return normalizeReservation(data);
+  } catch {
+    return null;
   }
 }
 
@@ -70,10 +96,9 @@ export async function createReservation(reservation) {
       status: reservation.status || 'pending',
       source: reservation.source || 'web',
       fully_paid: reservation.cashPaid || false,
-      guest_email: reservation.email,
-      guest_phone: reservation.phone,
+      guest_email: reservation.email || 'info@illapancha.com',
+      guest_phone: reservation.phone || '',
       extras: reservation.extras || [],
-      extras_total: reservation.extrasTotal || 0,
     })
     .select()
     .single();
