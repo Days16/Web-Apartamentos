@@ -32,6 +32,7 @@ export const paths = {
   bbq: "M3 3h18M9 3v4a3 3 0 006 0V3M12 7v14M8 21h8",
   crib: "M3 7h18M3 17h18M7 7v10M17 7v10M3 12h18",
   caret: "M6 9l6 6 6-6",
+  calendar: "M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z",
 };
 
 export default function Ico({ d, size = 16, color = 'currentColor', strokeWidth = 1.6 }) {

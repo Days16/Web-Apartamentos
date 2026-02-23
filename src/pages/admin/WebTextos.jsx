@@ -124,7 +124,9 @@ export default function WebTextos() {
       </div>
 
       <div className="p-6 bg-gray-50">
+
         {/* MANTENIMIENTO */}
+        {/*
         <div className={`bg-white border rounded-lg p-8 max-w-3xl mb-5 ${settings.maintenanceMode ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
           <div className="flex justify-between items-center flex-wrap gap-3">
             <div className="flex-1 min-w-0">
@@ -154,7 +156,7 @@ export default function WebTextos() {
             </div>
           </div>
         </div>
-
+        */}
         <div className="bg-white border border-gray-200 rounded-lg p-8 max-w-3xl mb-4">
           {/* HOME HERO */}
           <div className="font-serif text-xl text-navy mb-5">

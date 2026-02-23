@@ -9,7 +9,7 @@ const navItems = [
   { path: '/admin/ofertas', label: 'Ofertas', icon: paths.star },
   { path: '/admin/extras', label: 'Servicios extra', icon: paths.plus },
   { path: '/admin/web', label: 'Textos web', icon: paths.edit },
-  { path: '/admin/reglas', label: 'Reglas de reserva', icon: paths.calendar },
+  { path: '/admin/reglas', label: 'Reglas de reserva', icon: paths.cal },
 ];
 
 export default function AdminLayout() {
@@ -70,6 +70,10 @@ export default function AdminLayout() {
           <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/5 hover:text-white">
             <Ico d={paths.eye} size={18} color="currentColor" />
             Ver web pública
+          </Link>
+          <Link to="/admin/changelog" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/5 hover:text-white">
+            <Ico d={paths.msg} size={18} color="currentColor" />
+            Novedades
           </Link>
           <button
             onClick={logout}

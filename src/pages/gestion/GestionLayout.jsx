@@ -56,6 +56,10 @@ export default function GestionLayout() {
             <Ico d={paths.eye} size={18} color="currentColor" />
             Ver web pública
           </Link>
+          <Link to="/admin/changelog" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/5 hover:text-white">
+            <Ico d={paths.msg} size={18} color="currentColor" />
+            Novedades
+          </Link>
           <button
             onClick={logout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-red-500/10 text-red-400 mt-2 text-left w-full"

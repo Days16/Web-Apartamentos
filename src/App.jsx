@@ -36,6 +36,7 @@ import IcalAdmin from './pages/admin/IcalAdmin';
 import Usuarios from './pages/admin/Usuarios';
 import WebTextos from './pages/admin/WebTextos';
 import ReglasReserva from './pages/admin/ReglasReserva';
+import Changelog from './pages/admin/Changelog';
 
 // Componentes
 import CookieBanner from './components/CookieBanner';
@@ -133,6 +134,7 @@ export default function App() {
                         <Route path="ofertas" element={<OfertasAdmin />} />
                         <Route path="extras" element={<ExtrasAdmin />} />
                         <Route path="reglas" element={<ReglasReserva />} />
+                        <Route path="changelog" element={<Changelog />} />
                       </Route>
                     </Route>
 

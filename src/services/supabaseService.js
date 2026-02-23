@@ -493,3 +493,18 @@ export async function deleteMinStayRule(id) {
   if (error) throw error;
   return true;
 }
+
+// ─── CHANGELOG ─────────────────────────────────────────────────────────────
+export async function fetchChangelog() {
+  const { data, error } = await supabase
+    .from('changelog')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching changelog:', error);
+    return [];
+  }
+  return data || [];
+}
+
