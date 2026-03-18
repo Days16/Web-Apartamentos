@@ -6,6 +6,7 @@ import Ico, { paths } from '../components/Ico';
 import SEO from '../components/SEO';
 import { useLang } from '../contexts/LangContext';
 import { useT } from '../i18n/translations';
+import { useSettings } from '../contexts/SettingsContext';
 import { fetchApartments, submitContactMessage } from '../services/supabaseService';
 import { sendOwnerNotification } from '../services/resendService';
 import { safeHtml } from '../utils/sanitize';
@@ -49,6 +50,9 @@ export default function Contact() {
   const { lang, t } = useLang();
   const T = useT(lang);
   const C = T.contact;
+  const { settings } = useSettings();
+  const sitePhone = settings?.site_phone || '';
+  const waPhone = sitePhone.replace(/\D/g, '');
 
   return (
     <>
@@ -81,7 +85,7 @@ export default function Contact() {
               <div className="text-4xl font-serif font-light text-navy mb-3">
                 {C.sentTitle}
               </div>
-              <p className="text-sm text-gray-600 leading-relaxed mb-7" dangerouslySetInnerHTML={{ __html: C.sentDesc.replace('{email}', `<strong>${form.email}</strong>`) }} />
+              <p className="text-sm text-gray-600 leading-relaxed mb-7" dangerouslySetInnerHTML={safeHtml(C.sentDesc.replace('{email}', `<strong>${form.email}</strong>`))} />
               <button
                 className="border-2 border-navy text-navy hover:bg-navy hover:text-white px-6 py-3 rounded transition-all"
                 onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', apt: '', msg: '' }); }}
@@ -174,7 +178,7 @@ export default function Contact() {
             <Ico d={paths.phone} size={18} color="#7dd3fc" />
             <div>
               <div className="text-sm font-semibold text-navy">{T.booking.phone}</div>
-              <div className="text-lg font-semibold text-teal">+34 982 XXX XXX</div>
+              <div className="text-lg font-semibold text-teal">{sitePhone || '+34 982 XXX XXX'}</div>
               <div className="text-xs text-gray-500 mt-1">
                 {C.hours}
               </div>
@@ -199,12 +203,12 @@ export default function Contact() {
             <div>
               <div className="text-sm font-semibold text-navy">WhatsApp</div>
               <a
-                href={`https://wa.me/34982XXXXXX?text=${encodeURIComponent(C.waMsg)}`}
+                href={waPhone ? `https://wa.me/${waPhone}?text=${encodeURIComponent(C.waMsg)}` : '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-lg font-semibold text-teal hover:text-teal-700 transition-colors block"
               >
-                +34 982 XXX XXX
+                {sitePhone || '+34 982 XXX XXX'}
               </a>
               <div className="text-xs text-gray-500 mt-1">
                 Respuesta inmediata
@@ -222,7 +226,7 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="mt-10 p-6 bg-teal/10 rounded-xl border border-teal/20">
+          <div className="mt-10 p-6 bg-teal/10 dark:bg-teal/5 rounded-xl border border-teal/20 dark:border-teal/10">
             <div className="font-serif text-xl text-navy mb-4 font-bold">
               {T.detail.checkin} y {T.detail.checkout}
             </div>

@@ -76,6 +76,32 @@ CREATE TABLE IF NOT EXISTS extras (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- FOTOS DE APARTAMENTOS
+CREATE TABLE IF NOT EXISTS apartment_photos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  apartment_slug TEXT REFERENCES apartments(slug) ON DELETE CASCADE,
+  photo_url TEXT NOT NULL,
+  storage_path TEXT,          -- ruta en Supabase Storage (bucket: apartment-photos)
+  order_index INT DEFAULT 0,
+  is_main BOOLEAN DEFAULT FALSE,
+  caption TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE apartment_photos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Fotos públicas" ON apartment_photos FOR SELECT USING (true);
+CREATE POLICY "Insertar fotos" ON apartment_photos FOR INSERT WITH CHECK (true);
+CREATE POLICY "Borrar fotos" ON apartment_photos FOR DELETE USING (true);
+CREATE POLICY "Actualizar fotos" ON apartment_photos FOR UPDATE USING (true);
+
+-- STORAGE BUCKET (ejecutar en Supabase SQL Editor)
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('apartment-photos', 'apartment-photos', true) ON CONFLICT (id) DO NOTHING;
+-- CREATE POLICY "Public read" ON storage.objects FOR SELECT USING (bucket_id = 'apartment-photos');
+-- CREATE POLICY "Auth insert" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'apartment-photos');
+-- CREATE POLICY "Auth delete" ON storage.objects FOR DELETE USING (bucket_id = 'apartment-photos');
+
+-- MIGRACIÓN: añadir storage_path si la tabla ya existe
+-- ALTER TABLE apartment_photos ADD COLUMN IF NOT EXISTS storage_path TEXT;
+
 -- RESEÑAS
 CREATE TABLE IF NOT EXISTS reviews (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

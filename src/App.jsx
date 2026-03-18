@@ -18,6 +18,7 @@ import Terminos from './pages/Terminos';
 import ProteccionDatos from './pages/ProteccionDatos';
 import ReservaConfirmada from './pages/ReservaConfirmada';
 import PortalReserva from './pages/PortalReserva';
+import Reservar from './pages/Reservar';
 
 // Panel de gestión
 import GestionLayout from './pages/gestion/GestionLayout';
@@ -45,12 +46,14 @@ import WhatsAppButton from './components/WhatsAppButton';
 import { LangProvider } from './contexts/LangContext';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Admin
 import ExtrasAdmin from './pages/admin/ExtrasAdmin';
 import ResenasAdmin from './pages/admin/ResenasAdmin';
 import OfertasAdmin from './pages/admin/OfertasAdmin';
+import Pagos from './pages/admin/Pagos';
 import { DiscountProvider } from './contexts/DiscountContext';
 import Login from './pages/Login';
 import OffersBanner from './components/OffersBanner';
@@ -90,6 +93,7 @@ import PreviewBanner from './components/PreviewBanner';
 
 export default function App() {
   return (
+    <ThemeProvider>
     <Elements stripe={stripePromise}>
       <AuthProvider>
         <SettingsProvider>
@@ -112,6 +116,7 @@ export default function App() {
                     <Route path="/proteccion-datos" element={<ProteccionDatos />} />
                     <Route path="/reserva-confirmada/:id" element={<ReservaConfirmada />} />
                     <Route path="/mi-reserva" element={<PortalReserva />} />
+                    <Route path="/reservar" element={<Reservar />} />
 
                     <Route path="/login" element={<Login />} />
 
@@ -139,6 +144,7 @@ export default function App() {
                         <Route path="resenas" element={<ResenasAdmin />} />
                         <Route path="cancelacion" element={<Cancelacion />} />
                         <Route path="changelog" element={<Changelog />} />
+                        <Route path="pagos" element={<Pagos />} />
                       </Route>
                     </Route>
 
@@ -155,5 +161,6 @@ export default function App() {
         </SettingsProvider>
       </AuthProvider>
     </Elements>
+    </ThemeProvider>
   );
 }

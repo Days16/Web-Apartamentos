@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -24,7 +24,7 @@ export default function PortalReserva() {
     const [settings, setSettings] = useState(null);
 
     // Cargar settings globales preventivamente
-    useState(() => {
+    useEffect(() => {
         fetchSettings().then(setSettings);
     }, []);
 
@@ -123,7 +123,7 @@ export default function PortalReserva() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col">
             <Navbar />
 
             <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-12 md:py-20">
@@ -133,7 +133,7 @@ export default function PortalReserva() {
                 </div>
 
                 {!reservation ? (
-                    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto border border-gray-100 animate-in fade-in zoom-in duration-300">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 max-w-md mx-auto border border-gray-100 dark:border-slate-700 animate-in fade-in zoom-in duration-300">
                         <form onSubmit={handleSearch} className="space-y-6">
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Código de Reserva</label>

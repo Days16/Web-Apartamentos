@@ -12,7 +12,9 @@ export default function ConfiguracionGeneral() {
         cancellation_free_days: 14,
         payment_deposit_percentage: 50,
         tax_percentage: 10,
-        maintenance_mode: false
+        maintenance_mode: false,
+        booking_mode: 'modal',
+        booking_com_url: ''
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -28,7 +30,9 @@ export default function ConfiguracionGeneral() {
                     cancellation_free_days: data.cancellation_free_days ?? 14,
                     payment_deposit_percentage: data.payment_deposit_percentage ?? 50,
                     tax_percentage: data.tax_percentage ?? 10,
-                    maintenance_mode: data.maintenance_mode ?? false
+                    maintenance_mode: data.maintenance_mode ?? false,
+                    booking_mode: data.booking_mode ?? 'modal',
+                    booking_com_url: data.booking_com_url ?? ''
                 });
             } catch (err) {
                 console.error('Error cargando ajustes:', err);
@@ -54,7 +58,9 @@ export default function ConfiguracionGeneral() {
                 updateSetting('cancellation_free_days', settings.cancellation_free_days, 'number'),
                 updateSetting('payment_deposit_percentage', settings.payment_deposit_percentage, 'number'),
                 updateSetting('tax_percentage', settings.tax_percentage, 'number'),
-                updateSetting('maintenance_mode', settings.maintenance_mode, 'boolean')
+                updateSetting('maintenance_mode', settings.maintenance_mode, 'boolean'),
+                updateSetting('booking_mode', settings.booking_mode, 'string'),
+                updateSetting('booking_com_url', settings.booking_com_url, 'string')
             ]);
 
             // 2. Sincronizar con la tabla de apartamentos (Propagación manual)
@@ -214,6 +220,83 @@ export default function ConfiguracionGeneral() {
                     </section>
 
                 </div>
+
+                {/* MODO BOTONES DE RESERVA */}
+                <section className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="p-6 border-b border-gray-100 flex items-start gap-4">
+                        <div className="mt-1"><Ico d={paths.tag} size={20} color="#64748b" /></div>
+                        <div>
+                            <h2 className="text-lg font-bold text-navy">Botones de Reserva</h2>
+                            <p className="text-xs text-gray-500">Decide qué ocurre cuando un cliente pulsa "Reservar" en la web</p>
+                        </div>
+                    </div>
+                    <div className="p-6 space-y-6">
+                        {/* Selector de modo */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <button
+                                onClick={() => handleChange('booking_mode', 'modal')}
+                                className={`flex flex-col items-start gap-2 p-5 rounded-xl border-2 text-left transition-all ${settings.booking_mode !== 'redirect' ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300'}`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${settings.booking_mode !== 'redirect' ? 'border-teal-600' : 'border-gray-300'}`}>
+                                        {settings.booking_mode !== 'redirect' && <div className="w-2 h-2 rounded-full bg-teal-600" />}
+                                    </div>
+                                    <span className="font-bold text-navy text-sm">Modal de reserva</span>
+                                </div>
+                                <p className="text-xs text-gray-500 leading-relaxed pl-6">Abre el formulario de reserva integrado en la web (comportamiento actual)</p>
+                            </button>
+
+                            <button
+                                onClick={() => handleChange('booking_mode', 'redirect')}
+                                className={`flex flex-col items-start gap-2 p-5 rounded-xl border-2 text-left transition-all ${settings.booking_mode === 'redirect' ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300'}`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${settings.booking_mode === 'redirect' ? 'border-teal-600' : 'border-gray-300'}`}>
+                                        {settings.booking_mode === 'redirect' && <div className="w-2 h-2 rounded-full bg-teal-600" />}
+                                    </div>
+                                    <span className="font-bold text-navy text-sm">Página de reserva</span>
+                                </div>
+                                <p className="text-xs text-gray-500 leading-relaxed pl-6">Redirige a <code className="bg-gray-100 px-1 rounded">/reservar</code> con formulario de contacto y enlace a Booking.com</p>
+                            </button>
+                        </div>
+
+                        {/* URL de Booking.com — solo visible cuando está en modo redirect */}
+                        <div className={`transition-all ${settings.booking_mode === 'redirect' ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                                URL de tu propiedad en Booking.com
+                            </label>
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#003580' }}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                        <path d="M3.5 2A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h5a.5.5 0 00.5-.5V17h6v4.5a.5.5 0 00.5.5h5a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2h-17zm5 11a2.5 2.5 0 110-5 2.5 2.5 0 010 5zm7 0a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="url"
+                                    value={settings.booking_com_url}
+                                    onChange={e => handleChange('booking_com_url', e.target.value)}
+                                    placeholder="https://www.booking.com/hotel/es/tu-propiedad.es.html"
+                                    className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-400 mt-1.5">
+                                Copia la URL completa de tu alojamiento en Booking.com. Se mostrará en la página <code>/reservar</code>.
+                            </p>
+                        </div>
+
+                        {/* Preview */}
+                        {settings.booking_mode === 'redirect' && (
+                            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" className="mt-0.5 flex-shrink-0">
+                                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                <p className="text-xs text-amber-700 leading-relaxed">
+                                    Los botones "Reservar" de toda la web redirigirán a <strong>/reservar</strong> en lugar de abrir el modal. Esa página muestra el formulario de contacto y el enlace a Booking.com.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </section>
 
                 {/* ESTADO DEL SITIO */}
                 <section className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">

@@ -155,7 +155,17 @@
         "cardData": "Datos de tarjeta",
         "testCard": "Prueba: 4242 4242 4242 4242, fecha futura (ej: 12/27), CVC aleatorio (ej: 123)",
         "notServer": "Tus datos de tarjeta nunca tocan nuestros servidores",
-        "paidFull": "Pago completo realizado online"
+        "paidFull": "Pago completo realizado online",
+        "notFound": "Reserva no encontrada",
+        "stayReady": "tu estancia en Illa Pancha está lista.",
+        "stayDetails": "Detalles de la Estancia",
+        "paymentInfo": "Información de Pago",
+        "totalAmount": "Importe Total",
+        "depositPaid": "Depósito Pagado",
+        "pendingArrival": "Pendiente al llegar",
+        "downloadPDF": "Descargar Factura PDF",
+        "backToWeb": "Volver a la Web",
+        "confirmationEmail": "Hemos enviado todos los detalles y el código de confirmación a tu email. Si tienes alguna duda, contáctanos en"
     },
     "footer": {
         "tagline": "Ocho apartamentos frente a la ría del Eo, en Ribadeo, Galicia. Reserva directo y paga menos que en cualquier plataforma.",
@@ -190,7 +200,8 @@
         "persons": "personas",
         "occupied": "Ocupado",
         "available": "Disponible",
-        "past": "Pasado"
+        "past": "Pasado",
+        "seeMore": "Ver más"
     },
     "about": {
         "title": "Nosotros",

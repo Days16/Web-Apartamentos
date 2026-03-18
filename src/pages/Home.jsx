@@ -89,6 +89,10 @@ export default function Home() {
   };
 
   const handleBook = (apt) => {
+    if (settings?.booking_mode === 'redirect') {
+      navigate('/reservar');
+      return;
+    }
     setSelectedApt(apt);
     setBookingOpen(true);
   };

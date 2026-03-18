@@ -25,7 +25,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
+    <div className="flex h-screen bg-gray-50 dark:bg-slate-900 overflow-hidden font-sans">
       <div className="w-64 bg-[#1C1810] text-gray-300 flex flex-col flex-shrink-0">
         <div className="p-6 border-b border-white/10">
           <div
@@ -95,7 +95,7 @@ export default function AdminLayout() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-gray-50 text-slate-800">
+      <div className="flex-1 overflow-auto bg-gray-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
         <Outlet />
       </div>
     </div>

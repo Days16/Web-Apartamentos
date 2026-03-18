@@ -19,7 +19,7 @@ export default function ProteccionDatos() {
           <h1 className="text-5xl md:text-6xl font-serif font-bold text-navy mb-6">{L.dataTitle}</h1>
           <p className="text-xs text-gray-500 mt-2">{L.lastUpdate}</p>
         </div>
-        <div className="max-w-3xl mx-auto px-4 py-12">
+        <div className="policy-content max-w-3xl mx-auto px-4 py-12">
           <p>Este documento complementa la Política de Privacidad general y detalla de forma específica el cumplimiento del <strong>Reglamento General de Protección de Datos (RGPD)</strong> y la <strong>Ley Orgánica 3/2018 de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD)</strong> por parte de <strong>Illa Pancha Ribadeo</strong>.</p>
 
           <h2>1. Responsable del tratamiento</h2>
@@ -91,29 +91,6 @@ export default function ProteccionDatos() {
 
           <h2>9. Actualizaciones</h2>
           <p>Este documento puede actualizarse para adaptarse a cambios normativos o en nuestros sistemas de tratamiento. La versión vigente estará siempre disponible en esta página con la fecha de última actualización.</p>
-          <style>{`
-            .policy-content p {
-              @apply text-gray-700 leading-relaxed mb-4;
-            }
-            .policy-content h2 {
-              @apply font-serif text-2xl font-bold text-navy mb-4 mt-8;
-            }
-            .policy-content h2:first-of-type {
-              @apply mt-0;
-            }
-            .policy-content ul {
-              @apply list-disc list-inside text-gray-700 leading-relaxed ml-4 mb-4;
-            }
-            .policy-content li {
-              @apply text-gray-700 leading-relaxed mb-2;
-            }
-            .policy-content strong {
-              @apply font-bold text-slate-900;
-            }
-            .policy-content a {
-              @apply text-teal hover:underline;
-            }
-          `}</style>
         </div>
       </div>
       <Footer />

@@ -75,6 +75,7 @@
         "noCommission": "No fees · Free cancellation until",
         "daysBefore": "days before",
         "depositNow": "by card at booking",
+        "depositPct": "by card at booking",
         "cashArrival": "in cash on arrival",
         "available": "Available",
         "occupied": "Occupied",
@@ -156,7 +157,17 @@
         "cardData": "Card details",
         "testCard": "Test: 4242 4242 4242 4242, future date (e.g. 12/27), random CVC (e.g. 123)",
         "notServer": "Your card details never touch our servers",
-        "paidFull": "Full payment made online"
+        "paidFull": "Full payment made online",
+        "notFound": "Booking not found",
+        "stayReady": "your stay at Illa Pancha is ready.",
+        "stayDetails": "Stay Details",
+        "paymentInfo": "Payment Information",
+        "totalAmount": "Total Amount",
+        "depositPaid": "Deposit Paid",
+        "pendingArrival": "Due on arrival",
+        "downloadPDF": "Download PDF Invoice",
+        "backToWeb": "Back to Website",
+        "confirmationEmail": "We have sent all details and confirmation code to your email. If you have any questions, contact us at"
     },
     "footer": {
         "tagline": "Eight apartments by the Eo estuary in Ribadeo, Galicia. Book direct and pay less than on any platform.",
@@ -179,7 +190,9 @@
     },
     "seo": {
         "homeTitle": "Home",
-        "homeDesc": "Book your stay at Illa Pancha, luxury tourist apartments in Ribadeo with sea views."
+        "homeDesc": "Book your stay at Illa Pancha, luxury tourist apartments in Ribadeo with sea views.",
+        "aptsTitle": "Apartments",
+        "aptsDesc": "Explore our selection of tourist apartments in Ribadeo. Fully equipped and ready for your stay."
     },
     "common": {
         "offerApplied": "Offer applied",
@@ -189,7 +202,8 @@
         "persons": "guests",
         "occupied": "Occupied",
         "available": "Available",
-        "past": "Past"
+        "past": "Past",
+        "seeMore": "See more"
     },
     "about": {
         "title": "About Us",

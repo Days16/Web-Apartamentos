@@ -9,12 +9,14 @@ import { fetchWebsiteContent } from '../services/supabaseService';
 import { useLang } from '../contexts/LangContext';
 import { useT } from '../i18n/translations';
 import { safeHtml } from '../utils/sanitize';
+import { useSettings } from '../contexts/SettingsContext';
 
 export default function About() {
   const navigate = useNavigate();
   const { lang, t } = useLang();
   const T = useT(lang);
   const A = T.about;
+  const { settings } = useSettings();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [texts, setTexts] = useState({});
 
@@ -180,7 +182,7 @@ export default function About() {
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <button
               className="w-full sm:w-auto px-8 py-4 bg-teal text-white hover:bg-teal-600 font-medium rounded transition-colors text-lg"
-              onClick={() => setBookingOpen(true)}
+              onClick={() => settings?.booking_mode === 'redirect' ? navigate('/reservar') : setBookingOpen(true)}
             >
               {T.home.availability}
             </button>

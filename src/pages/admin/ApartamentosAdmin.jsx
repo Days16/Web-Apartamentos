@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { formatDateNumeric, formatPrice } from '../../utils/format';
 import { supabase } from '../../lib/supabase';
+import { uploadPhotoToStorage, deletePhotoFromStorage } from '../../services/supabaseService';
 import Ico, { paths } from '../../components/Ico';
 
 const amenities = ['WiFi', 'Parking', 'Cocina equipada', 'TV Smart', 'A/C', 'Calefacción', 'Lavadora', 'Terraza', 'Vistas al mar', 'Vistas a la ría', 'Cuna disponible', 'Barbacoa'];
@@ -36,6 +37,7 @@ export default function ApartamentosAdmin() {
   const [seasonPrices, setSeasonPrices] = useState([]);
   const [photos, setPhotos] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [unsplashUrl, setUnsplashUrl] = useState('');
   const [newSeasonData, setNewSeasonData] = useState({ type: 'low', price: '', start_date: '', end_date: '' });
@@ -88,7 +90,7 @@ export default function ApartamentosAdmin() {
         .from('apartment_photos')
         .select('*')
         .eq('apartment_slug', apartmentSlug)
-        .order('order_index', { ascending: true });
+        .order('id', { ascending: true });
 
       if (fetchError) throw fetchError;
       setPhotos(data || []);
@@ -125,8 +127,8 @@ export default function ApartamentosAdmin() {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
 
-      // Auto-generar slug si se está escribiendo el nombre y es un apartamento nuevo
-      if (field === 'name' && editing === 'new') {
+      // Auto-generar slug al cambiar el nombre (nuevo o existente)
+      if (field === 'name') {
         newData.slug = value
           .toLowerCase()
           .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
@@ -211,7 +213,7 @@ export default function ApartamentosAdmin() {
       setError(null);
       setSuccess(null);
 
-      const payload = {
+      const basePayload = {
         name: formData.name,
         name_en: formData.name_en,
         tagline: formData.tagline,
@@ -222,17 +224,19 @@ export default function ApartamentosAdmin() {
         baths: formData.bathrooms,
         beds: formData.beds,
         min_stay: formData.min_stay,
-        slug: formData.slug,
         description: formData.description,
         description_en: formData.description_en,
         color: formData.color,
         cancellation_days: formData.cancellation_days,
         deposit_percentage: formData.deposit_percentage,
         active: formData.active,
-        amenities: selectedAmenities
+        amenities: selectedAmenities,
+        slug: formData.slug,
+        maps_url: formData.maps_url || null
       };
 
       if (editing === 'new') {
+        const payload = { ...basePayload };
         const { error: insertError } = await supabase
           .from('apartments')
           .insert([payload]);
@@ -241,7 +245,7 @@ export default function ApartamentosAdmin() {
       } else {
         const { error: updateError } = await supabase
           .from('apartments')
-          .update(payload)
+          .update(basePayload)
           .eq('slug', editing);
 
         if (updateError) throw updateError;
@@ -261,6 +265,49 @@ export default function ApartamentosAdmin() {
   };
 
   // ─── GESTIÓN DE FOTOS ────────────────────────────────────────────────
+  const addPhotoFromFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+    if (!allowed.includes(file.type)) {
+      setError('Formato no permitido. Usa JPG, PNG, WebP o AVIF.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('La imagen no puede superar los 10 MB.');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const { path, publicUrl } = await uploadPhotoToStorage(editing, file);
+
+      const { data, error: insertError } = await supabase
+        .from('apartment_photos')
+        .insert([{
+          apartment_slug: editing,
+          photo_url: publicUrl,
+          storage_path: path,
+          order_index: photos.length,
+          is_main: photos.length === 0
+        }])
+        .select();
+
+      if (insertError) throw insertError;
+
+      setPhotos([...photos, data[0]]);
+      setSuccess('✓ Foto subida correctamente');
+      setTimeout(() => setSuccess(null), 2000);
+    } catch (err) {
+      console.error('Error uploading photo:', err);
+      setError('Error al subir foto: ' + err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const addPhoto = async () => {
     if (!unsplashUrl.trim()) {
       setError('Por favor, ingresa una URL de foto');
@@ -273,6 +320,7 @@ export default function ApartamentosAdmin() {
         .insert([{
           apartment_slug: editing,
           photo_url: unsplashUrl,
+          storage_path: null,
           order_index: photos.length,
           is_main: photos.length === 0
         }])
@@ -292,12 +340,19 @@ export default function ApartamentosAdmin() {
 
   const deletePhoto = async (photoId) => {
     try {
+      const photo = photos.find(p => p.id === photoId);
+
       const { error: deleteError } = await supabase
         .from('apartment_photos')
         .delete()
         .eq('id', photoId);
 
       if (deleteError) throw deleteError;
+
+      // Eliminar también del Storage si tiene ruta
+      if (photo?.storage_path) {
+        await deletePhotoFromStorage(photo.storage_path);
+      }
 
       setPhotos(photos.filter(p => p.id !== photoId));
       setSuccess('✓ Foto eliminada correctamente');
@@ -479,6 +534,7 @@ export default function ApartamentosAdmin() {
                     { id: 'photos', label: '📸 Fotos' },
                     { id: 'seasons', label: '🗓️ Temporadas' }
                   ] : []),
+                  { id: 'location', label: '📍 Ubicación' },
                   { id: 'amenities', label: '✨ Comodidades' },
                   { id: 'state', label: '⚙️ Estado' }
                 ].map(tab => (
@@ -495,7 +551,7 @@ export default function ApartamentosAdmin() {
                       cursor: 'pointer',
                       fontSize: 13,
                       fontWeight: 600,
-                      borderBottom: tab.id !== 'state' ? '1px solid #eee' : 'none',
+                      borderBottom: '1px solid #eee',
                       transition: 'all 0.2s'
                     }}
                   >
@@ -608,7 +664,7 @@ export default function ApartamentosAdmin() {
                         border: `2px solid ${validationErrors.slug ? '#f44' : '#ddd'}`,
                         borderRadius: 6,
                         fontSize: 14,
-                        fontFamily: 'monospace'
+                        fontFamily: 'monospace',
                       }}
                       placeholder="ej: apartamento-deluxe"
                     />
@@ -918,16 +974,54 @@ export default function ApartamentosAdmin() {
                     Gestionar Fotos
                   </div>
 
-                  {/* Agregar foto */}
+                  {/* Agregar foto — subir archivo al Storage */}
                   <div style={{
                     background: LIGHT_BG,
                     border: `2px dashed ${PRIMARY_COLOR}`,
                     borderRadius: 8,
                     padding: 20,
-                    marginBottom: 24
+                    marginBottom: 16
                   }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: SECONDARY_COLOR, marginBottom: 12 }}>
-                      Agregar foto (URL de Unsplash)
+                      Subir foto desde tu dispositivo
+                    </div>
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 10,
+                      padding: '12px 20px',
+                      background: uploading ? '#ccc' : PRIMARY_COLOR,
+                      color: '#fff',
+                      borderRadius: 6,
+                      cursor: uploading ? 'not-allowed' : 'pointer',
+                      fontSize: 13,
+                      fontWeight: 600,
+                    }}>
+                      {uploading ? '⏳ Subiendo…' : '📁 Elegir imagen'}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/avif"
+                        style={{ display: 'none' }}
+                        disabled={uploading}
+                        onChange={addPhotoFromFile}
+                      />
+                    </label>
+                    <div style={{ fontSize: 11, color: '#888', marginTop: 8 }}>
+                      JPG, PNG, WebP o AVIF · máx. 10 MB · se guarda en Supabase Storage
+                    </div>
+                  </div>
+
+                  {/* Agregar foto — URL externa */}
+                  <div style={{
+                    background: LIGHT_BG,
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 8,
+                    padding: 16,
+                    marginBottom: 24
+                  }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#666', marginBottom: 10 }}>
+                      O pega una URL externa
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <input
@@ -959,9 +1053,6 @@ export default function ApartamentosAdmin() {
                       >
                         + Agregar
                       </button>
-                    </div>
-                    <div style={{ fontSize: 11, color: '#888', marginTop: 8 }}>
-                      💡 Tip: Usa URLs de Unsplash para fotos de calidad gratis
                     </div>
                   </div>
 
@@ -1008,6 +1099,22 @@ export default function ApartamentosAdmin() {
                               fontWeight: 600
                             }}>
                               PRINCIPAL
+                            </div>
+                          )}
+                          {photo.storage_path && (
+                            <div style={{
+                              position: 'absolute',
+                              top: 4,
+                              left: 4,
+                              background: '#16a34a',
+                              color: '#fff',
+                              padding: '2px 5px',
+                              borderRadius: 4,
+                              fontSize: 9,
+                              fontWeight: 700,
+                              letterSpacing: '0.3px'
+                            }}>
+                              STORAGE
                             </div>
                           )}
                           <div style={{
@@ -1232,6 +1339,72 @@ export default function ApartamentosAdmin() {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB: UBICACIÓN */}
+              {activeTab === 'location' && (
+                <div style={{ background: '#fff', border: `1px solid #ddd`, borderRadius: 12, padding: 28 }}>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: PRIMARY_COLOR, marginBottom: 8 }}>
+                    Ubicación
+                  </div>
+                  <div style={{ fontSize: 13, color: '#888', marginBottom: 24 }}>
+                    Pega el enlace de Google Maps del apartamento. Aparecerá como botón en la página del apartamento.
+                  </div>
+
+                  <div style={{ marginBottom: 20 }}>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: SECONDARY_COLOR, marginBottom: 8 }}>
+                      Enlace Google Maps
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.maps_url || ''}
+                      onChange={(e) => handleInputChange('maps_url', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #ddd',
+                        borderRadius: 6,
+                        fontSize: 14,
+                      }}
+                      placeholder="https://maps.google.com/..."
+                    />
+                  </div>
+
+                  {formData.maps_url && (
+                    <div style={{ background: '#f0faf9', border: '1px solid #b2ddd8', borderRadius: 8, padding: 16 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: PRIMARY_COLOR, marginBottom: 8 }}>Vista previa del botón</div>
+                      <a
+                        href={formData.maps_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '12px 16px',
+                          background: '#fff',
+                          border: '1px solid #ddd',
+                          borderRadius: 8,
+                          textDecoration: 'none',
+                          color: '#0f172a'
+                        }}
+                      >
+                        <span style={{ fontSize: 20 }}>📍</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600 }}>Ver ubicación en Google Maps</div>
+                          <div style={{ fontSize: 11, color: '#888', marginTop: 2, wordBreak: 'break-all' }}>{formData.maps_url}</div>
+                        </div>
+                        <span style={{ color: PRIMARY_COLOR, fontSize: 16 }}>→</span>
+                      </a>
+                    </div>
+                  )}
+
+                  {!formData.maps_url && (
+                    <div style={{ background: '#fafafa', border: '1px dashed #ddd', borderRadius: 8, padding: 24, textAlign: 'center', color: '#aaa', fontSize: 13 }}>
+                      📍 Sin enlace de Maps configurado
                     </div>
                   )}
                 </div>

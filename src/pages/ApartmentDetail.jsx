@@ -198,6 +198,28 @@ function BookingWidget({ apt, onBook, T }) {
     }
   };
 
+  // Modo página de reserva: widget simplificado con solo botón
+  if (globalSettings?.booking_mode === 'redirect') {
+    return (
+      <div className="flex flex-col gap-5 p-6 border border-gray-200 rounded-lg sticky top-8">
+        <div>
+          <div className="text-3xl font-serif font-bold text-teal">{formatPrice(apt.price)}</div>
+          <div className="text-xs text-gray-500 mt-1">{T.detail.pricePerNight}</div>
+        </div>
+        <div className="h-px bg-gray-100" />
+        <button
+          className="w-full bg-[#82c8bd] hover:bg-[#6bb5a9] text-white px-4 py-3.5 rounded font-semibold transition-all text-base"
+          onClick={() => onBook({})}
+        >
+          {lang === 'EN' ? 'Book now' : 'Reservar'}
+        </button>
+        <div className="text-xs text-gray-500 text-center">
+          {T.detail.noCommission} {apt.cancellation_days ?? globalSettings.cancellation_free_days ?? 14} {T.detail.daysBefore}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4 p-6 border border-gray-200 rounded-lg sticky top-8">
       <div className="text-3xl font-serif font-bold text-teal mb-1">{formatPrice(apt.price)}</div>
@@ -452,7 +474,7 @@ export default function ApartmentDetail() {
         title={aptName}
         description={aptDesc.substring(0, 160)}
       />
-      <Navbar onOpenBooking={() => setBookingOpen(true)} />
+      <Navbar onOpenBooking={() => globalSettings?.booking_mode === 'redirect' ? navigate('/reservar') : setBookingOpen(true)} />
 
       <div className="w-full">
         {/* GALERÍA */}
@@ -539,8 +561,12 @@ export default function ApartmentDetail() {
                 </div>
               ))}
             </div>
-            <div className="text-2xl font-serif font-bold text-navy mb-4 mt-8">{T.detail.availability}</div>
-            <MiniCalendar occupiedDays={apt.occupiedDays || []} T={T} />
+            {globalSettings?.booking_mode !== 'redirect' && (
+              <>
+                <div className="text-2xl font-serif font-bold text-navy mb-4 mt-8">{T.detail.availability}</div>
+                <MiniCalendar occupiedDays={apt.occupiedDays || []} T={T} />
+              </>
+            )}
 
             <div className="text-2xl font-serif font-bold text-navy mb-4 mt-8">{T.detail.rules}</div>
             <ul className="space-y-3 mb-8">
@@ -561,12 +587,28 @@ export default function ApartmentDetail() {
                 </div>
               ))}
             </div>
-            <div className="border border-gray-300 rounded-lg bg-gray-50 p-12 text-center mb-8">
-              <div className="text-gray-600 text-center">
+            {apt.maps_url ? (
+              <a
+                href={apt.maps_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 border border-gray-200 rounded-lg p-4 mb-8 hover:border-teal hover:bg-teal/5 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-full bg-teal/10 flex items-center justify-center flex-shrink-0">
+                  <Ico d={paths.map} size={18} color="#1a5f6e" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-navy">Ver ubicación en Google Maps</div>
+                  <div className="text-xs text-gray-500 truncate">{apt.maps_url}</div>
+                </div>
+                <span className="text-teal text-sm group-hover:translate-x-1 transition-transform">→</span>
+              </a>
+            ) : (
+              <div className="border border-gray-300 rounded-lg bg-gray-50 p-12 text-center mb-8">
                 <Ico d={paths.map} size={32} color="#cbd5e1" />
-                <div className="mt-2 text-xs">Ribadeo, Lugo · Galicia, España</div>
+                <div className="mt-2 text-xs text-gray-400">Ribadeo, Lugo · Galicia, España</div>
               </div>
-            </div>
+            )}
 
             {aptReviews.length > 0 && (
               <>
@@ -589,7 +631,14 @@ export default function ApartmentDetail() {
 
           {/* COLUMNA DERECHA: WIDGET */}
           <div>
-            <BookingWidget apt={apt} onBook={(dates) => { setBookingDates(dates); setBookingOpen(true); }} T={T} />
+            <BookingWidget apt={apt} onBook={(dates) => {
+              if (globalSettings?.booking_mode === 'redirect') {
+                navigate('/reservar');
+              } else {
+                setBookingDates(dates);
+                setBookingOpen(true);
+              }
+            }} T={T} />
 
             <div className="mt-4 p-5 bg-gray-50 text-xs text-gray-700 leading-relaxed rounded-lg">
               <div className="font-semibold mb-1 text-navy">{T.detail.payModel}</div>

@@ -189,7 +189,7 @@ export default function Dashboard() {
                       <span className="font-semibold text-slate-900">{p}%</span>
                     </div>
                     <div className="bg-slate-100 h-1 rounded-full overflow-hidden">
-                      <div className={`bg-[#1a5f6e] h-full transition-all duration-500 w-[${p}%]`} />
+                      <div className="bg-[#1a5f6e] h-full transition-all duration-500" style={{ width: `${p}%` }} />
                     </div>
                   </div>
                 );

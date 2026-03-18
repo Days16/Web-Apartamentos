@@ -24,7 +24,7 @@ export default function Terminos() {
           <h1 className="text-5xl md:text-6xl font-serif font-bold text-navy mb-6">{L.termsTitle}</h1>
           <p className="text-xs text-gray-500 mt-2">{L.lastUpdate}</p>
         </div>
-        <div className="max-w-3xl mx-auto px-4 py-12">
+        <div className="policy-content max-w-3xl mx-auto px-4 py-12">
           <p>Estos Términos y Condiciones regulan la contratación de servicios de alojamiento turístico ofrecidos por <strong>Illa Pancha Ribadeo</strong> (en adelante, «el Propietario» o «nosotros») a través del sitio web <strong>illapancha.com</strong>. Al realizar una reserva, el cliente (en adelante, «el Huésped») acepta expresamente los presentes términos.</p>
 
           <h2>1. Identificación del prestador</h2>
@@ -96,29 +96,6 @@ export default function Terminos() {
 
           <h2>12. Legislación aplicable y jurisdicción</h2>
           <p>Estos términos se rigen por la legislación española. Para la resolución de cualquier controversia, las partes se someten, con renuncia expresa a cualquier otro fuero, a los Juzgados y Tribunales de Lugo (Galicia, España). Para conflictos de consumo, el Huésped también puede recurrir a la plataforma europea de resolución en línea de litigios: <strong>ec.europa.eu/consumers/odr</strong>.</p>
-          <style>{`
-            .policy-content p {
-              @apply text-gray-700 leading-relaxed mb-4;
-            }
-            .policy-content h2 {
-              @apply font-serif text-2xl font-bold text-navy mb-4 mt-8;
-            }
-            .policy-content h2:first-of-type {
-              @apply mt-0;
-            }
-            .policy-content ul {
-              @apply list-disc list-inside text-gray-700 leading-relaxed ml-4 mb-4;
-            }
-            .policy-content li {
-              @apply text-gray-700 leading-relaxed mb-2;
-            }
-            .policy-content strong {
-              @apply font-bold text-slate-900;
-            }
-            .policy-content a {
-              @apply text-teal hover:underline;
-            }
-          `}</style>
         </div>
       </div>
       <Footer />

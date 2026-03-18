@@ -24,6 +24,10 @@ export default function WebTextos() {
     'home_features_4_title', 'home_features_4_title_en',
     'home_features_4_desc', 'home_features_4_desc_en',
 
+    // ... HERO NOSOTROS ...
+    'about_hero_title', 'about_hero_title_en',
+    'about_hero_desc', 'about_hero_desc_en',
+
     // ... SECCIÓN HISTORIA ...
     'about_history_title', 'about_history_title_en',
     'about_history_desc_1', 'about_history_desc_1_en',

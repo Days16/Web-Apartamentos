@@ -311,59 +311,105 @@ export default function Apartments() {
 
         <div className="mb-6" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
           {filtered.map(apt => {
             const status = getAvailStatus(apt);
+            const tagline = lang === 'EN' ? (apt.tagline_en || apt.taglineEn || apt.tagline) : apt.tagline;
+            const topAmenities = (apt.amenities || []).slice(0, 3);
             return (
               <div
                 key={apt.slug}
-                className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
+                className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 hover:-translate-y-1"
                 onClick={() => navigate(`/apartamentos/${apt.slug}`)}
               >
-                <div className="relative h-64 overflow-hidden bg-gray-100 flex items-center justify-center">
+                {/* IMAGEN */}
+                <div className="relative h-60 overflow-hidden">
                   {apt.coverPhoto ? (
                     <img
                       src={apt.coverPhoto}
                       alt={apt.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
-                    <div className={`w-full h-full flex items-center justify-center bg-[${apt.gradient}]`}>
-                      <Ico d={paths.photo} size={48} color="rgba(255,255,255,0.2)" />
+                    <div
+                      className="w-full h-full flex flex-col items-center justify-center gap-3"
+                      style={{ background: apt.color ? `linear-gradient(135deg, ${apt.color}cc, ${apt.color}88)` : 'linear-gradient(135deg, #1a5f6e, #0f3d47)' }}
+                    >
+                      <Ico d={paths.photo} size={40} color="rgba(255,255,255,0.25)" />
+                      <span className="text-white/50 text-xs font-medium uppercase tracking-widest">Sin foto</span>
                     </div>
                   )}
+
+                  {/* Overlay degradado inferior */}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
+
+                  {/* Badge disponibilidad / tagline */}
                   {status === 'unavailable' ? (
-                    <div className="absolute top-4 right-4 bg-gray-700/90 text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                    <div className="absolute top-3 left-3 bg-gray-800/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
                       {lang === 'EN' ? 'Not available' : 'No disponible'}
                     </div>
-                  ) : (
-                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur shadow-sm px-3 py-1 rounded-full text-[11px] font-bold text-navy uppercase tracking-wider">
-                      {lang === 'EN' ? (apt.taglineEn || apt.tagline) : apt.tagline}
+                  ) : tagline ? (
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm shadow-sm px-3 py-1 rounded-full text-[10px] font-bold text-navy uppercase tracking-wider">
+                      {tagline}
+                    </div>
+                  ) : null}
+
+                  {/* Rating badge */}
+                  {apt.rating && (
+                    <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm shadow px-2.5 py-1 rounded-full text-[11px] font-bold text-navy flex items-center gap-1">
+                      ★ {apt.rating}
                     </div>
                   )}
-                  {status === 'unavailable' && (
-                    <div className="absolute inset-0 bg-gray-900/30" />
-                  )}
+
+                  {/* Overlay no disponible */}
+                  {status === 'unavailable' && <div className="absolute inset-0 bg-gray-900/30" />}
                   {!apt.active && (
                     <div className="absolute inset-0 bg-navy/60 backdrop-blur-[2px] flex items-center justify-center">
-                      <span className="text-white font-serif text-xl border-2 border-white px-6 py-2 uppercase tracking-widest">{A.unavailable}</span>
+                      <span className="text-white font-serif text-lg border-2 border-white px-6 py-2 uppercase tracking-widest">{A.unavailable}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-2xl font-serif font-bold text-navy mb-2 group-hover:text-teal transition-colors">{apt.name}</h3>
-                  <div className="flex gap-4 text-xs text-slate-500 font-medium mb-6">
-                    <span className="flex items-center gap-1"><Ico d={paths.users} size={14} /> {apt.cap} {T.common.persons}</span>
-                    <span className="flex items-center gap-1"><Ico d={paths.bed} size={14} /> {apt.bedrooms} {A.bedrooms}</span>
+                {/* CONTENIDO */}
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="text-xl font-serif font-bold text-navy mb-1 group-hover:text-teal transition-colors leading-tight">{apt.name}</h3>
+
+                  {/* Capacidad + dormitorios */}
+                  <div className="flex gap-3 text-xs text-slate-500 font-medium mb-3">
+                    <span className="flex items-center gap-1">
+                      <Ico d={paths.users} size={13} /> {apt.cap} {T.common.persons}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Ico d={paths.bed} size={13} /> {apt.bedrooms} {A.bedrooms}
+                    </span>
+                    {apt.baths && (
+                      <span className="flex items-center gap-1">
+                        <Ico d={paths.bath || paths.home} size={13} /> {apt.baths} baño{apt.baths > 1 ? 's' : ''}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex justify-between items-center pt-6 border-t border-gray-100">
-                    <div className="text-xl font-bold text-navy">
-                      {formatPrice(apt.price)}<span className="text-xs text-slate-400 font-normal">/{T.detail.perNight}</span>
+
+                  {/* Amenities top */}
+                  {topAmenities.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {topAmenities.map((a, i) => (
+                        <span key={i} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">{a}</span>
+                      ))}
+                      {(apt.amenities || []).length > 3 && (
+                        <span className="text-[10px] text-slate-400 px-2 py-0.5">+{(apt.amenities || []).length - 3}</span>
+                      )}
                     </div>
-                    <button className="text-teal font-bold text-sm hover:translate-x-1 transition-transform flex items-center gap-1">
+                  )}
+
+                  {/* Precio + CTA */}
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-auto">
+                    <div>
+                      <span className="text-xl font-bold text-navy">{formatPrice(apt.price)}</span>
+                      <span className="text-xs text-slate-400 font-normal ml-1">{T.apartments.perNight}</span>
+                    </div>
+                    <span className="text-teal font-semibold text-sm group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
                       {T.common.seeMore} →
-                    </button>
+                    </span>
                   </div>
                 </div>
               </div>

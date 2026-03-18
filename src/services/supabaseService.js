@@ -91,6 +91,17 @@ export async function deleteApartment(slug) {
 }
 
 // ─── PHOTOS ──────────────────────────────────────────────────────────────
+const STORAGE_BUCKET = 'apartment-photos';
+
+// Resuelve la URL pública de una foto (Storage o URL externa)
+export function resolvePhotoUrl(photo) {
+  if (photo?.storage_path) {
+    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(photo.storage_path);
+    return data.publicUrl;
+  }
+  return photo?.photo_url || null;
+}
+
 export async function fetchApartmentPhotos(slug) {
   const { data, error } = await supabase
     .from('apartment_photos')
@@ -99,7 +110,33 @@ export async function fetchApartmentPhotos(slug) {
     .order('display_order');
 
   if (error) throw error;
-  return data || [];
+  return (data || []).map(p => ({
+    ...p,
+    photo_url: resolvePhotoUrl(p),
+  }));
+}
+
+// Sube un archivo al Storage de Supabase y devuelve { path, publicUrl }
+export async function uploadPhotoToStorage(slug, file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const safeName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const path = `${slug}/${safeName}`;
+
+  const { error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, file, { cacheControl: '3600', upsert: false });
+
+  if (error) throw error;
+
+  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  return { path, publicUrl: data.publicUrl };
+}
+
+// Elimina un archivo del Storage
+export async function deletePhotoFromStorage(storagePath) {
+  if (!storagePath) return;
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
+  if (error) console.warn('Error borrando del Storage:', error.message);
 }
 
 export async function addPhoto(slug, photo) {
@@ -111,13 +148,17 @@ export async function addPhoto(slug, photo) {
   return data;
 }
 
-export async function deletePhoto(id) {
+export async function deletePhoto(id, storagePath = null) {
   const { data, error } = await supabase
     .from('apartment_photos')
     .delete()
     .eq('id', id);
 
   if (error) throw error;
+
+  // Eliminar también del Storage si tiene ruta
+  if (storagePath) await deletePhotoFromStorage(storagePath);
+
   return data;
 }
 

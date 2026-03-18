@@ -7,7 +7,7 @@ export default async function generateInvoice(reservation) {
   ]);
 
   const siteSettings = {
-    cleaningFee: 0,
+    cleaningFee: settings?.cleaning_fee ?? 0,
     site_address: 'Ribadeo, Lugo, Galicia',
     site_email: settings?.site_email || 'info@illapancha.com',
     site_phone: settings?.site_phone || '+34 982 XX XX XX',
@@ -115,8 +115,10 @@ export default async function generateInvoice(reservation) {
 
   const lineItems = [
     [`${reservation.nights || 7} noches × ${nightPrice}€/noche`, nightPrice * (reservation.nights || 7)],
-    ['Limpieza final', siteSettings?.cleaningFee || 40],
   ];
+  if (siteSettings.cleaningFee > 0) {
+    lineItems.push(['Limpieza final', siteSettings.cleaningFee]);
+  }
 
   if (reservation.extras && reservation.extras.length > 0) {
     reservation.extras.forEach(extraId => {
@@ -181,7 +183,7 @@ export default async function generateInvoice(reservation) {
   doc.text(`Resto en efectivo (${100 - depositPct}%) — A pagar al llegar:`, margin, y);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(138, 138, 138);
-  doc.text(deposit + ' EUR  ⏳ Pendiente', 175, y, { align: 'right' });
+  doc.text((reservation.total - deposit) + ' EUR  ⏳ Pendiente', 175, y, { align: 'right' });
   y += 16;
 
   // ── NOTA CANCELACIÓN ──────────────────────────────────────────

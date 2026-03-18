@@ -19,7 +19,7 @@ export default function Cookies() {
           <h1 className="text-5xl md:text-6xl font-serif font-bold text-navy mb-6">{L.cookiesTitle}</h1>
           <p className="text-xs text-gray-500 mt-2">{L.lastUpdate}</p>
         </div>
-        <div className="max-w-3xl mx-auto px-4 py-12">
+        <div className="policy-content max-w-3xl mx-auto px-4 py-12">
           <p>Esta política explica qué son las cookies, qué tipos utilizamos en <strong>illapancha.com</strong> y cómo puedes gestionarlas, de conformidad con el artículo 22.2 de la Ley 34/2002 (LSSI) y la Guía sobre el uso de las cookies de la AEPD.</p>
 
           <h2>1. ¿Qué es una cookie?</h2>
@@ -61,29 +61,6 @@ export default function Cookies() {
 
           <h2>5. Más información</h2>
           <p>Para cualquier consulta sobre nuestra política de cookies, escríbenos a <strong>info@illapancha.com</strong>.</p>
-          <style>{`
-            .policy-content p {
-              @apply text-gray-700 leading-relaxed mb-4;
-            }
-            .policy-content h2 {
-              @apply font-serif text-2xl font-bold text-navy mb-4 mt-8;
-            }
-            .policy-content h2:first-of-type {
-              @apply mt-0;
-            }
-            .policy-content ul {
-              @apply list-disc list-inside text-gray-700 leading-relaxed ml-4 mb-4;
-            }
-            .policy-content li {
-              @apply text-gray-700 leading-relaxed mb-2;
-            }
-            .policy-content strong {
-              @apply font-bold text-slate-900;
-            }
-            .policy-content a {
-              @apply text-teal hover:underline;
-            }
-          `}</style>
         </div>
       </div>
       <Footer />

@@ -9,6 +9,7 @@ import { sendBookingConfirmation, sendOwnerNotification } from '../services/rese
 import { fetchExtras, fetchSettings } from '../services/supabaseService';
 import { useDiscount } from '../contexts/DiscountContext';
 import { useLang } from '../contexts/LangContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useT } from '../i18n/translations';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice, strToDate, dateToStr } from '../utils/format';
@@ -18,6 +19,7 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   const navigate = useNavigate();
   const { lang, t } = useLang();
   const T = useT(lang);
+  const { dark } = useTheme();
   const apt = apartment || { name: 'Apt. Cantábrico', price: 140 };
   const stripe = useStripe();
   const elements = useElements();
@@ -254,8 +256,8 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white rounded-lg overflow-hidden flex max-w-5xl w-full max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white dark:bg-slate-900 dark:border dark:border-slate-700 rounded-lg overflow-hidden flex max-w-5xl w-full max-h-[90vh]">
         {/* PANEL IZQUIERDO */}
         <div className="bg-gradient-to-br from-slate-900 to-slate-900 text-white flex-1 p-8 flex flex-col justify-between">
           <div className="flex flex-col gap-3 mb-12 pb-8 border-b border-white/20">
@@ -503,22 +505,24 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 <label className="text-xs font-bold tracking-widest uppercase text-gray-600 mb-2 block">
                   {T.booking.cardData}
                 </label>
-                <div className="border border-gray-300 p-3.5 rounded bg-gray-50">
+                <div className="border border-gray-300 dark:border-slate-600 p-3.5 rounded bg-gray-50 dark:bg-slate-800">
                   <CardElement options={{
                     style: {
                       base: {
                         fontSize: '16px',
                         fontFamily: 'Jost, sans-serif',
-                        color: '#0f172a',
+                        color: dark ? '#f1f5f9' : '#0f172a',
                         '::placeholder': { color: '#b0b0b0' },
                       },
                       invalid: { color: '#dc3545' },
                     },
                   }} />
                 </div>
-                <div className="text-xs text-gray-600 mt-2 leading-relaxed">
-                  {T.booking.testCard}
-                </div>
+                {import.meta.env.DEV && (
+                  <div className="text-xs text-gray-600 mt-2 leading-relaxed">
+                    {T.booking.testCard}
+                  </div>
+                )}
               </div>
 
               {stripeError && (
@@ -544,7 +548,7 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 </button>
               </div>
               <div className="text-xs text-gray-400 text-center mt-4">
-                Tus datos de tarjeta nunca tocan nuestros servidores
+                {T.booking.cardNote}
               </div>
             </>
           )}
