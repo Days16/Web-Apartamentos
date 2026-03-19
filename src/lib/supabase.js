@@ -19,30 +19,34 @@ export const supabase = createClient(
 // ─── SQL PARA CREAR LAS TABLAS EN SUPABASE ────────────────────────────────────
 // Ejecuta este SQL en Supabase Dashboard → SQL Editor:
 /*
--- APARTAMENTOS
+-- APARTAMENTOS  (schema completo en /database.sql en la raíz del proyecto)
 CREATE TABLE IF NOT EXISTS apartments (
-  slug TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  name_en TEXT,
-  tagline TEXT,
-  tagline_en TEXT,
-  cap INT DEFAULT 2,
-  beds INT DEFAULT 1,
-  baths INT DEFAULT 1,
-  price INT NOT NULL,
-  rating NUMERIC(3,1) DEFAULT 5.0,
-  review_count INT DEFAULT 0,
-  min_stay INT DEFAULT 2,
-  active BOOLEAN DEFAULT TRUE,
-  gradient TEXT,
-  amenities TEXT[] DEFAULT '{}',
-  description TEXT,
-  description_en TEXT,
-  rules TEXT[] DEFAULT '{}',
-  nearby TEXT[] DEFAULT '{}',
-  occupied_days INT[] DEFAULT '{}',
-  extra_night INT DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  slug                TEXT        PRIMARY KEY,
+  name                TEXT        NOT NULL,
+  name_en             TEXT,
+  tagline             TEXT,
+  tagline_en          TEXT,
+  description         TEXT,
+  description_en      TEXT,
+  capacity            INT         DEFAULT 2,
+  bedrooms            INT         DEFAULT 1,
+  baths               INT         DEFAULT 1,
+  beds                INT         DEFAULT 1,
+  price               INT         NOT NULL,
+  extra_night         INT         DEFAULT 0,
+  min_stay            INT         DEFAULT 2,
+  cancellation_days   INT         DEFAULT 14,
+  deposit_percentage  INT         DEFAULT 50,
+  active              BOOLEAN     DEFAULT TRUE,
+  rating              NUMERIC(3,1) DEFAULT 5.0,
+  review_count        INT         DEFAULT 0,
+  color               TEXT        DEFAULT '#1a5f6e',
+  maps_url            TEXT,
+  amenities           TEXT[]      DEFAULT '{}',
+  rules               TEXT[]      DEFAULT '{}',
+  nearby              TEXT[]      DEFAULT '{}',
+  occupied_days       TEXT[]      DEFAULT '{}',
+  created_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- RESERVAS

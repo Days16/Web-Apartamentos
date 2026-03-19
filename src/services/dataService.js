@@ -218,14 +218,15 @@ function normalizeApartment(d) {
     tagline: d.tagline,
     taglineEn: d.tagline_en || d.taglineEn || d.tagline,
     cap: d.capacity ?? d.cap ?? 2,
-    beds: d.beds,
-    baths: d.baths,
+    bedrooms: d.bedrooms ?? d.beds ?? 1,
+    beds: d.beds ?? d.bedrooms ?? 1,
+    baths: d.baths ?? 1,
     price: d.price,
     rating: d.rating,
     reviewCount: d.review_count ?? d.reviewCount ?? 0,
     minStay: d.min_stay ?? d.minStay ?? 2,
     active: d.active ?? true,
-    gradient: d.gradient || 'linear-gradient(135deg, #1a3a4e 0%, #2C4A5E 100%)',
+    gradient: d.gradient || (d.color ? `linear-gradient(135deg, ${d.color} 0%, #2C4A5E 100%)` : 'linear-gradient(135deg, #1a3a4e 0%, #2C4A5E 100%)'),
     amenities: d.amenities || [],
     description: d.description || '',
     descriptionEn: d.description_en || d.descriptionEn || d.description || '',
@@ -235,6 +236,7 @@ function normalizeApartment(d) {
     extraNight: d.extra_night ?? d.extraNight ?? 0,
     cancellation_days: d.cancellation_days ?? 14,
     deposit_percentage: d.deposit_percentage ?? 50,
+    maps_url: d.maps_url || null,
   };
 }
 

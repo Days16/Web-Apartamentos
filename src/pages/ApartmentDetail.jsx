@@ -587,28 +587,27 @@ export default function ApartmentDetail() {
                 </div>
               ))}
             </div>
-            {apt.maps_url ? (
-              <a
-                href={apt.maps_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 border border-gray-200 rounded-lg p-4 mb-8 hover:border-teal hover:bg-teal/5 transition-all group"
-              >
-                <div className="w-10 h-10 rounded-full bg-teal/10 flex items-center justify-center flex-shrink-0">
-                  <Ico d={paths.map} size={18} color="#1a5f6e" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-navy">Ver ubicación en Google Maps</div>
-                  <div className="text-xs text-gray-500 truncate">{apt.maps_url}</div>
-                </div>
-                <span className="text-teal text-sm group-hover:translate-x-1 transition-transform">→</span>
-              </a>
-            ) : (
-              <div className="border border-gray-300 rounded-lg bg-gray-50 p-12 text-center mb-8">
-                <Ico d={paths.map} size={32} color="#cbd5e1" />
-                <div className="mt-2 text-xs text-gray-400">Ribadeo, Lugo · Galicia, España</div>
-              </div>
-            )}
+            {(() => {
+              const mapsUrl = apt.maps_url ||
+                'https://www.google.com/maps/place/Av.+de+Rosal%C3%ADa+de+Castro,+25,+27700+Ribadeo,+Lugo/@43.5397524,-7.0411052,199m/data=!3m1!1e3!4m6!3m5!1s0xd317e5724d77fed:0x5b60c517683c15a5!8m2!3d43.5399657!4d-7.0410569!16s%2Fg%2F11c19xgmd5?entry=ttu&g_ep=EgoyMDI2MDMxNS4wIKXMDSoASAFQAw%3D%3D';
+              return (
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 border border-gray-200 rounded-lg p-4 mb-8 hover:border-teal hover:bg-teal/5 transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-teal/10 flex items-center justify-center flex-shrink-0">
+                    <Ico d={paths.map} size={18} color="#1a5f6e" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-navy">Ver ubicación en Google Maps</div>
+                    <div className="text-xs text-gray-500">Av. Rosalía de Castro 25, 27700 Ribadeo, Lugo</div>
+                  </div>
+                  <span className="text-teal text-sm group-hover:translate-x-1 transition-transform">→</span>
+                </a>
+              );
+            })()}
 
             {aptReviews.length > 0 && (
               <>
