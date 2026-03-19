@@ -53,6 +53,7 @@ import OfertasAdmin from './pages/admin/OfertasAdmin';
 import Pagos from './pages/admin/Pagos';
 import { DiscountProvider } from './contexts/DiscountContext';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import OffersBanner from './components/OffersBanner';
 
 function MaintenanceGuard({ children }) {
@@ -116,6 +117,7 @@ export default function App() {
                     <Route path="/reservar" element={<Reservar />} />
 
                     <Route path="/login" element={<Login />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
 
                     {/* ─── PANEL GESTIÓN (PROTEGIDO) ────────────────────── */}
                     <Route element={<ProtectedRoute />}>

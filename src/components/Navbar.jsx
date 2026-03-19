@@ -72,7 +72,7 @@ export default function Navbar({ onOpenBooking }) {
       className={`sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 dark:border-b dark:border-slate-700 transition-[box-shadow] duration-300 ${scrolled ? 'shadow-[0_2px_20px_rgba(15,23,42,0.08)] dark:shadow-slate-900/50' : 'shadow-none'}`}
       ref={navRef}
     >
-      <Link to="/" className="text-2xl font-serif font-bold text-navy">Illa Pancha</Link>
+      <Link to="/"><img src="/logo_lineas.png" alt="Illa Pancha" className="h-10 w-auto" /></Link>
 
       {/* Links - escritorio y menú móvil */}
       <div className={`flex flex-col md:flex-row md:items-center md:gap-8 absolute md:relative top-16 md:top-0 left-0 md:left-auto right-0 md:right-auto w-full md:w-auto bg-white dark:bg-slate-900 dark:border-slate-700 md:bg-transparent md:dark:bg-transparent px-6 md:px-0 py-4 md:py-0 border-b md:border-0 transition-all duration-300 ${mobileOpen ? 'max-h-64 opacity-100' : 'md:max-h-full md:opacity-100 max-h-0 opacity-0 overflow-hidden md:overflow-visible'}`}>

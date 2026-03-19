@@ -17,7 +17,7 @@ serve(async (req) => {
         const { guestEmail, guestName, subject, replyText } = await req.json();
 
         const result = await resend.emails.send({
-            from: "Administración Illa Pancha <onboarding@resend.dev>", // Reemplazar en producción
+            from: "Administración Illa Pancha <reservas@apartamentosillapancha.com>", // Reemplazar en producción
             to: guestEmail,
             subject: subject || "Respuesta a tu consulta - Illa Pancha Ribadeo",
             html: `

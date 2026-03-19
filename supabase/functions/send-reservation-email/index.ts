@@ -33,7 +33,7 @@ serve(async (req) => {
         const portalLink = portalUrl ? `${portalUrl}?id=${reservationId}` : `https://illapancha.com/mi-reserva?id=${reservationId}`;
 
         const result = await resend.emails.send({
-            from: "Illa Pancha Ribadeo <onboarding@resend.dev>",
+            from: "Illa Pancha Ribadeo <reservas@apartamentosillapancha.com>",
             to: guestEmail,
             subject: `✅ Reserva confirmada ${reservationId} — Illa Pancha Ribadeo`,
             html: `

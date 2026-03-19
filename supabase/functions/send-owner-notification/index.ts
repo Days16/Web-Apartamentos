@@ -73,7 +73,7 @@ serve(async (req) => {
     }
 
     await resend.emails.send({
-      from: "Illa Pancha Ribadeo <onboarding@resend.dev>",
+      from: "Illa Pancha Ribadeo <reservas@apartamentosillapancha.com>",
       to: OWNER_EMAIL,
       subject,
       html,
