@@ -520,30 +520,4 @@ export async function fetchChangelog() {
   return data || [];
 }
 
-// ─── ICAL CHANNELS ────────────────────────────────────────────────────────
-export async function fetchIcalChannels() {
-  const { data, error } = await supabase
-    .from('ical_channels')
-    .select('*');
-
-  if (error) {
-    console.error('Error fetching ical channels:', error);
-    return [];
-  }
-  return data || [];
-}
-
-export async function updateIcalChannel(channelData) {
-  const { data, error } = await supabase
-    .from('ical_channels')
-    .upsert(channelData, { onConflict: 'id' })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error updating ical channel:', error);
-    throw error;
-  }
-  return data;
-}
 

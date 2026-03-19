@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 import BookingModal from '../components/BookingModal';
 import Ico, { paths } from '../components/Ico';
 import SEO from '../components/SEO';
-import { fetchApartmentPhotos, fetchWebsiteContent } from '../services/supabaseService';
+import { fetchApartmentPhotos } from '../services/supabaseService';
 import { getApartments } from '../services/dataService';
 import { useLang } from '../contexts/LangContext';
 import { useT } from '../i18n/translations';

@@ -25,7 +25,6 @@ import GestionLayout from './pages/gestion/GestionLayout';
 import Dashboard from './pages/gestion/Dashboard';
 import Reservas from './pages/gestion/Reservas';
 import Calendario from './pages/gestion/Calendario';
-import Sync from './pages/gestion/Sync';
 import Mensajes from './pages/gestion/Mensajes';
 
 // Panel de administración
@@ -33,7 +32,6 @@ import AdminLayout from './pages/admin/AdminLayout';
 import ApartamentosAdmin from './pages/admin/ApartamentosAdmin';
 import Precios from './pages/admin/Precios';
 import ConfiguracionGeneral from './pages/admin/ConfiguracionGeneral';
-import IcalAdmin from './pages/admin/IcalAdmin';
 import Usuarios from './pages/admin/Usuarios';
 import ReglasReserva from './pages/admin/ReglasReserva';
 import Cancelacion from './pages/admin/Cancelacion';
@@ -125,7 +123,6 @@ export default function App() {
                         <Route index element={<Dashboard />} />
                         <Route path="reservas" element={<Reservas />} />
                         <Route path="calendario" element={<Calendario />} />
-                        <Route path="sync" element={<Sync />} />
                         <Route path="mensajes" element={<Mensajes />} />
                       </Route>
 
@@ -134,7 +131,6 @@ export default function App() {
                         <Route index element={<ApartamentosAdmin />} />
                         <Route path="precios" element={<Precios />} />
                         <Route path="configuracion" element={<ConfiguracionGeneral />} />
-                        <Route path="ical" element={<IcalAdmin />} />
                         <Route path="usuarios" element={<Usuarios />} />
                         <Route path="ofertas" element={<OfertasAdmin />} />
                         <Route path="extras" element={<ExtrasAdmin />} />

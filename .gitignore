@@ -29,5 +29,6 @@ docs
 .env.production
 .antigravity
 .claude
-supabase/.temp
 scripts
+supabase/.temp
+supabase/functions
