@@ -184,7 +184,6 @@ export default function ManualBookingModal({ onClose, onSuccess }) {
                             <select className="form-input" value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))}>
                                 <option value="direct">Manual (Teléfono/Email)</option>
                                 <option value="booking">Booking.com</option>
-                                <option value="airbnb">Airbnb</option>
                             </select>
                         </div>
                     </div>

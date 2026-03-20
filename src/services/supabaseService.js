@@ -520,4 +520,22 @@ export async function fetchChangelog() {
   return data || [];
 }
 
+export async function fetchWebsiteContent() {
+  const { data, error } = await supabase
+    .from('website_content')
+    .select('section_key, content_es, content_en');
+  if (error) {
+    console.error('Error fetching website_content:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function updateWebsiteContent(key, fields) {
+  const { error } = await supabase
+    .from('website_content')
+    .upsert({ section_key: key, ...fields }, { onConflict: 'section_key' });
+  if (error) throw error;
+}
+
 

@@ -12,7 +12,7 @@ import { useSettings } from '../contexts/SettingsContext';
 
 export default function About() {
   const navigate = useNavigate();
-  const { lang, t } = useLang();
+  const { lang } = useLang();
   const T = useT(lang);
   const A = T.about;
   const { settings } = useSettings();
@@ -92,7 +92,7 @@ export default function About() {
             />
             <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
               <div className="text-xs font-bold tracking-[0.2em] text-teal-300 uppercase mb-2">{A.location}</div>
-              <div className="text-2xl font-serif font-bold text-white mb-2">Ribadeo, Lugo · Galicia</div>
+              <div className="text-2xl font-serif font-bold text-white mb-2">{A.locationLabel}</div>
               <div className="text-gray-200 leading-relaxed max-w-2xl">{A.locationDetail}</div>
             </div>
             <a
@@ -101,7 +101,7 @@ export default function About() {
               rel="noopener noreferrer"
               className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-navy text-xs font-semibold px-3 py-1.5 rounded-full shadow hover:bg-teal hover:text-white transition-colors"
             >
-              Ver en Google Maps ↗
+              {T.common.openMaps}
             </a>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function About() {
             <div className="flex-1 space-y-8 animate-in slide-in-from-left duration-700">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal/10 text-teal text-xs font-bold uppercase tracking-widest">
                 <Ico d={paths.map} size={14} color="#1a5f6e" />
-                {lang === 'EN' ? 'The Region' : 'La Zona'}
+                {A.zone}
               </div>
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-navy leading-tight" dangerouslySetInnerHTML={safeHtml(A.whyRibadeo)} />
               <div className="w-20 h-1 bg-teal" />
@@ -134,7 +134,7 @@ export default function About() {
               <div className="absolute inset-0 bg-gradient-to-t from-navy/60 to-transparent" />
               <div className="absolute bottom-6 left-6 text-white font-serif text-xl font-medium flex items-center gap-2">
                 <Ico d={paths.location} size={20} color="#fff" />
-                Ría de Ribadeo
+                {A.riaLabel}
               </div>
             </div>
           </div>

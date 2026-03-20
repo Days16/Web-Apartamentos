@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -358,6 +358,8 @@ export default function ApartmentDetail() {
   const [nightsRule, setNightsRule] = useState(1);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState(0);
+  const touchStartX = useRef(0);
+  const activeThumbRef = useRef(null);
 
   useEffect(() => {
     async function load() {
@@ -442,6 +444,10 @@ export default function ApartmentDetail() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [lightboxOpen, photos.length]);
 
+  useEffect(() => {
+    activeThumbRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [lightboxIdx]);
+
   if (!apt) {
     return (
       <>
@@ -475,6 +481,44 @@ export default function ApartmentDetail() {
       <SEO
         title={aptName}
         description={aptDesc.substring(0, 160)}
+        ogImage={apt.coverPhoto || undefined}
+        ogType="website"
+        jsonLd={apt.slug ? {
+          '@context': 'https://schema.org',
+          '@type': 'Apartment',
+          name: aptName,
+          description: aptDesc.substring(0, 300),
+          url: `https://www.apartamentosillapancha.com/apartamentos/${apt.slug}`,
+          image: apt.coverPhoto || 'https://www.apartamentosillapancha.com/og-image.jpg',
+          numberOfRooms: apt.rooms || 1,
+          occupancy: {
+            '@type': 'QuantitativeValue',
+            maxValue: apt.capacity || 4,
+          },
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Ribadeo',
+            addressRegion: 'Galicia',
+            postalCode: '27700',
+            addressCountry: 'ES',
+          },
+          containedInPlace: {
+            '@type': 'LodgingBusiness',
+            name: 'Illa Pancha',
+            url: 'https://www.apartamentosillapancha.com',
+          },
+          offers: apt.price ? {
+            '@type': 'Offer',
+            price: apt.price,
+            priceCurrency: 'EUR',
+            priceSpecification: {
+              '@type': 'UnitPriceSpecification',
+              price: apt.price,
+              priceCurrency: 'EUR',
+              unitCode: 'DAY',
+            },
+          } : undefined,
+        } : undefined}
       />
       <Navbar onOpenBooking={() => globalSettings?.booking_mode === 'redirect' ? navigate('/reservar') : setBookingOpen(true)} />
 
@@ -487,7 +531,7 @@ export default function ApartmentDetail() {
               onClick={() => { setLightboxIdx(0); setLightboxOpen(true); }}
             >
               {photos[0] ? (
-                <img src={photos[0].photo_url} alt={photos[0].caption || aptName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <img src={photos[0].photo_url} alt={photos[0].caption || aptName} loading="eager" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-[#1a5f6e] to-[#2C4A5E] flex items-center justify-center">
                   <Ico d={paths.photo} size={48} color="rgba(255,255,255,0.1)" />
@@ -503,7 +547,7 @@ export default function ApartmentDetail() {
               onClick={() => { setLightboxIdx(i); setLightboxOpen(true); }}
             >
               {photos[i] ? (
-                <img src={photos[i].photo_url} alt={photos[i].caption || `${aptName} ${i + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <img src={photos[i].photo_url} alt={photos[i].caption || `${aptName} ${i + 1}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-[#1a5f6e] to-[#2C4A5E] flex items-center justify-center">
                   <Ico d={paths.photo} size={28} color="rgba(255,255,255,0.1)" />
@@ -669,57 +713,72 @@ export default function ApartmentDetail() {
       {/* LIGHTBOX */}
       {lightboxOpen && photos.length > 0 && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
           onClick={() => setLightboxOpen(false)}
+          onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchEnd={e => {
+            const dx = e.changedTouches[0].clientX - touchStartX.current;
+            if (dx > 50) setLightboxIdx(i => Math.max(0, i - 1));
+            else if (dx < -50) setLightboxIdx(i => Math.min(photos.length - 1, i + 1));
+          }}
         >
-          {/* Cerrar */}
-          <button
-            className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl font-light z-10 w-10 h-10 flex items-center justify-center"
-            onClick={() => setLightboxOpen(false)}
-          >
-            ✕
-          </button>
-
-          {/* Contador */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm font-medium">
-            {lightboxIdx + 1} / {photos.length}
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-5 py-3 flex-shrink-0 z-10" onClick={e => e.stopPropagation()}>
+            <div className="text-white/60 text-sm font-medium tabular-nums">{lightboxIdx + 1} / {photos.length}</div>
+            <button
+              className="text-white/70 hover:text-white text-2xl font-light w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+              onClick={() => setLightboxOpen(false)}
+            >✕</button>
           </div>
 
-          {/* Flecha anterior */}
-          {lightboxIdx > 0 && (
-            <button
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-5xl font-light z-10 w-12 h-12 flex items-center justify-center"
-              onClick={e => { e.stopPropagation(); setLightboxIdx(i => i - 1); }}
-            >
-              ‹
-            </button>
-          )}
-
-          {/* Imagen */}
-          <div className="max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center px-16" onClick={e => e.stopPropagation()}>
+          {/* Main image */}
+          <div className="flex-1 flex items-center justify-center relative px-14 min-h-0" onClick={e => e.stopPropagation()}>
+            {lightboxIdx > 0 && (
+              <button
+                className="absolute left-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-5xl font-light z-10 w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                onClick={() => setLightboxIdx(i => i - 1)}
+              >‹</button>
+            )}
             <img
+              key={lightboxIdx}
               src={photos[lightboxIdx].photo_url}
               alt={photos[lightboxIdx].caption || `${aptName} ${lightboxIdx + 1}`}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
             />
+            {lightboxIdx < photos.length - 1 && (
+              <button
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-5xl font-light z-10 w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                onClick={() => setLightboxIdx(i => i + 1)}
+              >›</button>
+            )}
           </div>
-
-          {/* Flecha siguiente */}
-          {lightboxIdx < photos.length - 1 && (
-            <button
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-5xl font-light z-10 w-12 h-12 flex items-center justify-center"
-              onClick={e => { e.stopPropagation(); setLightboxIdx(i => i + 1); }}
-            >
-              ›
-            </button>
-          )}
 
           {/* Caption */}
           {photos[lightboxIdx].caption && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-sm text-center max-w-md">
+            <div className="text-white/50 text-sm text-center px-4 pt-2 flex-shrink-0" onClick={e => e.stopPropagation()}>
               {photos[lightboxIdx].caption}
             </div>
           )}
+
+          {/* Thumbnail strip */}
+          <div
+            className="flex gap-2 px-4 py-3 overflow-x-auto flex-shrink-0"
+            style={{ scrollbarWidth: 'none' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {photos.map((p, i) => (
+              <button
+                key={i}
+                ref={i === lightboxIdx ? activeThumbRef : null}
+                onClick={() => setLightboxIdx(i)}
+                className={`flex-shrink-0 w-14 h-14 rounded overflow-hidden border-2 transition-all ${
+                  i === lightboxIdx ? 'border-white opacity-100 scale-105' : 'border-transparent opacity-40 hover:opacity-70'
+                }`}
+              >
+                <img src={p.photo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </>

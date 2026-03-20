@@ -1,6 +1,8 @@
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Ico, { paths } from '../../components/Ico';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 const navItems = [
   { path: '/gestion', label: 'Dashboard', icon: paths.home, exact: true },
@@ -13,6 +15,27 @@ export default function GestionLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const refreshUnread = () => {
+    supabase.from('messages').select('*', { count: 'exact', head: true })
+      .eq('status', 'unread')
+      .then(({ count }) => setUnreadCount(count || 0));
+  };
+
+  useEffect(() => {
+    // Re-fetch en cada navegación (funciona sin Realtime)
+    refreshUnread();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    // Realtime — requiere habilitar replicación en Supabase Dashboard > Database > Replication
+    const channel = supabase
+      .channel('layout-messages')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, refreshUnread)
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, []);
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path;
@@ -43,7 +66,12 @@ export default function GestionLayout() {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive(item) ? 'bg-white/10 text-white' : 'hover:bg-white/5 hover:text-white'}`}
             >
               <Ico d={item.icon} size={18} color="currentColor" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.path === '/gestion/mensajes' && unreadCount > 0 && (
+                <span className="bg-[#D4A843] text-[#0f172a] text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </Link>
           ))}
 

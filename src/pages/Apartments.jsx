@@ -21,6 +21,7 @@ export default function Apartments() {
   const A = T.apartments;
 
   const [apartments, setApartments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [reservations, setReservations] = useState([]);
   const [filter, setFilter] = useState('all');
   const [checkin, setCheckin] = useState('');
@@ -58,9 +59,11 @@ export default function Apartments() {
         }
       }));
       setApartments(aptsWithPhotos);
+      setLoading(false);
     }).catch(err => {
       console.error('Error loading apartments:', err);
       setApartments([]);
+      setLoading(false);
     });
   }, []);
 
@@ -312,7 +315,30 @@ export default function Apartments() {
         <div className="mb-6" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          {filtered.map(apt => {
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
+                  <div className="h-60 bg-gray-200" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-5 bg-gray-200 rounded w-2/3" />
+                    <div className="flex gap-3">
+                      <div className="h-3 bg-gray-100 rounded w-16" />
+                      <div className="h-3 bg-gray-100 rounded w-16" />
+                      <div className="h-3 bg-gray-100 rounded w-16" />
+                    </div>
+                    <div className="flex gap-1.5 pt-1">
+                      <div className="h-5 bg-gray-100 rounded-full w-14" />
+                      <div className="h-5 bg-gray-100 rounded-full w-14" />
+                      <div className="h-5 bg-gray-100 rounded-full w-14" />
+                    </div>
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-2">
+                      <div className="h-6 bg-gray-200 rounded w-24" />
+                      <div className="h-4 bg-gray-100 rounded w-16" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            : filtered.map(apt => {
             const status = getAvailStatus(apt);
             const tagline = lang === 'EN' ? (apt.tagline_en || apt.taglineEn || apt.tagline) : apt.tagline;
             const topAmenities = (apt.amenities || []).slice(0, 3);
@@ -328,6 +354,7 @@ export default function Apartments() {
                     <img
                       src={apt.coverPhoto}
                       alt={apt.name}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (

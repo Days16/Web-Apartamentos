@@ -4,7 +4,7 @@ import { fetchExtras } from '../services/supabaseService';
 export default async function exportReservationsExcel(reservations, filename = 'reservas-illa-pancha.xlsx') {
   const extras = await fetchExtras();
   const statusLabel = { confirmed: 'Confirmada', pending: 'Pendiente', cancelled: 'Cancelada' };
-  const sourceLabel = { web: 'Directa', booking: 'Booking.com', airbnb: 'Airbnb' };
+  const sourceLabel = { web: 'Directa', booking: 'Booking.com' };
 
   const data = reservations.map(r => {
     const extrasNames = (r.extras || [])

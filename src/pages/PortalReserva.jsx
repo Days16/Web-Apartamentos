@@ -113,6 +113,23 @@ export default function PortalReserva() {
         }
     };
 
+    // Información de check-in visible desde 48h antes hasta fin del checkout
+    const isCheckinInfoVisible = () => {
+        if (!reservation || reservation.status === 'cancelled') return false;
+        const checkinDate = new Date(reservation.checkin + 'T00:00:00');
+        const checkoutDate = new Date(reservation.checkout + 'T23:59:59');
+        const now = new Date();
+        return (checkinDate - now) <= 48 * 60 * 60 * 1000 && now <= checkoutDate;
+    };
+
+    // Check-in aún no próximo (más de 48h) pero la reserva está confirmada y en el futuro
+    const isCheckinPending = () => {
+        if (!reservation || reservation.status === 'cancelled') return false;
+        const checkinDate = new Date(reservation.checkin + 'T00:00:00');
+        const now = new Date();
+        return (checkinDate - now) > 48 * 60 * 60 * 1000;
+    };
+
     // Calcular si la reserva se puede cancelar sin penalización
     const canCancel = () => {
         if (!reservation || !apt || reservation.status === 'cancelled') return false;
@@ -233,6 +250,113 @@ export default function PortalReserva() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* AVISO CHECK-IN PRÓXIMO */}
+                            {isCheckinPending() && (
+                                <div className="mt-8 flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-4">
+                                    <Ico d={paths.lock} size={18} color="#d97706" />
+                                    <div>
+                                        <p className="text-sm font-bold text-amber-800">Instrucciones de acceso</p>
+                                        <p className="text-xs text-amber-700 mt-0.5">El código de cerradura y las instrucciones de check-in estarán disponibles 48 horas antes de tu llegada.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* INFORMACIÓN DE CHECK-IN */}
+                            {isCheckinInfoVisible() && (
+                                <div className="mt-10 pt-10 border-t border-gray-100">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
+                                            <Ico d={paths.check} size={16} color="#16a34a" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-serif text-xl font-bold text-navy">Instrucciones de Check-in</h3>
+                                            <p className="text-xs text-gray-400">Información disponible para tu llegada</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                        {/* Código de acceso */}
+                                        <div className="bg-amber-50 border border-amber-100 rounded-xl p-5">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <Ico d={paths.lock} size={16} color="#d97706" />
+                                                <span className="text-xs font-bold text-amber-700 uppercase tracking-widest">Código de Acceso</span>
+                                            </div>
+                                            <div className="font-mono text-3xl font-bold text-navy tracking-widest">
+                                                {settings?.checkin_lock_code || '—'}
+                                            </div>
+                                            {settings?.checkin_access_info && (
+                                                <p className="text-sm text-gray-600 mt-2 leading-relaxed">{settings.checkin_access_info}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Normas de la finca */}
+                                        <div className="bg-teal/5 border border-teal/20 rounded-xl p-5">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <Ico d={paths.home} size={16} color="#1a5f6e" />
+                                                <span className="text-xs font-bold text-teal uppercase tracking-widest">Normas de la Finca</span>
+                                            </div>
+                                            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                                                {settings?.checkin_house_rules || 'Consulta las normas en el tablón de bienvenida del apartamento.'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Contacto de emergencia */}
+                                        <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <Ico d={paths.phone} size={16} color="#334155" />
+                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Contacto de Emergencia</span>
+                                            </div>
+                                            <div className="space-y-3">
+                                                {settings?.contact_phone && (
+                                                    <a href={`tel:${settings.contact_phone}`} className="block text-lg font-bold text-navy hover:text-teal transition-colors">
+                                                        {settings.contact_phone}
+                                                    </a>
+                                                )}
+                                                {settings?.contact_whatsapp && (
+                                                    <a
+                                                        href={`https://wa.me/${settings.contact_whatsapp}?text=${encodeURIComponent(`Hola, soy ${reservation.guest} y tengo la reserva ${reservation.id} para ${apt?.name} del ${reservation.checkin} al ${reservation.checkout}. Necesito ayuda.`)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-green-600 transition-colors"
+                                                    >
+                                                        <Ico d={paths.msg} size={16} color="#fff" />
+                                                        WhatsApp con el anfitrión
+                                                    </a>
+                                                )}
+                                                {!settings?.contact_phone && !settings?.contact_whatsapp && (
+                                                    <p className="text-sm text-gray-500">info@apartamentosillapancha.com</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Cómo llegar */}
+                                        <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <Ico d={paths.map} size={16} color="#334155" />
+                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Cómo Llegar</span>
+                                            </div>
+                                            {settings?.property_address ? (
+                                                <>
+                                                    <p className="text-sm text-gray-700 mb-3 leading-relaxed">{settings.property_address}</p>
+                                                    <a
+                                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.property_address)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 text-teal font-bold text-sm hover:underline"
+                                                    >
+                                                        Abrir en Google Maps →
+                                                    </a>
+                                                </>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">El anfitrión te enviará las indicaciones de acceso por correo.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="flex flex-col md:flex-row gap-4 pt-8 border-t border-gray-100">
                                 <button

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from './lib/stripe';
 import { useEffect, useState } from 'react';
@@ -36,6 +36,7 @@ import Usuarios from './pages/admin/Usuarios';
 import ReglasReserva from './pages/admin/ReglasReserva';
 import Cancelacion from './pages/admin/Cancelacion';
 import Changelog from './pages/admin/Changelog';
+import WebTextos from './pages/admin/WebTextos';
 
 // Componentes
 import CookieBanner from './components/CookieBanner';
@@ -54,6 +55,8 @@ import Pagos from './pages/admin/Pagos';
 import { DiscountProvider } from './contexts/DiscountContext';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
+import NotFound from './pages/NotFound';
 import OffersBanner from './components/OffersBanner';
 
 function MaintenanceGuard({ children }) {
@@ -118,6 +121,7 @@ export default function App() {
 
                     <Route path="/login" element={<Login />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
 
                     {/* ─── PANEL GESTIÓN (PROTEGIDO) ────────────────────── */}
                     <Route element={<ProtectedRoute />}>
@@ -141,11 +145,12 @@ export default function App() {
                         <Route path="cancelacion" element={<Cancelacion />} />
                         <Route path="changelog" element={<Changelog />} />
                         <Route path="pagos" element={<Pagos />} />
+                        <Route path="web" element={<WebTextos />} />
                       </Route>
                     </Route>
 
                     {/* ─── FALLBACK ────────────────────────────────────── */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                   <PreviewBanner />
                 </MaintenanceGuard>

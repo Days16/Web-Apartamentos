@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import Turnstile from './Turnstile';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Ico, { paths } from './Ico';
@@ -36,6 +37,7 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   const [occupiedDates, setOccupiedDates] = useState([]);
   const [globalSettings, setGlobalSettings] = useState({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
 
   // Cargar extras desde Supabase
   useEffect(() => {
@@ -75,6 +77,17 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
 
   const { activeDiscount } = useDiscount();
   const nights = calculateNights();
+
+  // Estancia mínima: regla por fechas > mínimo del apartamento > 1
+  const effectiveMinStay = (() => {
+    if (!checkinDate) return apt.minStay || 1;
+    const checkinStr = dateToStr(checkinDate);
+    const rule = (apt.minStayRules || []).find(r =>
+      checkinStr >= r.start_date && checkinStr <= r.end_date
+    );
+    return rule ? rule.min_nights : (apt.minStay || 1);
+  })();
+  const belowMinStay = nights > 0 && nights < effectiveMinStay;
 
   const taxPct = globalSettings.tax_percentage !== undefined ? globalSettings.tax_percentage : 10;
   const subtotal = apt.price * nights;
@@ -403,7 +416,7 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 {T.booking.cancelFree.replace('{days}', cancelDays)}
               </div>
 
-              <label className="flex items-start gap-2 text-sm text-slate-800 mb-6 cursor-pointer">
+              <label className="flex items-start gap-2 text-sm text-slate-800 mb-3 cursor-pointer">
                 <input
                   type="checkbox"
                   className="mt-1 w-4 h-4 text-[#82c8bd] rounded border-gray-300 focus:ring-teal-500"
@@ -415,17 +428,26 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 </span>
               </label>
 
+              <Turnstile onVerify={setCaptchaToken} onExpire={() => setCaptchaToken('')} theme="light" />
+
               <div className="flex gap-2">
                 {hasOverlap && (
                   <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded text-xs mb-4">
                     {lang === 'ES' ? 'Las fechas seleccionadas tienen días ya ocupados en medio.' : 'The selected dates have occupied days in between.'}
                   </div>
                 )}
+                {belowMinStay && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-700 p-3 rounded text-xs mb-4">
+                    {lang === 'ES'
+                      ? `Estancia mínima: ${effectiveMinStay} noches.`
+                      : `Minimum stay: ${effectiveMinStay} nights.`}
+                  </div>
+                )}
 
                 <button
-                  className={`bg-[#82c8bd] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6bb5a9] transition-all flex-[2] disabled:opacity-50 disabled:cursor-not-allowed ${(!form.name.trim() || !form.email.includes('@') || !form.phone.trim() || !acceptedTerms || hasOverlap) ? 'opacity-50 cursor-not-allowed' : 'opacity-100 cursor-pointer'}`}
+                  className={`bg-[#82c8bd] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6bb5a9] transition-all flex-[2] disabled:opacity-50 disabled:cursor-not-allowed ${(!form.name.trim() || !form.email.includes('@') || !form.phone.trim() || !acceptedTerms || hasOverlap || belowMinStay) ? 'opacity-50 cursor-not-allowed' : 'opacity-100 cursor-pointer'}`}
                   onClick={() => setStep(1)}
-                  disabled={!form.name.trim() || !form.email.includes('@') || !form.phone.trim() || !acceptedTerms || hasOverlap}
+                  disabled={!form.name.trim() || !form.email.includes('@') || !form.phone.trim() || !acceptedTerms || hasOverlap || belowMinStay}
                 >
                   {T.booking.continueExtras}
                 </button>

@@ -14,7 +14,13 @@ export default function ConfiguracionGeneral() {
         tax_percentage: 10,
         maintenance_mode: false,
         booking_mode: 'modal',
-        booking_com_url: ''
+        booking_com_url: '',
+        checkin_lock_code: '',
+        checkin_access_info: '',
+        checkin_house_rules: '',
+        contact_phone: '',
+        contact_whatsapp: '',
+        property_address: ''
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -32,7 +38,13 @@ export default function ConfiguracionGeneral() {
                     tax_percentage: data.tax_percentage ?? 10,
                     maintenance_mode: data.maintenance_mode ?? false,
                     booking_mode: data.booking_mode ?? 'modal',
-                    booking_com_url: data.booking_com_url ?? ''
+                    booking_com_url: data.booking_com_url ?? '',
+                    checkin_lock_code: data.checkin_lock_code ?? '',
+                    checkin_access_info: data.checkin_access_info ?? '',
+                    checkin_house_rules: data.checkin_house_rules ?? '',
+                    contact_phone: data.contact_phone ?? '',
+                    contact_whatsapp: data.contact_whatsapp ?? '',
+                    property_address: data.property_address ?? ''
                 });
             } catch (err) {
                 console.error('Error cargando ajustes:', err);
@@ -60,7 +72,13 @@ export default function ConfiguracionGeneral() {
                 updateSetting('tax_percentage', settings.tax_percentage, 'number'),
                 updateSetting('maintenance_mode', settings.maintenance_mode, 'boolean'),
                 updateSetting('booking_mode', settings.booking_mode, 'string'),
-                updateSetting('booking_com_url', settings.booking_com_url, 'string')
+                updateSetting('booking_com_url', settings.booking_com_url, 'string'),
+                updateSetting('checkin_lock_code', settings.checkin_lock_code, 'string'),
+                updateSetting('checkin_access_info', settings.checkin_access_info, 'string'),
+                updateSetting('checkin_house_rules', settings.checkin_house_rules, 'string'),
+                updateSetting('contact_phone', settings.contact_phone, 'string'),
+                updateSetting('contact_whatsapp', settings.contact_whatsapp, 'string'),
+                updateSetting('property_address', settings.property_address, 'string')
             ]);
 
             // 2. Sincronizar con la tabla de apartamentos (Propagación manual)
@@ -271,6 +289,82 @@ export default function ConfiguracionGeneral() {
                                 </p>
                             </div>
                         )}
+                    </div>
+                </section>
+
+                {/* CHECK-IN Y CONTACTO */}
+                <section className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="p-6 border-b border-gray-100 flex items-start gap-4">
+                        <div className="mt-1"><Ico d={paths.lock} size={20} color="#64748b" /></div>
+                        <div>
+                            <h2 className="text-lg font-bold text-navy">Check-in y Contacto</h2>
+                            <p className="text-xs text-gray-500">Se muestra al huésped 48h antes de su llegada en el portal de reservas</p>
+                        </div>
+                    </div>
+                    <div className="p-6 space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Código de cerradura</label>
+                                <input
+                                    type="text"
+                                    value={settings.checkin_lock_code}
+                                    onChange={e => handleChange('checkin_lock_code', e.target.value)}
+                                    placeholder="Ej: 4281"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg font-mono text-navy focus:outline-none focus:ring-2 focus:ring-teal/20"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Dirección del alojamiento</label>
+                                <input
+                                    type="text"
+                                    value={settings.property_address}
+                                    onChange={e => handleChange('property_address', e.target.value)}
+                                    placeholder="Ej: Calle Illa Pancha 1, 27700 Ribadeo"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-navy focus:outline-none focus:ring-2 focus:ring-teal/20"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Teléfono de contacto</label>
+                                <input
+                                    type="text"
+                                    value={settings.contact_phone}
+                                    onChange={e => handleChange('contact_phone', e.target.value)}
+                                    placeholder="Ej: +34 600 000 000"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-navy focus:outline-none focus:ring-2 focus:ring-teal/20"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">WhatsApp (solo dígitos)</label>
+                                <input
+                                    type="text"
+                                    value={settings.contact_whatsapp}
+                                    onChange={e => handleChange('contact_whatsapp', e.target.value)}
+                                    placeholder="Ej: 34600000000"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-navy focus:outline-none focus:ring-2 focus:ring-teal/20"
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1">Prefijo + número sin espacios ni signos. Ej: 34600000000</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Instrucciones de acceso</label>
+                            <textarea
+                                value={settings.checkin_access_info}
+                                onChange={e => handleChange('checkin_access_info', e.target.value)}
+                                rows={2}
+                                placeholder="Ej: La caja de llaves está junto a la puerta principal. Introduce el código en el teclado numérico."
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-navy focus:outline-none focus:ring-2 focus:ring-teal/20 resize-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Normas de la finca</label>
+                            <textarea
+                                value={settings.checkin_house_rules}
+                                onChange={e => handleChange('checkin_house_rules', e.target.value)}
+                                rows={4}
+                                placeholder="Ej: No se permiten mascotas. Horario de silencio de 23:00 a 08:00. Check-out antes de las 12:00."
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-navy focus:outline-none focus:ring-2 focus:ring-teal/20 resize-none"
+                            />
+                        </div>
                     </div>
                 </section>
 

@@ -8,7 +8,7 @@ import Ico, { paths } from '../components/Ico';
 import SEO from '../components/SEO';
 import { fetchApartments, fetchApartmentPhotos } from '../services/supabaseService';
 import { getReservations, getReviews } from '../services/dataService';
-import { formatPrice, strToDate, dateToStr } from '../utils/format';
+import { formatPrice, strToDate, dateToStr, formatDateShort } from '../utils/format';
 import { safeHtml } from '../utils/sanitize';
 import { getMockPhotosForApartment } from '../data/mockPhotos';
 
@@ -27,15 +27,22 @@ import { useSettings } from '../contexts/SettingsContext';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { lang, t } = useLang();
+  const { lang } = useLang();
   const { settings } = useSettings();
   const T = useT(lang);
 
   const cancelDays = settings?.cancellation_free_days || 14;
   const depositPct = settings?.payment_deposit_percentage || 50;
 
-  const [checkin, setCheckin] = useState('2026-07-12');
-  const [checkout, setCheckout] = useState('2026-07-19');
+  const today = new Date();
+  const defaultCheckin = new Date(today);
+  defaultCheckin.setDate(today.getDate() + 7);
+  const defaultCheckout = new Date(today);
+  defaultCheckout.setDate(today.getDate() + 14);
+  const fmt = (d) => d.toISOString().split('T')[0];
+
+  const [checkin, setCheckin] = useState(fmt(defaultCheckin));
+  const [checkout, setCheckout] = useState(fmt(defaultCheckout));
   const [guests, setGuests] = useState(2);
   const [searched, setSearched] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -44,6 +51,7 @@ export default function Home() {
   const [featuredApts, setFeaturedApts] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -67,6 +75,7 @@ export default function Home() {
         }
       }));
       setFeaturedApts(aptsWithPhotos);
+      setLoading(false);
     });
   }, []);
 
@@ -90,6 +99,37 @@ export default function Home() {
       <SEO
         title={T.seo.homeTitle}
         description={T.seo.homeDesc}
+        ogType="website"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'LodgingBusiness',
+          name: 'Illa Pancha',
+          url: 'https://www.apartamentosillapancha.com',
+          telephone: '+34 614 52 30 77',
+          image: 'https://www.apartamentosillapancha.com/og-image.jpg',
+          description: T.seo.homeDesc,
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Ribadeo',
+            addressLocality: 'Ribadeo',
+            addressRegion: 'Galicia',
+            postalCode: '27700',
+            addressCountry: 'ES',
+          },
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: 43.5354,
+            longitude: -7.0415,
+          },
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.9',
+            reviewCount: '220',
+            bestRating: '5',
+          },
+          priceRange: '€€',
+          numberOfRooms: 8,
+        }}
       />
       <Navbar onOpenBooking={() => setBookingOpen(true)} />
 
@@ -104,17 +144,17 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/55" />
 
         <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-4xl">
-          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-4">Ribadeo, Galicia</div>
+          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-4">{T.home.feature4Title}</div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight" dangerouslySetInnerHTML={safeHtml(T.home.heroTitle)} />
           <p className="text-lg md:text-xl text-gray-100 mb-12 leading-relaxed">
             {T.home.heroDesc}
           </p>
           <div className="flex gap-4 flex-wrap justify-center mb-16">
             <button className="bg-navy text-white px-8 py-4 rounded hover:bg-slate-900 transition-all font-semibold text-lg" onClick={handleSearch}>
-              {t('Ver disponibilidad', 'Check availability')}
+              {T.home.availability}
             </button>
             <button className="border-2 border-white text-white px-8 py-4 rounded hover:bg-white hover:text-navy transition-all font-semibold text-lg" onClick={() => navigate('/apartamentos')}>
-              {t('Conocer los apartamentos', 'Meet the apartments')}
+              {T.home.meetApts}
             </button>
           </div>
         </div>
@@ -123,7 +163,7 @@ export default function Home() {
         <div className="relative z-20 w-full max-w-4xl">
           <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-3">
             <div className="flex flex-col w-full [&_.react-datepicker-wrapper]:w-full">
-              <div className="text-xs font-semibold text-navy uppercase tracking-wider mb-2">{t('Llegada', 'Check-in')}</div>
+              <div className="text-xs font-semibold text-navy uppercase tracking-wider mb-2">{T.apartments.checkin}</div>
               <DatePicker
                 selected={strToDate(checkin)}
                 onChange={date => date && setCheckin(dateToStr(new Date(date.getFullYear(), date.getMonth(), date.getDate())))}
@@ -135,7 +175,7 @@ export default function Home() {
               />
             </div>
             <div className="flex flex-col w-full [&_.react-datepicker-wrapper]:w-full">
-              <div className="text-xs font-semibold text-navy uppercase tracking-wider mb-2">{t('Salida', 'Check-out')}</div>
+              <div className="text-xs font-semibold text-navy uppercase tracking-wider mb-2">{T.apartments.checkout}</div>
               <DatePicker
                 selected={strToDate(checkout)}
                 onChange={date => date && setCheckout(dateToStr(new Date(date.getFullYear(), date.getMonth(), date.getDate())))}
@@ -146,14 +186,14 @@ export default function Home() {
               />
             </div>
             <div className="flex flex-col w-full">
-              <div className="text-xs font-semibold text-navy uppercase tracking-wider mb-2">{t('Huéspedes', 'Guests')}</div>
+              <div className="text-xs font-semibold text-navy uppercase tracking-wider mb-2">{T.apartments.guests}</div>
               <select
                 value={guests}
                 onChange={e => setGuests(+e.target.value)}
                 className="w-full h-[42px] px-3 py-2 border border-gray-300 rounded text-sm text-navy cursor-pointer focus:outline-none focus:border-[#82c8bd] focus:ring-2 focus:ring-[#82c8bd]/20 transition-all"
               >
                 {[1, 2, 3, 4, 5, 6].map(n => (
-                  <option key={n} value={n}>{n} {n === 1 ? 'persona' : 'personas'}</option>
+                  <option key={n} value={n}>{n} {n === 1 ? T.common.person : T.common.persons}</option>
                 ))}
               </select>
             </div>
@@ -184,13 +224,13 @@ export default function Home() {
 
       {/* APARTAMENTOS */}
       <div className="py-20 md:py-28 px-4" id="apartments-section">
-        <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-2">{t('Nuestros apartamentos', 'Our apartments')}</div>
+        <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-2">{T.home.ourAptHeading}</div>
         <div className="flex justify-between items-end gap-8 mb-12 flex-col md:flex-row">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-navy" dangerouslySetInnerHTML={safeHtml(t('Ocho espacios<br /><em>para descansar</em>', 'Eight spaces<br /><em>to rest</em>'))} />
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-navy" dangerouslySetInnerHTML={safeHtml(T.home.spacesToRest)} />
           <div className="flex gap-4 flex-wrap items-center">
             {searched && (
               <div className="text-sm text-gray-600 font-light">
-                Disponibilidad · {checkin} → {checkout}
+                {T.home.availFilter} {formatDateShort(checkin)} → {formatDateShort(checkout)}
               </div>
             )}
             <button
@@ -203,78 +243,95 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-          {[...featuredApts]
-            .map(apt => {
-              if (!searched) return { ...apt, available: true };
-              const capacityOk = guests <= (apt.capacity || 2);
-              const hasOverlap = reservations.some(r => {
-                if (r.status === 'cancelled') return false;
-                if (r.aptSlug !== apt.slug && r.apt !== apt.slug) return false;
-                const rIn = new Date(r.checkin + 'T00:00:00');
-                const rOut = new Date(r.checkout + 'T00:00:00');
-                const sIn = new Date(checkin + 'T00:00:00');
-                const sOut = new Date(checkout + 'T00:00:00');
-                return (sIn < rOut && sOut > rIn);
-              });
-              return { ...apt, available: capacityOk && !hasOverlap };
-            })
-            .sort((a, b) => {
-              if (!searched) return 0;
-              if (a.available && !b.available) return -1;
-              if (!a.available && b.available) return 1;
-              return 0;
-            })
-            .map((apt, i) => (
-              <div
-                key={apt.slug}
-                className={`group relative flex flex-col rounded-lg overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all h-full min-h-[300px] ${searched && !apt.available ? 'opacity-70' : ''}`}
-                onClick={() => navigate(`/apartamentos/${apt.slug}`)}
-              >
-                <div
-                  className="flex-1 w-full flex items-center justify-center bg-center bg-cover"
-                  style={{
-                    ...(apt.coverPhoto ? { backgroundImage: `url(${apt.coverPhoto})` } : { background: apt.gradient }),
-                    minHeight: 200,
-                  }}
-                >
-                  {!apt.coverPhoto && <Ico d={paths.photo} size={40} color="rgba(255,255,255,0.12)" />}
-                </div>
-                {searched && !apt.available ? (
-                  <div className="absolute top-4 right-4 bg-gray-700 text-white px-3 py-1 rounded text-sm z-10 font-medium">
-                    {t('No disponible', 'Not available')}
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-lg overflow-hidden shadow-sm bg-white min-h-[300px] animate-pulse">
+                <div className="bg-gray-200 h-52" />
+                <div className="p-6 space-y-3">
+                  <div className="h-5 bg-gray-200 rounded w-2/3" />
+                  <div className="flex justify-between">
+                    <div className="h-4 bg-gray-200 rounded w-1/3" />
+                    <div className="h-4 bg-gray-200 rounded w-1/4" />
                   </div>
-                ) : (
-                  <div className="absolute top-4 right-4 bg-teal text-white px-3 py-1 rounded text-sm z-10 font-medium">{apt.tagline}</div>
-                )}
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all" />
-                <div className="p-6 bg-white">
-                  <h3 className="text-xl font-serif font-bold text-navy mb-2">{apt.name}</h3>
-                  <div className="flex justify-between items-center text-sm text-gray-600 mb-4">
-                    <span>{apt.capacity} pers · {apt.beds} dorm</span>
-                    <span className="font-semibold text-teal text-lg">
-                      {formatPrice(apt.price)}
-                      <span className="text-xs text-gray-500">/{t('noche', 'night')}</span>
-                    </span>
-                  </div>
-                </div>
-                <div className="absolute bottom-4 right-4 bg-white rounded-full px-3 py-1 text-sm font-semibold text-navy shadow">
-                  ★ {apt.rating}
                 </div>
               </div>
-            ))}
+            ))
+            : [...featuredApts]
+              .map(apt => {
+                if (!searched) return { ...apt, available: true };
+                const capacityOk = guests <= (apt.capacity || 2);
+                const hasOverlap = reservations.some(r => {
+                  if (r.status === 'cancelled') return false;
+                  if (r.aptSlug !== apt.slug && r.apt !== apt.slug) return false;
+                  const rIn = new Date(r.checkin + 'T00:00:00');
+                  const rOut = new Date(r.checkout + 'T00:00:00');
+                  const sIn = new Date(checkin + 'T00:00:00');
+                  const sOut = new Date(checkout + 'T00:00:00');
+                  return (sIn < rOut && sOut > rIn);
+                });
+                return { ...apt, available: capacityOk && !hasOverlap };
+              })
+              .sort((a, b) => {
+                if (!searched) return 0;
+                if (a.available && !b.available) return -1;
+                if (!a.available && b.available) return 1;
+                return 0;
+              })
+              .map((apt, i) => (
+                <div
+                  key={apt.slug}
+                  className={`group relative flex flex-col rounded-lg overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all h-full min-h-[300px] ${searched && !apt.available ? 'opacity-70' : ''}`}
+                  onClick={() => navigate(`/apartamentos/${apt.slug}`)}
+                >
+                  <div className="relative w-full flex-shrink-0" style={{ minHeight: 200 }}>
+                    {apt.coverPhoto
+                      ? <img
+                        src={apt.coverPhoto}
+                        alt={apt.name}
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      : <div className="absolute inset-0 flex items-center justify-center" style={{ background: apt.gradient }}>
+                        <Ico d={paths.photo} size={40} color="rgba(255,255,255,0.12)" />
+                      </div>
+                    }
+                  </div>
+                  {searched && !apt.available ? (
+                    <div className="absolute top-4 right-4 bg-gray-700 text-white px-3 py-1 rounded text-sm z-10 font-medium">
+                      {T.apartments.unavailable}
+                    </div>
+                  ) : (
+                    <div className="absolute top-4 right-4 bg-teal text-white px-3 py-1 rounded text-sm z-10 font-medium">{apt.tagline}</div>
+                  )}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all" />
+                  <div className="p-6 bg-white">
+                    <h3 className="text-xl font-serif font-bold text-navy mb-2">{apt.name}</h3>
+                    <div className="flex justify-between items-center text-sm text-gray-600 mb-4">
+                      <span>{apt.capacity} pers · {apt.beds} dorm</span>
+                      <span className="font-semibold text-teal text-lg">
+                        {formatPrice(apt.price)}
+                        <span className="text-xs text-gray-500">/{T.common.night}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-4 right-4 bg-white rounded-full px-3 py-1 text-sm font-semibold text-navy shadow">
+                    ★ {apt.rating}
+                  </div>
+                </div>
+              ))}
         </div>
       </div>
 
       {/* RESEÑAS */}
       <div className="py-20 md:py-28 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-2">Lo que dicen nuestros huéspedes</div>
+          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-2">{T.home.whatGuestsSay}</div>
           <div className="flex justify-between items-start gap-8 mb-12 flex-col md:flex-row">
             <h2 className="text-4xl md:text-5xl font-serif font-bold text-navy">
-              Opiniones<br /><em className="text-teal italic font-light">reales</em>
+              {T.home.opinionsTitle}<br /><em className="text-teal italic font-light">{T.home.opinionsEm}</em>
             </h2>
             <div className="text-xl font-semibold text-navy">
-              4.9 ★ · +220 opiniones verificadas
+              {T.home.verifiedReviews}
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

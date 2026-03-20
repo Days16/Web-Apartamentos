@@ -18,6 +18,9 @@
         "spacesToRest": "Ocho espacios<br /><em>para descansar</em>",
         "viewAll": "Ver todos",
         "night": "noche",
+        "availFilter": "Disponibilidad ·",
+        "opinionsTitle": "Opiniones",
+        "opinionsEm": "reales",
         "whatGuestsSay": "Lo que dicen nuestros huéspedes",
         "realOpinions": "Opiniones<br /><em>reales</em>",
         "verifiedReviews": "4.9 ★ · +220 opiniones verificadas",
@@ -30,11 +33,11 @@
         "feature2Title": "Pago seguro",
         "feature2Desc": "{pct}% ahora con tarjeta como depósito. El resto en efectivo cuando llegues al apartamento.",
         "feature3Title": "Siempre actualizado",
-        "feature3Desc": "Nuestro calendario se sincroniza con Booking y Airbnb en tiempo real. Nunca habrá doble reserva.",
+        "feature3Desc": "Nuestro calendario se sincroniza con Booking en tiempo real. Nunca habrá doble reserva.",
         "feature4Title": "Ribadeo, Galicia",
         "feature4Desc": "A 5 minutos del puente internacional y de las mejores playas de la costa norte gallega.",
         "bannerTitle": "¿Por qué reservar<br /><em>directo con nosotros?</em>",
-        "bannerDesc": "Ahorra entre un 15 y un 20% respecto a Booking.com o Airbnb. El mismo apartamento, el mismo servicio, sin comisiones de intermediarios."
+        "bannerDesc": "Ahorra entre un 15 y un 20% respecto a Booking.com. El mismo apartamento, el mismo servicio, sin comisiones de intermediarios."
     },
     "apartments": {
         "eyebrow": "Colección completa",
@@ -213,7 +216,8 @@
         "occupied": "Ocupado",
         "available": "Disponible",
         "past": "Pasado",
-        "seeMore": "Ver más"
+        "seeMore": "Ver más",
+        "openMaps": "Ver en Google Maps ↗"
     },
     "about": {
         "title": "Nosotros",
@@ -223,7 +227,7 @@
         "storyTitle": "Una historia de<br /><em>amor por Ribadeo</em>",
         "storyText1": "Todo empezó con un único apartamento frente a la ría que mi abuelo rehabilitó en los años 80. Con el tiempo, la familia fue creciendo y también el número de pisos. Hoy son ocho, pero el espíritu es el mismo: ofrecer a los visitantes la misma experiencia auténtica que tenemos nosotros cuando miramos el Eo desde la ventana.",
         "storyText2": "Ribadeo es un lugar especial. La ría, el puente internacional, la isla del faro, As Catedrais a 20 minutos. La luz de la tarde en verano pintando de dorado las aguas. El pulpo a feira en los chiringuitos del puerto. Queremos que lo experimentes como lo hacemos nosotros, y que no te cueste un ojo de la cara.",
-        "storyText3": "Llevamos años en Booking y Airbnb porque nos daban visibilidad. Pero nos hartamos de ver cómo cobraban entre un 15 y un 20% de comisión a nuestros huéspedes. Esta web es nuestra respuesta.",
+        "storyText3": "Llevamos años en Booking porque nos daba visibilidad. Pero nos hartamos de ver cómo cobraban entre un 15 y un 20% de comisión a nuestros huéspedes. Esta web es nuestra respuesta.",
         "stats": {
             "apts": "Apartamentos",
             "reviews": "Opiniones ★ 4.9",
@@ -231,6 +235,8 @@
         },
         "location": "Dónde estamos",
         "locationDetail": "En el extremo nororiental de Galicia, en la frontera con Asturias, al borde de la ría del Eo.",
+        "locationLabel": "Ribadeo, Lugo · Galicia",
+        "riaLabel": "Ría de Ribadeo",
         "whyRibadeo": "¿Por qué Ribadeo?",
         "ribadeoDesc1": "Ribadeo es la puerta de entrada a la Costa Verde gallega. A 20 minutos de las playas de As Catedrais, a 30 de Luarca y a 1 hora de Lugo. Un punto de partida perfecto para explorar la Mariña lucense.",
         "ribadeoDesc2": "El casco histórico, el paseo marítimo, el puerto deportivo, los miradores sobre la ría, los mercados locales y los mejores restaurantes de marisco de la comarca están a pocos minutos a pie.",
@@ -304,7 +310,11 @@
         "response": "Respuesta en < 24h",
         "waMsg": "Hola, me gustaría información sobre los apartamentos en Ribadeo.",
         "checkinTime": "A partir de las 15:00",
-        "checkoutTime": "Antes de las 11:00"
+        "checkoutTime": "Antes de las 11:00",
+        "waLabel": "WhatsApp",
+        "immediateResponse": "Respuesta inmediata",
+        "address": "Ribadeo, Lugo · Galicia, España",
+        "checkinCheckoutTitle": "Llegada y Salida"
     },
     "maintenance": {
         "title": "Estamos mejorando para ti",
@@ -321,6 +331,13 @@
         "button": "Entrar",
         "loading": "Iniciando sesión...",
         "back": "← Volver a la web principal"
+    },
+    "notFound": {
+        "code": "404",
+        "title": "Página no encontrada",
+        "desc": "La página que buscas no existe o ha sido movida.",
+        "home": "Volver al inicio",
+        "apartments": "Ver apartamentos"
     },
     "legal": {
         "termsTitle": "Términos y Condiciones",

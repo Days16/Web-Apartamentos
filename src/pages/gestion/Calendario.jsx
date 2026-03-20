@@ -35,6 +35,20 @@ export default function Calendario() {
   });
   const [selectedApt, setSelectedApt] = useState('all');
   const [selectedDate, setSelectedDate] = useState(null);
+  const calendarRef = useRef(null);
+
+  const todayStr = () => {
+    const t = new Date();
+    return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+  };
+
+  const shiftDate = (offset) => {
+    const [y, m, d] = startDate.split('-').map(Number);
+    const dt = new Date(y, m - 1, d + offset);
+    setStartDate(dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0'));
+  };
+
+  const handlePrint = () => window.print();
 
   const handleBlockDates = async () => {
     if (!blockForm.aptSlug || !blockForm.checkin || !blockForm.checkout) return;
@@ -115,7 +129,7 @@ export default function Calendario() {
 
   const getStatusType = (res) => {
     if (!res) return null;
-    if (res.source === 'booking' || res.source === 'airbnb' || res.source === 'other') return 'external';
+    if (res.source === 'booking' || res.source === 'other') return 'external';
     // Detección robusta de bloques: por status, por ID o por origen manual/bloqueado
     if (res.status === 'blocked' || res.id?.startsWith('BLK-') || res.guest?.includes('Bloqueado') || res.source === 'manual') return 'blocked';
     if (res.status === 'pending') return 'pending';
@@ -149,7 +163,8 @@ export default function Calendario() {
     <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen">
 
       {/* HEADER / CONTROLES */}
-      <div className="bg-white border border-gray-200 rounded-t-xl p-4 flex flex-wrap items-center gap-4 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-t-xl p-4 flex flex-wrap items-center gap-3 shadow-sm print:hidden">
+        {/* Filtro alojamiento */}
         <select
           className="border border-gray-300 rounded px-3 py-1.5 text-sm outline-none focus:border-teal-500"
           value={selectedApt}
@@ -159,34 +174,67 @@ export default function Calendario() {
           {apartments.map(a => <option key={a.slug} value={a.slug}>{a.name}</option>)}
         </select>
 
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span>Período:</span>
-          <select className="border border-gray-300 rounded px-2 py-1.5 outline-none">
-            <option>Predeterminado</option>
-          </select>
-          <input
-            type="date"
-            className="border border-gray-300 rounded px-2 py-1 outline-none ml-2"
-            value={startDate}
-            onChange={e => setStartDate(e.target.value)}
-          />
-          <button className="bg-white border border-blue-400 text-blue-600 px-4 py-1.5 rounded hover:bg-blue-50 transition-colors">
-            Mostrar
-          </button>
+        {/* Navegación de fechas */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => shiftDate(-daysToShow)}
+            className="border border-gray-300 rounded px-2.5 py-1.5 text-sm hover:bg-gray-50 transition-colors"
+            title="Período anterior"
+          >‹</button>
+          <button
+            onClick={() => setStartDate(todayStr())}
+            className="border border-gray-300 rounded px-3 py-1.5 text-sm font-semibold hover:bg-gray-50 transition-colors"
+          >Hoy</button>
+          <button
+            onClick={() => shiftDate(daysToShow)}
+            className="border border-gray-300 rounded px-2.5 py-1.5 text-sm hover:bg-gray-50 transition-colors"
+            title="Período siguiente"
+          >›</button>
+        </div>
+
+        {/* Fecha manual */}
+        <input
+          type="date"
+          className="border border-gray-300 rounded px-2 py-1.5 text-sm outline-none focus:border-teal-500"
+          value={startDate}
+          onChange={e => setStartDate(e.target.value)}
+        />
+
+        {/* Selector de días */}
+        <div className="flex items-center gap-1 rounded border border-gray-300 overflow-hidden text-sm">
+          {[14, 25, 60].map(n => (
+            <button
+              key={n}
+              onClick={() => setDaysToShow(n)}
+              className={`px-3 py-1.5 transition-colors ${daysToShow === n ? 'bg-teal-600 text-white font-semibold' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >{n}d</button>
+          ))}
         </div>
 
         <div className="ml-auto flex items-center gap-4">
+          {/* Leyenda */}
           <div className="flex items-center gap-4 text-[11px] font-medium text-gray-500 uppercase tracking-wider">
             {Object.entries(STATUS_COLORS).map(([key, config]) => (
               <div key={key} className="flex items-center gap-1.5">
-                <div className={`w-4 h-4 rounded border`} style={{ backgroundColor: config.bg, borderColor: config.border }} />
+                <div className="w-4 h-4 rounded border" style={{ backgroundColor: config.bg, borderColor: config.border }} />
                 <span>{config.label}</span>
               </div>
             ))}
           </div>
+
+          {/* Exportar PDF */}
+          <button
+            onClick={handlePrint}
+            className="bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+            title="Imprimir / Guardar como PDF"
+          >
+            <Ico d={paths.upload} size={14} color="currentColor" />
+            PDF
+          </button>
+
           <button
             onClick={() => setIsBlockModalOpen(true)}
-            className="bg-white border border-teal-500 text-teal-600 px-4 py-1.5 rounded text-sm font-bold hover:bg-teal-50 transition-colors ml-4"
+            className="bg-white border border-teal-500 text-teal-600 px-4 py-1.5 rounded text-sm font-bold hover:bg-teal-50 transition-colors"
           >
             Bloquear
           </button>
@@ -396,10 +444,6 @@ export default function Calendario() {
         </div>
       )}
 
-      {/* FOOTER NAVBAR (opcional, imitando la de la imagen) */}
-      <div className="mt-4 flex items-center justify-center gap-2">
-        {/* Botones de navegación de rango si fuera necesario */}
-      </div>
 
     </div>
   );

@@ -366,3 +366,13 @@
     color: #475569;
   }
 }
+
+@media print {
+  /* Ocultar elementos que no pertenecen al calendario */
+  .print\:hidden { display: none !important; }
+  /* Sidebar del panel de gestión */
+  nav, aside, header, footer { display: none !important; }
+  /* Expandir el contenedor del calendario a pantalla completa */
+  body, html { background: white !important; }
+  * { box-shadow: none !important; }
+}

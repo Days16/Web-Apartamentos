@@ -33,55 +33,23 @@ export default function Login() {
     };
 
     return (
-        <div style={{
-            height: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1a5f6e 100%)',
-            color: '#fff',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
-        }}>
-            <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px)',
-                padding: '40px',
-                borderRadius: '16px',
-                width: '100%',
-                maxWidth: '400px',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                    <div style={{
-                        width: '64px',
-                        height: '64px',
-                        background: '#D4A843',
-                        borderRadius: '16px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 16px',
-                        boxShadow: '0 10px 15px -3px rgba(212, 168, 67, 0.3)'
-                    }}>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy to-teal text-white font-sans">
+            <div className="bg-white/5 backdrop-blur-md p-10 rounded-2xl w-full max-w-sm shadow-2xl border border-white/10">
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-gold rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_10px_15px_-3px_rgba(212,168,67,0.3)]">
                         <Ico d={paths.lock} size={32} color="#0f172a" />
                     </div>
-                    <h1 style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: '28px',
-                        margin: 0,
-                        letterSpacing: '0.02em'
-                    }}>
+                    <h1 className="font-serif text-4xl tracking-wide m-0">
                         {L.title}
                     </h1>
-                    <p style={{ opacity: 0.6, fontSize: '14px', marginTop: '8px' }}>
+                    <p className="text-sm opacity-60 mt-2 mb-0">
                         {L.sub}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', opacity: 0.8 }}>
+                    <div className="mb-5">
+                        <label className="block text-xs font-bold uppercase mb-2 opacity-80">
                             {L.email}
                         </label>
                         <input
@@ -89,23 +57,12 @@ export default function Login() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                outline: 'none',
-                                transition: 'all 0.2s'
-                            }}
-                            onFocus={(e) => e.target.style.borderColor = '#D4A843'}
-                            onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white outline-none transition-colors focus:border-gold"
                         />
                     </div>
 
-                    <div style={{ marginBottom: '32px' }}>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', opacity: 0.8 }}>
+                    <div className="mb-8">
+                        <label className="block text-xs font-bold uppercase mb-2 opacity-80">
                             {L.password}
                         </label>
                         <input
@@ -113,32 +70,12 @@ export default function Login() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                outline: 'none',
-                                transition: 'all 0.2s'
-                            }}
-                            onFocus={(e) => e.target.style.borderColor = '#D4A843'}
-                            onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white outline-none transition-colors focus:border-gold"
                         />
                     </div>
 
                     {error && (
-                        <div style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
-                            color: '#f87171',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            marginBottom: '20px',
-                            textAlign: 'center'
-                        }}>
+                        <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-3 rounded-lg text-xs mb-5 text-center">
                             {error}
                         </div>
                     )}
@@ -146,32 +83,22 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            background: '#D4A843',
-                            border: 'none',
-                            borderRadius: '8px',
-                            color: '#0f172a',
-                            fontWeight: 'bold',
-                            fontSize: '16px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            transition: 'all 0.2s',
-                            opacity: loading ? 0.7 : 1
-                        }}
-                        onMouseEnter={(e) => { if (!loading) e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 4px 12px rgba(212, 168, 67, 0.3)' }}
-                        onMouseLeave={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = 'none' }}
+                        className="w-full py-3.5 bg-gold rounded-lg text-navy font-bold text-lg cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(212,168,67,0.3)] disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0"
                     >
                         {loading ? L.loading : L.button}
                     </button>
                 </form>
 
-                <div style={{ marginTop: '32px', textAlign: 'center' }}>
+                <div className="mt-8 text-center flex flex-col gap-3">
+                    <button
+                        onClick={() => navigate('/forgot-password')}
+                        className="bg-transparent border-none text-gold/80 cursor-pointer text-sm hover:text-gold transition-opacity"
+                    >
+                        ¿Olvidaste tu contraseña?
+                    </button>
                     <button
                         onClick={() => navigate('/')}
-                        style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.5, cursor: 'pointer', fontSize: '13px' }}
-                        onMouseEnter={(e) => e.target.style.opacity = 0.8}
-                        onMouseLeave={(e) => e.target.style.opacity = 0.5}
+                        className="bg-transparent border-none text-white/50 cursor-pointer text-sm hover:text-white/80 transition-opacity"
                     >
                         {L.back}
                     </button>

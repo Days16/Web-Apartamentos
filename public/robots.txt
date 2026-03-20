@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /gestion/
+Disallow: /login
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /reserva-confirmada/
+Disallow: /mi-reserva
+
+Sitemap: https://www.apartamentosillapancha.com/sitemap.xml

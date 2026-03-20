@@ -18,6 +18,9 @@
         "spacesToRest": "Eight spaces<br /><em>to rest</em>",
         "viewAll": "View all",
         "night": "night",
+        "availFilter": "Availability ·",
+        "opinionsTitle": "Opinions",
+        "opinionsEm": "real",
         "whatGuestsSay": "What our guests say",
         "realOpinions": "Real<br /><em>opinions</em>",
         "verifiedReviews": "4.9 ★ · +220 verified reviews",
@@ -30,11 +33,11 @@
         "feature2Title": "Secure payment",
         "feature2Desc": "{pct}% now by card as deposit. The rest in cash upon arrival.",
         "feature3Title": "Always updated",
-        "feature3Desc": "Our calendar syncs with Booking and Airbnb in real-time. Double bookings will never happen.",
+        "feature3Desc": "Our calendar syncs with Booking in real-time. Double bookings will never happen.",
         "feature4Title": "Ribadeo, Galicia",
         "feature4Desc": "5 minutes from the international bridge and the best beaches on the northern Galician coast.",
         "bannerTitle": "Why book<br /><em>direct with us?</em>",
-        "bannerDesc": "Save between 15% and 20% compared to Booking.com or Airbnb. Same apartment, same service, no commissions."
+        "bannerDesc": "Save between 15% and 20% compared to Booking.com. Same apartment, same service, no commissions."
     },
     "apartments": {
         "eyebrow": "Full collection",
@@ -215,7 +218,8 @@
         "occupied": "Occupied",
         "available": "Available",
         "past": "Past",
-        "seeMore": "See more"
+        "seeMore": "See more",
+        "openMaps": "Open in Google Maps ↗"
     },
     "about": {
         "title": "About Us",
@@ -225,7 +229,7 @@
         "storyTitle": "A story of<br /><em>love for Ribadeo</em>",
         "storyText1": "It all started with a single apartment facing the estuary that my grandfather rehabilitated in the 80s. Over time, the family grew and so did the number of floor. Today there are eight, but the spirit is the same: to offer visitors the same authentic experience we have when we look at the Eo from the window.",
         "storyText2": "Ribadeo is a special place. The estuary, the international bridge, the lighthouse island, As Catedrais 20 minutes away. The afternoon light in summer painting the waters golden. The octopus 'a feira' in the port stalls. We want you to experience it as we do, and not to cost you an arm and a leg.",
-        "storyText3": "We've been on Booking and Airbnb for years because they gave us visibility. But we got tired of seeing how they charged our guests between 15 and 20% commission. This website is our answer.",
+        "storyText3": "We've been on Booking for years because it gave us visibility. But we got tired of seeing how they charged our guests between 15 and 20% commission. This website is our answer.",
         "stats": {
             "apts": "Apartments",
             "reviews": "Reviews ★ 4.9",
@@ -233,6 +237,8 @@
         },
         "location": "Where we are",
         "locationDetail": "In the northeastern extreme of Galicia, on the border with Asturias, on the edge of the Eo estuary.",
+        "locationLabel": "Ribadeo, Lugo · Galicia",
+        "riaLabel": "Ría de Ribadeo",
         "whyRibadeo": "Why Ribadeo?",
         "ribadeoDesc1": "Ribadeo is the gateway to the Galician Green Coast. 20 minutes from the beaches of As Catedrais, 30 from Luarca and 1 hour from Lugo. A perfect starting point for exploring the Mariña lucense.",
         "ribadeoDesc2": "The historical center, the maritime walk, the yacht club, the viewpoints over the estuary, local markets and the best seafood restaurants in the region are just a few minutes walk away.",
@@ -306,7 +312,11 @@
         "response": "Response in < 24h",
         "waMsg": "Hi, I would like information about the apartments in Ribadeo.",
         "checkinTime": "From 15:00",
-        "checkoutTime": "Before 11:00"
+        "checkoutTime": "Before 11:00",
+        "waLabel": "WhatsApp",
+        "immediateResponse": "Immediate response",
+        "address": "Ribadeo, Lugo · Galicia, Spain",
+        "checkinCheckoutTitle": "Check-in & Check-out"
     },
     "maintenance": {
         "title": "We are improving for you",
@@ -323,6 +333,13 @@
         "button": "Login",
         "loading": "Logging in...",
         "back": "← Back to main website"
+    },
+    "notFound": {
+        "code": "404",
+        "title": "Page not found",
+        "desc": "The page you're looking for doesn't exist or has been moved.",
+        "home": "Back to home",
+        "apartments": "View apartments"
     },
     "legal": {
         "termsTitle": "Terms and Conditions",

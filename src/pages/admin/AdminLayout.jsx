@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const navItems = [
   { path: '/admin', label: 'Apartamentos', icon: paths.building, exact: true },
+  { path: '/admin/web', label: 'Textos Web', icon: paths.edit },
   { path: '/admin/configuracion', label: 'Ajustes Generales', icon: paths.settings },
   { path: '/admin/precios', label: 'Precios', icon: paths.tag },
   { path: '/admin/ofertas', label: 'Ofertas', icon: paths.star },

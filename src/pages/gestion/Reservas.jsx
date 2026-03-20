@@ -33,7 +33,6 @@ const statusBadgeColors = {
 const srcBadge = {
   web: ['Web Directa', '#1a5f6e'],
   booking: ['Booking.com', '#003580'],
-  airbnb: ['Airbnb', '#FF5A5F'],
 };
 
 export default function Reservas() {

@@ -2,11 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { fetchAllReservations, fetchApartments, fetchAllMessages } from '../../services/supabaseService';
 import { formatPrice } from '../../utils/format';
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 
 const srcBadge = {
   web: ['bg-[#1a5f6e] text-white', 'Web'],
   booking: ['bg-blue-100 text-blue-800', 'Booking'],
-  airbnb: ['bg-red-100 text-red-800', 'Airbnb'],
   manual: ['bg-yellow-100 text-yellow-800', 'Manual'],
 };
 
@@ -40,9 +43,15 @@ export default function Dashboard() {
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
 
-  // Parsers
+  // Parsers — soporta ISO "2026-07-12" (Supabase) y legado "12 Ene 2026"
   const parseStorageDate = (dateStr) => {
     if (!dateStr) return null;
+    // ISO format (Supabase)
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+      const [y, m, d] = dateStr.substring(0, 10).split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    // Legacy "12 Ene 2026"
     const parts = dateStr.split(' ');
     if (parts.length < 2) return null;
     const day = parseInt(parts[0], 10);
@@ -99,6 +108,49 @@ export default function Dashboard() {
 
   const occupancyText = `${occupancyRate}%`;
 
+  // ADR — ingreso medio por noche
+  const totalNights = confirmed.reduce((s, r) => s + (r.nights || 0), 0);
+  const totalIncome = confirmed.reduce((s, r) => s + (r.total_price || r.total || 0), 0);
+  const adr = totalNights > 0 ? Math.round(totalIncome / totalNights) : 0;
+
+  // Datos mensuales — últimos 12 meses
+  const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const monthlyData = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(currentYear, currentMonth - 11 + i, 1);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const label = `${MESES[m]} ${y !== currentYear ? y : ''}`.trim();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+    let income = 0;
+    const bySource = { web: 0, booking: 0, manual: 0 };
+    let occupiedAptDays = 0;
+
+    confirmed.forEach(r => {
+      const ci = parseStorageDate(r.check_in || r.checkin);
+      if (!ci) return;
+      if (ci.getFullYear() === y && ci.getMonth() === m) {
+        const amount = r.total_price || r.total || 0;
+        income += amount;
+        const src = r.source || 'web';
+        if (src in bySource) bySource[src] += amount; else bySource.web += amount;
+      }
+      // ocupación: días solapados con este mes
+      const co = parseStorageDate(r.check_out || r.checkout);
+      if (!co) return;
+      const monthStart = new Date(y, m, 1);
+      const monthEnd = new Date(y, m, daysInMonth);
+      const start = ci < monthStart ? monthStart : ci;
+      const end = co > monthEnd ? monthEnd : co;
+      if (end > start) occupiedAptDays += Math.round((end - start) / 86400000);
+    });
+
+    const maxAptDays = totalApts * daysInMonth;
+    const occ = maxAptDays > 0 ? Math.round((occupiedAptDays / maxAptDays) * 100) : 0;
+
+    return { label, income, occ, ...bySource };
+  });
+
   const formatterDate = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const formattedToday = formatterDate.format(today);
   const formattedTodayCap = formattedToday.charAt(0).toUpperCase() + formattedToday.slice(1);
@@ -118,12 +170,13 @@ export default function Dashboard() {
       <div className="px-8 pb-8">
         {loading && <div className="mb-5 text-gray-500">Actualizando datos reales...</div>}
         {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {[
             { l: 'Check-ins y outs hoy', v: checkinsoutsTodayCount, s: checkinsToday.length > 0 ? `${checkinsToday.length} entradas / ${checkoutsToday.length} salidas` : 'Sin movimiento hoy', accent: true },
             { l: 'Reservas esta semana', v: bookingsThisWeek.length.toString(), s: 'creadas en los últimos 7 días', accent: false },
             { l: 'Ingresos mes actual', v: formatPrice(incomeThisMonth), s: 'reservas con check-in en este mes', accent: false },
             { l: 'Ocupación hoy', v: occupancyText, s: 'sobre los apartamentos activos', accent: true },
+            { l: 'ADR — precio medio/noche', v: formatPrice(adr), s: `${totalNights} noches confirmadas en total`, accent: false },
           ].map((k, i) => (
             <div key={i} className={`bg-white p-6 rounded-lg shadow-sm border border-gray-200 ${k.accent ? 'border-l-4 border-l-[#1a5f6e]' : ''}`}>
               <div className="text-sm font-medium text-gray-500 mb-1">{k.l}</div>
@@ -177,10 +230,20 @@ export default function Dashboard() {
             </div>
             <div className="p-6">
               {apartments.length > 0 ? apartments.map(apt => {
-                const lastMonth = new Date();
-                lastMonth.setMonth(today.getMonth() - 1);
                 const aptReservations = confirmed.filter(r => (r.apartment_slug || r.aptSlug) === apt.slug);
-                const p = aptReservations.length > 0 ? Math.min(100, aptReservations.length * 15 + 10) : Math.floor(Math.random() * 40 + 20);
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                const monthStart = new Date(currentYear, currentMonth, 1);
+                const monthEnd = new Date(currentYear, currentMonth, daysInMonth);
+                let occupiedDays = 0;
+                aptReservations.forEach(r => {
+                  const ci = parseStorageDate(r.check_in || r.checkin);
+                  const co = parseStorageDate(r.check_out || r.checkout);
+                  if (!ci || !co) return;
+                  const start = ci < monthStart ? monthStart : ci;
+                  const end = co > monthEnd ? monthEnd : co;
+                  if (end > start) occupiedDays += Math.round((end - start) / 86400000);
+                });
+                const p = Math.min(100, Math.round((occupiedDays / daysInMonth) * 100));
 
                 return (
                   <div key={apt.slug} className="mb-3">
@@ -197,6 +260,45 @@ export default function Dashboard() {
                 <div className="px-5 text-slate-500 text-sm">No hay apartamentos activos.</div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* GRÁFICOS — últimos 12 meses */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+          {/* Ingresos por mes + desglose fuente */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="text-lg font-semibold text-gray-900 mb-1">Ingresos mensuales</div>
+            <div className="text-xs text-gray-400 mb-4">Últimos 12 meses · desglose por fuente</div>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={monthlyData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+                <Tooltip formatter={(v) => formatPrice(v)} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="web" name="Web" stackId="a" fill="#1a5f6e" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="booking" name="Booking" stackId="a" fill="#3b82f6" />
+                <Bar dataKey="manual" name="Manual" stackId="a" fill="#D4A843" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Tasa de ocupación mensual */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="text-lg font-semibold text-gray-900 mb-1">Ocupación mensual</div>
+            <div className="text-xs text-gray-400 mb-4">Últimos 12 meses · % de noches ocupadas</div>
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={monthlyData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={v => `${v}%`} />
+                <Tooltip formatter={(v) => `${v}%`} />
+                <Line
+                  type="monotone" dataKey="occ" name="Ocupación"
+                  stroke="#1a5f6e" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

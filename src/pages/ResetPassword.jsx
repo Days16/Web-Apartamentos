@@ -39,34 +39,26 @@ export default function ResetPassword() {
     };
 
     return (
-        <div style={{
-            height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1a5f6e 100%)', color: '#fff',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
-        }}>
-            <div style={{
-                background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)',
-                padding: '40px', borderRadius: '16px', width: '100%', maxWidth: '400px',
-                boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)'
-            }}>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '26px', marginTop: 0, textAlign: 'center' }}>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy to-teal text-white font-sans">
+            <div className="bg-white/5 backdrop-blur-md p-10 rounded-2xl w-full max-w-sm shadow-2xl border border-white/10">
+                <h1 className="font-serif text-3xl mt-0 text-center mb-8">
                     Nueva contraseña
                 </h1>
 
                 {success ? (
-                    <div style={{ textAlign: 'center', color: '#4ade80' }}>
+                    <div className="text-center text-green-400">
                         <p>✓ Contraseña actualizada correctamente.</p>
-                        <p style={{ opacity: 0.6, fontSize: '13px' }}>Redirigiendo al login...</p>
+                        <p className="opacity-60 text-sm">Redirigiendo al login...</p>
                     </div>
                 ) : !ready ? (
-                    <div style={{ textAlign: 'center', opacity: 0.6 }}>
+                    <div className="text-center opacity-60">
                         {error || 'Verificando token...'}
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit}>
                         {['Nueva contraseña', 'Confirmar contraseña'].map((label, i) => (
-                            <div key={i} style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', opacity: 0.8 }}>
+                            <div key={i} className="mb-5">
+                                <label className="block text-xs font-bold uppercase mb-2 opacity-80">
                                     {label}
                                 </label>
                                 <input
@@ -74,30 +66,22 @@ export default function ResetPassword() {
                                     value={i === 0 ? password : confirm}
                                     onChange={(e) => i === 0 ? setPassword(e.target.value) : setConfirm(e.target.value)}
                                     required
-                                    style={{
-                                        width: '100%', padding: '12px 16px', boxSizing: 'border-box',
-                                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '8px', color: '#fff', outline: 'none'
-                                    }}
+                                    className="w-full px-4 py-3 box-border bg-white/5 border border-white/10 rounded-lg text-white outline-none transition-colors focus:border-gold"
                                 />
                             </div>
                         ))}
 
                         {error && (
-                            <div style={{
-                                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                                color: '#f87171', padding: '12px', borderRadius: '8px',
-                                fontSize: '13px', marginBottom: '20px', textAlign: 'center'
-                            }}>
+                            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-3 rounded-lg text-xs mb-5 text-center">
                                 {error}
                             </div>
                         )}
 
-                        <button type="submit" disabled={loading} style={{
-                            width: '100%', padding: '14px', background: '#D4A843', border: 'none',
-                            borderRadius: '8px', color: '#0f172a', fontWeight: 'bold', fontSize: '16px',
-                            cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1
-                        }}>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-3.5 bg-gold rounded-lg text-navy font-bold text-lg cursor-pointer transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
                             {loading ? 'Guardando...' : 'Guardar contraseña'}
                         </button>
                     </form>
