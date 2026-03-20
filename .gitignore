@@ -29,5 +29,6 @@ docs
 .env.production
 .antigravity
 .claude
-scripts
 supabase/.temp
+scripts/crear-reserva-prueba.js
+scripts/test-email.js
