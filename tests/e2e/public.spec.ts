@@ -30,7 +30,7 @@ test.describe('Tests Cara Pública - Illa Pancha', () => {
     if (await firstApartment.isVisible()) {
       await firstApartment.click();
       // El botón real dice "Reservar" en la sección de disponibilidad
-      await expect(page.locator('button:has-text("Reservar")').first()).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole('button', { name: 'Reservar', exact: true }).first()).toBeVisible({ timeout: 10000 });
     } else {
       console.log('No hay apartamentos activos generados en test, saltando visita individual.');
     }
