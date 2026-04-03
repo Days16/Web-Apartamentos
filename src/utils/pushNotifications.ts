@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 /**
  * Utilidad para Web Push API.

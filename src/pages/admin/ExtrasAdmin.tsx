@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { getExtras, upsertExtra, deleteExtra } from '../../services/dataService';
@@ -29,7 +30,7 @@ export default function ExtrasAdmin() {
     }
   };
 
-  const startEdit = (extra) => {
+  const startEdit = extra => {
     setEditing(extra.id);
     setFormData({ ...extra });
     setFormError(null);
@@ -67,7 +68,7 @@ export default function ExtrasAdmin() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     if (!confirm('¿Estás seguro de que deseas eliminar este extra?')) return;
     try {
       await deleteExtra(id);
@@ -78,10 +79,10 @@ export default function ExtrasAdmin() {
     }
   };
 
-  const toggleActiveStatus = async (extra) => {
+  const toggleActiveStatus = async extra => {
     try {
       await upsertExtra({ ...extra, active: !extra.active });
-      setExtras(prev => prev.map(e => e.id === extra.id ? { ...e, active: !e.active } : e));
+      setExtras(prev => prev.map(e => (e.id === extra.id ? { ...e, active: !e.active } : e)));
     } catch (err) {
       toast.error(err.message || 'Error al actualizar estado');
     }
@@ -95,7 +96,11 @@ export default function ExtrasAdmin() {
         {/* Header */}
         <div className="border-b border-[#1a5f6e]/30 px-8 pt-8 pb-6 mb-0 flex items-center gap-4 bg-white">
           <button
-            onClick={() => { setEditing(null); setFormData({}); setFormError(null); }}
+            onClick={() => {
+              setEditing(null);
+              setFormData({});
+              setFormError(null);
+            }}
             className="px-3.5 py-2 border border-[#1a5f6e] text-[#1a5f6e] rounded font-semibold text-sm hover:bg-[#1a5f6e] hover:text-white transition-colors"
           >
             ← Volver
@@ -130,7 +135,9 @@ export default function ExtrasAdmin() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                Descripción
+              </label>
               <textarea
                 value={formData.description || ''}
                 onChange={e => handleInputChange('description', e.target.value)}
@@ -141,7 +148,9 @@ export default function ExtrasAdmin() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Precio (€)</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                Precio (€)
+              </label>
               <input
                 type="number"
                 min="0"
@@ -158,12 +167,16 @@ export default function ExtrasAdmin() {
                 onClick={() => handleInputChange('active', !formData.active)}
                 className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${formData.active !== false ? 'bg-[#1a5f6e]' : 'bg-gray-300'}`}
               >
-                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${formData.active !== false ? 'left-6' : 'left-1'}`} />
+                <span
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${formData.active !== false ? 'left-6' : 'left-1'}`}
+                />
               </button>
               <div>
                 <div className="text-sm font-medium text-slate-700">Estado del extra</div>
                 <div className="text-xs text-gray-400">
-                  {formData.active !== false ? 'Activo — visible para los huéspedes' : 'Inactivo — no se muestra'}
+                  {formData.active !== false
+                    ? 'Activo — visible para los huéspedes'
+                    : 'Inactivo — no se muestra'}
                 </div>
               </div>
             </div>
@@ -175,7 +188,11 @@ export default function ExtrasAdmin() {
           <span className="text-xs text-gray-400">Los cambios se guardarán en Supabase</span>
           <div className="flex gap-3">
             <button
-              onClick={() => { setEditing(null); setFormData({}); setFormError(null); }}
+              onClick={() => {
+                setEditing(null);
+                setFormData({});
+                setFormError(null);
+              }}
               className="px-4 py-2 border border-gray-300 text-slate-700 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
             >
               Cancelar
@@ -185,7 +202,9 @@ export default function ExtrasAdmin() {
               disabled={saving}
               className="px-5 py-2 bg-[#1a5f6e] text-white rounded text-sm font-semibold hover:bg-opacity-90 transition-colors disabled:opacity-60 flex items-center gap-2"
             >
-              {saving && <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              {saving && (
+                <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
               {saving ? 'Guardando…' : isNew ? 'Crear extra' : 'Guardar cambios'}
             </button>
           </div>
@@ -206,7 +225,10 @@ export default function ExtrasAdmin() {
           </div>
         </div>
         <button
-          onClick={() => { setFormData({ name: '', description: '', price: 0, active: true }); setEditing('new'); }}
+          onClick={() => {
+            setFormData({ name: '', description: '', price: 0, active: true });
+            setEditing('new');
+          }}
           className="bg-[#D4A843] text-white px-4 py-2 rounded font-semibold text-sm hover:bg-opacity-90 transition-colors"
         >
           + Nuevo extra
@@ -241,17 +263,23 @@ export default function ExtrasAdmin() {
                   <div className="text-sm font-semibold text-slate-800">{extra.name}</div>
                   {extra.description && (
                     <div className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">
-                      {extra.description.length > 60 ? extra.description.substring(0, 60) + '…' : extra.description}
+                      {extra.description.length > 60
+                        ? extra.description.substring(0, 60) + '…'
+                        : extra.description}
                     </div>
                   )}
                 </div>
 
                 {/* Precio */}
-                <div className="text-sm font-semibold text-[#1a5f6e]">{formatPrice(extra.price)}</div>
+                <div className="text-sm font-semibold text-[#1a5f6e]">
+                  {formatPrice(extra.price)}
+                </div>
 
                 {/* Creado */}
                 <div className="text-xs text-gray-400">
-                  {extra.created_at ? new Date(extra.created_at).toLocaleDateString('es-ES') : 'N/A'}
+                  {extra.created_at
+                    ? new Date(extra.created_at).toLocaleDateString('es-ES')
+                    : 'N/A'}
                 </div>
 
                 {/* Estado toggle */}

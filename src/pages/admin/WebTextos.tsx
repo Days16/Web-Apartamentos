@@ -1,7 +1,13 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchSettings, updateSetting, fetchWebsiteContent, updateWebsiteContent } from '../../services/supabaseService';
+import {
+  fetchSettings,
+  updateSetting,
+  fetchWebsiteContent,
+  updateWebsiteContent,
+} from '../../services/supabaseService';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Ico, { paths } from '../../components/Ico';
 import { useToast } from '../../contexts/ToastContext';
@@ -11,48 +17,76 @@ export default function WebTextos() {
   const toast = useToast();
   const KEYS = [
     // ... HERO INICIO ...
-    'home_hero_title', 'home_hero_title_en',
-    'home_hero_subtitle', 'home_hero_subtitle_en',
+    'home_hero_title',
+    'home_hero_title_en',
+    'home_hero_subtitle',
+    'home_hero_subtitle_en',
     // ... BANNER INICIO ...
-    'home_banner_title', 'home_banner_title_en',
-    'home_banner_desc', 'home_banner_desc_en',
+    'home_banner_title',
+    'home_banner_title_en',
+    'home_banner_desc',
+    'home_banner_desc_en',
 
     // ... CARACTERÍSTICAS INICIO ...
-    'home_features_1_title', 'home_features_1_title_en',
-    'home_features_1_desc', 'home_features_1_desc_en',
-    'home_features_2_title', 'home_features_2_title_en',
-    'home_features_2_desc', 'home_features_2_desc_en',
-    'home_features_3_title', 'home_features_3_title_en',
-    'home_features_3_desc', 'home_features_3_desc_en',
-    'home_features_4_title', 'home_features_4_title_en',
-    'home_features_4_desc', 'home_features_4_desc_en',
+    'home_features_1_title',
+    'home_features_1_title_en',
+    'home_features_1_desc',
+    'home_features_1_desc_en',
+    'home_features_2_title',
+    'home_features_2_title_en',
+    'home_features_2_desc',
+    'home_features_2_desc_en',
+    'home_features_3_title',
+    'home_features_3_title_en',
+    'home_features_3_desc',
+    'home_features_3_desc_en',
+    'home_features_4_title',
+    'home_features_4_title_en',
+    'home_features_4_desc',
+    'home_features_4_desc_en',
 
     // ... HERO NOSOTROS ...
-    'about_hero_title', 'about_hero_title_en',
-    'about_hero_desc', 'about_hero_desc_en',
+    'about_hero_title',
+    'about_hero_title_en',
+    'about_hero_desc',
+    'about_hero_desc_en',
 
     // ... SECCIÓN HISTORIA ...
-    'about_history_title', 'about_history_title_en',
-    'about_history_desc_1', 'about_history_desc_1_en',
-    'about_history_desc_2', 'about_history_desc_2_en',
+    'about_history_title',
+    'about_history_title_en',
+    'about_history_desc_1',
+    'about_history_desc_1_en',
+    'about_history_desc_2',
+    'about_history_desc_2_en',
 
     // ... SECCIÓN RIBADEO ...
-    'about_ribadeo_title', 'about_ribadeo_title_en',
-    'about_ribadeo_desc_1', 'about_ribadeo_desc_1_en',
-    'about_ribadeo_desc_2', 'about_ribadeo_desc_2_en',
+    'about_ribadeo_title',
+    'about_ribadeo_title_en',
+    'about_ribadeo_desc_1',
+    'about_ribadeo_desc_1_en',
+    'about_ribadeo_desc_2',
+    'about_ribadeo_desc_2_en',
 
     // ... SECCIÓN EXPERIENCIAS ...
-    'about_exp_title', 'about_exp_title_en',
-    'about_exp_desc_1', 'about_exp_desc_1_en',
-    'about_exp_desc_2', 'about_exp_desc_2_en'
+    'about_exp_title',
+    'about_exp_title_en',
+    'about_exp_desc_1',
+    'about_exp_desc_1_en',
+    'about_exp_desc_2',
+    'about_exp_desc_2_en',
   ];
   const [settings, setSettings] = useState(() => {
     const initialState = {
-      phone: '', email: '', address: '',
-      metaEs: '', metaEn: '',
-      maintenanceMode: false
+      phone: '',
+      email: '',
+      address: '',
+      metaEs: '',
+      metaEn: '',
+      maintenanceMode: false,
     };
-    KEYS.forEach(key => { initialState[key] = ''; });
+    KEYS.forEach(key => {
+      initialState[key] = '';
+    });
     return initialState;
   });
   const [saving, setSaving] = useState(false);
@@ -63,10 +97,7 @@ export default function WebTextos() {
   useEffect(() => {
     async function load() {
       try {
-        const [siteSet, webContent] = await Promise.all([
-          fetchSettings(),
-          fetchWebsiteContent()
-        ]);
+        const [siteSet, webContent] = await Promise.all([fetchSettings(), fetchWebsiteContent()]);
 
         const newSettings = { ...settings };
 
@@ -74,9 +105,12 @@ export default function WebTextos() {
           if (siteSet.site_phone !== undefined) newSettings.phone = siteSet.site_phone;
           if (siteSet.site_email !== undefined) newSettings.email = siteSet.site_email;
           if (siteSet.site_address !== undefined) newSettings.address = siteSet.site_address;
-          if (siteSet.maintenance_mode !== undefined) newSettings.maintenanceMode = siteSet.maintenance_mode === true;
-          if (siteSet.meta_description_es !== undefined) newSettings.metaEs = siteSet.meta_description_es;
-          if (siteSet.meta_description_en !== undefined) newSettings.metaEn = siteSet.meta_description_en;
+          if (siteSet.maintenance_mode !== undefined)
+            newSettings.maintenanceMode = siteSet.maintenance_mode === true;
+          if (siteSet.meta_description_es !== undefined)
+            newSettings.metaEs = siteSet.meta_description_es;
+          if (siteSet.meta_description_en !== undefined)
+            newSettings.metaEn = siteSet.meta_description_en;
         }
 
         webContent.forEach(c => {
@@ -100,11 +134,12 @@ export default function WebTextos() {
     load();
   }, []);
 
-  const up = (field) => (e) => setSettings(p => ({ ...p, [field]: e.target.value }));
+  const up = field => e => setSettings(p => ({ ...p, [field]: e.target.value }));
 
   const Field = ({ label, name, isTextarea = false, placeholder = '' }) => {
     const value = settings[name] || '';
-    const isRequired = name.includes('title') && !name.endsWith('_en') || name === 'phone' || name === 'email';
+    const isRequired =
+      (name.includes('title') && !name.endsWith('_en')) || name === 'phone' || name === 'email';
     const hasError = isRequired && !value.trim();
     const inputClass = `w-full px-3 py-2 border rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 ${hasError ? 'border-red-500' : 'border-gray-300'}`;
 
@@ -167,7 +202,7 @@ export default function WebTextos() {
     }
   };
 
-  const handleToggleMaintenance = async (active) => {
+  const handleToggleMaintenance = async active => {
     setSettings(p => ({ ...p, maintenanceMode: active }));
     try {
       await updateSetting('maintenance_mode', active, 'boolean');
@@ -214,9 +249,7 @@ export default function WebTextos() {
           {activeTab === 'inicio' && (
             <div className="space-y-8 animate-in fade-in duration-300">
               {/* HOME HERO */}
-              <div className="font-serif text-xl text-navy mb-5">
-                Inicio: Hero principal
-              </div>
+              <div className="font-serif text-xl text-navy mb-5">Inicio: Hero principal</div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                 <div className="space-y-5">
                   <Field label="Título principal" name="home_hero_title" />
@@ -234,11 +267,19 @@ export default function WebTextos() {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                 <div className="space-y-5">
-                  <Field label="Título banner" name="home_banner_title" placeholder="¿Por qué reservar directo con nosotros?" />
+                  <Field
+                    label="Título banner"
+                    name="home_banner_title"
+                    placeholder="¿Por qué reservar directo con nosotros?"
+                  />
                   <Field label="Descripción banner" name="home_banner_desc" isTextarea />
                 </div>
                 <div className="space-y-5">
-                  <Field label="Banner title (EN)" name="home_banner_title_en" placeholder="Why book direct with us?" />
+                  <Field
+                    label="Banner title (EN)"
+                    name="home_banner_title_en"
+                    placeholder="Why book direct with us?"
+                  />
                   <Field label="Banner desc (EN)" name="home_banner_desc_en" isTextarea />
                 </div>
               </div>
@@ -350,9 +391,7 @@ export default function WebTextos() {
           {activeTab === 'nosotros' && (
             <div className="space-y-8 animate-in fade-in duration-300">
               {/* ABOUT HERO */}
-              <div className="font-serif text-xl text-navy mb-5">
-                Nosotros: Hero
-              </div>
+              <div className="font-serif text-xl text-navy mb-5">Nosotros: Hero</div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                 <div className="space-y-5">
                   <Field label="Título Nosotros" name="about_hero_title" />
@@ -423,33 +462,63 @@ export default function WebTextos() {
           </div>
           <div className="flex gap-4 flex-wrap mb-4">
             <div className="flex-1 min-w-0">
-              <label className="block text-sm font-semibold text-navy mb-2">Teléfono {!settings.phone.trim() && <span className="text-red-500">*</span>}</label>
-              <input className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 ${!settings.phone.trim() ? 'border-red-500' : 'border-gray-300'}`} value={settings.phone} onChange={up('phone')} />
+              <label className="block text-sm font-semibold text-navy mb-2">
+                Teléfono {!settings.phone.trim() && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 ${!settings.phone.trim() ? 'border-red-500' : 'border-gray-300'}`}
+                value={settings.phone}
+                onChange={up('phone')}
+              />
             </div>
             <div className="flex-1 min-w-0">
-              <label className="block text-sm font-semibold text-navy mb-2">Email {!settings.email.includes('@') && <span className="text-red-500">*</span>}</label>
-              <input className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 ${!settings.email.includes('@') ? 'border-red-500' : 'border-gray-300'}`} value={settings.email} onChange={up('email')} />
+              <label className="block text-sm font-semibold text-navy mb-2">
+                Email {!settings.email.includes('@') && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 ${!settings.email.includes('@') ? 'border-red-500' : 'border-gray-300'}`}
+                value={settings.email}
+                onChange={up('email')}
+              />
             </div>
           </div>
           <div className="flex-1 min-w-0 mb-4">
-            <label className="block text-sm font-semibold text-navy mb-2">Meta Descripción (ES)</label>
-            <textarea className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 resize-none" value={settings.metaEs} onChange={up('metaEs')} />
+            <label className="block text-sm font-semibold text-navy mb-2">
+              Meta Descripción (ES)
+            </label>
+            <textarea
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 resize-none"
+              value={settings.metaEs}
+              onChange={up('metaEs')}
+            />
           </div>
           <div className="flex-1 min-w-0">
-            <label className="block text-sm font-semibold text-navy mb-2">Meta Description (EN)</label>
-            <textarea className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 resize-none" value={settings.metaEn} onChange={up('metaEn')} />
+            <label className="block text-sm font-semibold text-navy mb-2">
+              Meta Description (EN)
+            </label>
+            <textarea
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 resize-none"
+              value={settings.metaEn}
+              onChange={up('metaEn')}
+            />
           </div>
         </div>
-
       </div>
 
       <div className="fixed bottom-0 right-0 left-0 bg-white border-t border-gray-200 py-4 px-6 z-50 flex justify-end">
         <button
           className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold transition-all cursor-pointer border-0 bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50`}
           onClick={() => setConfirmOpen(true)}
-          disabled={saving || !settings.home_hero_title?.trim() || !settings.email.includes('@') || !settings.phone.trim()}
+          disabled={
+            saving ||
+            !settings.home_hero_title?.trim() ||
+            !settings.email.includes('@') ||
+            !settings.phone.trim()
+          }
         >
-          {saving && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+          {saving && (
+            <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          )}
           {saving ? 'Publicando...' : 'Guardar y publicar'}
         </button>
       </div>
@@ -458,7 +527,10 @@ export default function WebTextos() {
         open={confirmOpen}
         title="¿Publicar cambios en la web?"
         message="Los textos actualizados se mostrarán en la web pública inmediatamente."
-        onConfirm={() => { setConfirmOpen(false); handleSave(); }}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          handleSave();
+        }}
         onCancel={() => setConfirmOpen(false)}
         confirmLabel="Confirmar y publicar"
       />

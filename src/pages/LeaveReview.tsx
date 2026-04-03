@@ -10,11 +10,11 @@ import { useToast } from '../contexts/ToastContext';
 import { sendOwnerNotification } from '../services/resendService';
 
 export default function LeaveReview() {
+  const { lang } = useLang();
+  const T = useT(lang);
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();
-  const { lang } = useLang();
-  const T = useT(lang);
   const { success, error: errorMsg } = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -74,7 +74,7 @@ export default function LeaveReview() {
           stars,
           comment,
           apartmentName: reservation.apt,
-          panelUrl: `${window.location.origin}/admin/resenas`
+          panelUrl: `${window.location.origin}/admin/resenas`,
         });
       } catch (notifyErr) {
         console.warn('Error al notificar al propietario:', notifyErr);
@@ -100,14 +100,16 @@ export default function LeaveReview() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <SEO title="Dejar Reseña | Illa Pancha" description="Comparte tu experiencia en Apartamentos Illa Pancha" />
+      <SEO title={T.seo.leaveReviewTitle} description={T.seo.leaveReviewDesc} noIndex />
       <Navbar />
 
       <main className="flex-grow py-20 px-4">
         <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
           <div className="bg-navy p-8 text-white text-center">
             <h1 className="text-3xl font-serif font-bold mb-2">Tu opinión nos importa</h1>
-            <p className="text-gray-300">Gracias por elegir Illa Pancha, {reservation?.guest || 'huésped'}</p>
+            <p className="text-gray-300">
+              Gracias por elegir Illa Pancha, {reservation?.guest || 'huésped'}
+            </p>
           </div>
 
           <div className="p-8">
@@ -115,7 +117,7 @@ export default function LeaveReview() {
               <div className="text-center py-10">
                 <div className="text-red-500 text-5xl mb-4">⚠️</div>
                 <p className="text-gray-600 mb-6">{error}</p>
-                <button 
+                <button
                   onClick={() => navigate('/')}
                   className="bg-teal text-white px-6 py-2 rounded-lg font-semibold hover:bg-teal-600 transition-colors"
                 >
@@ -125,14 +127,18 @@ export default function LeaveReview() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <p className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wider">Estancia en</p>
+                  <p className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wider">
+                    Estancia en
+                  </p>
                   <p className="text-xl font-semibold text-navy">{reservation.apt}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">¿Cómo fue tu experiencia? (1-5 estrellas)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    ¿Cómo fue tu experiencia? (1-5 estrellas)
+                  </label>
                   <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((num) => (
+                    {[1, 2, 3, 4, 5].map(num => (
                       <button
                         key={num}
                         type="button"
@@ -148,12 +154,14 @@ export default function LeaveReview() {
                 </div>
 
                 <div>
-                  <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">Comentario (opcional)</label>
+                  <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
+                    Comentario (opcional)
+                  </label>
                   <textarea
                     id="comment"
                     rows={4}
                     value={comment}
-                    onChange={(e) => setComment(e.target.value)}
+                    onChange={e => setComment(e.target.value)}
                     placeholder="Cuéntanos qué fue lo que más te gustó..."
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal/20 focus:border-teal outline-none transition-all resize-none"
                   />
@@ -173,7 +181,7 @@ export default function LeaveReview() {
                     'Enviar mi reseña'
                   )}
                 </button>
-                
+
                 <p className="text-xs text-gray-400 text-center">
                   Tu reseña será revisada por nuestro equipo antes de ser publicada.
                 </p>

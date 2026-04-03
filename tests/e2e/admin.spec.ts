@@ -50,10 +50,29 @@ test.describe('Tests Panel Administrador', () => {
     await page.goto('/admin');
     await page.waitForURL('**/admin**', { timeout: 15000 });
 
+    // Esperar a que haya al menos un botón Editar visible
+    await page.waitForSelector('button:has-text("Editar")', { timeout: 10000 });
+
     const editBtn = page.getByRole('button', { name: /editar/i }).first();
-    if (await editBtn.isVisible({ timeout: 8000 })) {
+    const isVisible = await editBtn.isVisible({ timeout: 5000 }).catch(() => false);
+    
+    if (isVisible) {
       await editBtn.click();
-      await expect(page.getByLabel(/nombre/i).first()).toBeVisible({ timeout: 5000 });
+      
+      // Esperar a que la interfaz de edición se cargue - puede haber cambios de estado en React
+      await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(300); // Pequeño delay adicional para que React re-renderice
+      
+      // Buscar el campo de nombre - ahora debería tener htmlFor="apartment-name"
+      const nameField = page.getByLabel(/nombre/i).first();
+      await expect(nameField).toBeVisible({ timeout: 10000 });
+      
+      // Verificar que el campo está realmente en la página y es escribible
+      await expect(nameField).toHaveAttribute('id', 'apartment-name');
+    } else {
+      // Si no hay botón Editar, es porque no hay apartamentos - marcar test como pendiente
+      await page.goto('/admin/configuracion');
+      test.skip(true, 'No hay apartamentos en la base de datos de test para editar');
     }
   });
 

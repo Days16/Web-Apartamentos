@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { fetchSettings, updateSetting } from '../../services/supabaseService';
@@ -45,7 +46,9 @@ export default function Pagos() {
     } catch (err) {
       console.error('Error FULL saving payment settings:', err);
       const isRLS = err.code === '42501' || err.message?.includes('policy');
-      toast.error(`Error al guardar: ${err.message}${isRLS ? ' (Revisa permisos RLS en Supabase)' : ''}`);
+      toast.error(
+        `Error al guardar: ${err.message}${isRLS ? ' (Revisa permisos RLS en Supabase)' : ''}`
+      );
     } finally {
       setSaving(false);
     }
@@ -82,9 +85,7 @@ export default function Pagos() {
               onChange={e => setDepositPct(+e.target.value)}
             />
             <div className="text-center flex-shrink-0">
-              <div className="font-serif text-5xl text-navy leading-none">
-                {depositPct}%
-              </div>
+              <div className="font-serif text-5xl text-navy leading-none">{depositPct}%</div>
               <div className="text-xs text-slate-600">tarjeta</div>
             </div>
           </div>
@@ -96,7 +97,7 @@ export default function Pagos() {
               </div>
               <div className="font-serif text-3xl text-blue-900">{depositPct}%</div>
               <div className="text-xs text-blue-700 mt-1">
-                Ej: {formatPrice(Math.round(1020 * depositPct / 100))} de {formatPrice(1020)}
+                Ej: {formatPrice(Math.round((1020 * depositPct) / 100))} de {formatPrice(1020)}
               </div>
             </div>
             <div className="bg-amber-50 p-6">
@@ -105,17 +106,15 @@ export default function Pagos() {
               </div>
               <div className="font-serif text-3xl text-amber-900">{100 - depositPct}%</div>
               <div className="text-xs text-amber-900 mt-1">
-                Ej: {formatPrice(Math.round(1020 * (100 - depositPct) / 100))} de {formatPrice(1020)}
+                Ej: {formatPrice(Math.round((1020 * (100 - depositPct)) / 100))} de{' '}
+                {formatPrice(1020)}
               </div>
             </div>
           </div>
-
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-8 max-w-3xl mb-24">
-          <div className="font-serif text-xl text-navy mb-1.5">
-            Porcentaje de impuestos (IVA)
-          </div>
+          <div className="font-serif text-xl text-navy mb-1.5">Porcentaje de impuestos (IVA)</div>
           <div className="text-xs text-slate-600 mb-7">
             Este porcentaje se aplicará al precio total de la estancia en el momento del pago
           </div>
@@ -131,9 +130,7 @@ export default function Pagos() {
               onChange={e => setTaxPct(+e.target.value)}
             />
             <div className="text-center flex-shrink-0 min-w-[60px]">
-              <div className="font-serif text-5xl text-navy leading-none">
-                {taxPct}%
-              </div>
+              <div className="font-serif text-5xl text-navy leading-none">{taxPct}%</div>
               <div className="text-xs text-slate-600">impuestos</div>
             </div>
           </div>
@@ -141,7 +138,9 @@ export default function Pagos() {
       </div>
 
       <div className="fixed bottom-0 right-0 left-0 bg-white border-t border-gray-200 py-4 px-6 flex justify-between items-center z-50">
-        <span className="text-xs text-gray-600">Configuración actual: {depositPct}% tarjeta · {100 - depositPct}% efectivo</span>
+        <span className="text-xs text-gray-600">
+          Configuración actual: {depositPct}% tarjeta · {100 - depositPct}% efectivo
+        </span>
         <button
           className={`px-4 py-2 rounded-lg font-semibold transition-all border-0 bg-teal-600 text-white hover:bg-teal-700 ${saving ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
           onClick={handleSave}

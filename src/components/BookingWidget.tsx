@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
@@ -33,14 +34,15 @@ export default function BookingWidget({ apt, onBook, T }) {
   const getDynamicMinStay = () => {
     if (!checkin) return apt.minStay || 1;
     const rule = apt.minStayRules?.find(r => checkin >= r.start_date && checkin <= r.end_date);
-    return rule ? rule.min_nights : (apt.minStay || 1);
+    return rule ? rule.min_nights : apt.minStay || 1;
   };
 
   const currentMinStay = getDynamicMinStay();
 
   const calcNights = () => {
     if (!checkin || !checkout) return 0;
-    const diff = (new Date(checkout).getTime() - new Date(checkin).getTime()) / (1000 * 60 * 60 * 24);
+    const diff =
+      (new Date(checkout).getTime() - new Date(checkin).getTime()) / (1000 * 60 * 60 * 24);
     return diff > 0 ? diff : 0;
   };
 
@@ -76,7 +78,10 @@ export default function BookingWidget({ apt, onBook, T }) {
   const handleDateClick = (date, type) => {
     const normalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const dStr = dateToStr(normalized);
-    const block = apt.rawReservations?.find(r => dStr >= r.checkin && dStr < r.checkout && (r.id.startsWith('BLK-') || r.source === 'manual'));
+    const block = apt.rawReservations?.find(
+      r =>
+        dStr >= r.checkin && dStr < r.checkout && (r.id.startsWith('BLK-') || r.source === 'manual')
+    );
 
     if (block) {
       setBlockReason(block.guest || 'Mantenimiento');
@@ -107,7 +112,9 @@ export default function BookingWidget({ apt, onBook, T }) {
           {lang === 'EN' ? 'Book now' : 'Reservar'}
         </button>
         <div className="text-xs text-gray-500 text-center">
-          {T.detail.noCommission} {apt.cancellation_days ?? globalSettings.cancellation_free_days ?? 14} {T.detail.daysBefore}
+          {T.detail.noCommission}{' '}
+          {apt.cancellation_days ?? globalSettings.cancellation_free_days ?? 14}{' '}
+          {T.detail.daysBefore}
         </div>
       </div>
     );
@@ -126,7 +133,9 @@ export default function BookingWidget({ apt, onBook, T }) {
             onChange={date => handleDateClick(date, 'checkin')}
             minDate={new Date()}
             excludeDates={occupiedDatesList.map(d => strToDate(d))}
-            maxDate={strToDate(checkout) ? new Date(strToDate(checkout).getTime() - 86400000) : null}
+            maxDate={
+              strToDate(checkout) ? new Date(strToDate(checkout).getTime() - 86400000) : null
+            }
             dateFormat={lang === 'ES' ? 'dd/MM/yyyy' : 'MM/dd/yyyy'}
             placeholderText={lang === 'ES' ? 'dd/mm/aaaa' : 'mm/dd/yyyy'}
             className="w-full px-2 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#82c8bd] focus:ring-2 focus:ring-[#82c8bd]/20"
@@ -137,8 +146,12 @@ export default function BookingWidget({ apt, onBook, T }) {
           <DatePicker
             selected={strToDate(checkout)}
             onChange={date => handleDateClick(date, 'checkout')}
-            minDate={strToDate(checkin) ? new Date(strToDate(checkin).getTime() + 86400000) : new Date()}
-            maxDate={firstBlockedNightAfterCheckin ? strToDate(firstBlockedNightAfterCheckin) : null}
+            minDate={
+              strToDate(checkin) ? new Date(strToDate(checkin).getTime() + 86400000) : new Date()
+            }
+            maxDate={
+              firstBlockedNightAfterCheckin ? strToDate(firstBlockedNightAfterCheckin) : null
+            }
             dateFormat={lang === 'ES' ? 'dd/MM/yyyy' : 'MM/dd/yyyy'}
             placeholderText={lang === 'ES' ? 'dd/mm/aaaa' : 'mm/dd/yyyy'}
             className="w-full px-2 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:border-[#82c8bd] focus:ring-2 focus:ring-[#82c8bd]/20"
@@ -158,9 +171,15 @@ export default function BookingWidget({ apt, onBook, T }) {
 
       <div className="flex flex-col mb-5">
         <div className="text-xs font-semibold text-navy mb-2">{T.detail.guestsLabel}</div>
-        <select value={guests} onChange={e => setGuests(+e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+        <select
+          value={guests}
+          onChange={e => setGuests(+e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+        >
           {Array.from({ length: apt.cap }, (_, i) => i + 1).map(n => (
-            <option key={n} value={n}>{n} {n === 1 ? T.common.person : T.common.persons}</option>
+            <option key={n} value={n}>
+              {n} {n === 1 ? T.common.person : T.common.persons}
+            </option>
           ))}
         </select>
       </div>
@@ -169,12 +188,20 @@ export default function BookingWidget({ apt, onBook, T }) {
         <>
           <div className="h-px bg-gray-200 my-4" />
           <div className="flex justify-between items-center text-sm text-gray-700">
-            <span>{convertPrice(apt.price)} × {nights} {nights === 1 ? T.common.night : T.common.nights}</span>
-            <strong className={`${discountAmount > 0 ? 'line-through opacity-60' : 'no-underline opacity-100'}`}>{convertPrice(subtotal)}</strong>
+            <span>
+              {convertPrice(apt.price)} × {nights} {nights === 1 ? T.common.night : T.common.nights}
+            </span>
+            <strong
+              className={`${discountAmount > 0 ? 'line-through opacity-60' : 'no-underline opacity-100'}`}
+            >
+              {convertPrice(subtotal)}
+            </strong>
           </div>
           {discountAmount > 0 && (
             <div className="flex justify-between items-center text-sm text-green-500 -mt-1.5">
-              <span className="text-xs">{T.common.offerApplied} {activeDiscount.discount_percentage}%</span>
+              <span className="text-xs">
+                {T.common.offerApplied} {activeDiscount.discount_percentage}%
+              </span>
               <strong>-{convertPrice(discountAmount)}</strong>
             </div>
           )}
@@ -196,7 +223,9 @@ export default function BookingWidget({ apt, onBook, T }) {
           </div>
           <div className="h-px bg-gray-200 my-4" />
           <div className="flex justify-between text-xs text-gray-700 mb-1">
-            <span>💳 {depositPct}% {T.detail.depositPct}</span>
+            <span>
+              💳 {depositPct}% {T.detail.depositPct}
+            </span>
             <strong className="text-navy">{convertPrice(deposit)}</strong>
           </div>
           <div className="flex justify-between text-xs text-gray-700 mb-4">

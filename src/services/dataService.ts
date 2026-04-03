@@ -3,7 +3,7 @@
  * Para activar Supabase: asegúrate de tener las tablas creadas (SQL en supabase.js)
  */
 import { supabase } from '../lib/supabase';
-import type { Apartment, Reservation, DbApartment, DbReservation } from '../types';
+import type { Apartment, Reservation } from '../types';
 
 // ─── APARTAMENTOS ─────────────────────────────────────────────────────────────
 export async function getApartments(): Promise<Apartment[]> {
@@ -27,11 +27,7 @@ export async function getApartments(): Promise<Apartment[]> {
 
 export async function getApartmentBySlug(slug: string): Promise<Apartment | null> {
   try {
-    const { data, error } = await supabase
-      .from('apartments')
-      .select('*')
-      .eq('slug', slug)
-      .single();
+    const { data, error } = await supabase.from('apartments').select('*').eq('slug', slug).single();
     if (error || !data) return null;
     return normalizeApartment(data);
   } catch {
@@ -40,10 +36,7 @@ export async function getApartmentBySlug(slug: string): Promise<Apartment | null
 }
 
 export async function deleteApartment(slug: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('apartments')
-    .delete()
-    .eq('slug', slug);
+  const { error } = await supabase.from('apartments').delete().eq('slug', slug);
   if (error) throw error;
   return true;
 }
@@ -70,11 +63,7 @@ export async function getReservations(): Promise<Reservation[]> {
 
 export async function getReservationById(id: string): Promise<Reservation | null> {
   try {
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('reservations').select('*').eq('id', id).single();
     if (error || !data) return null;
     return normalizeReservation(data);
   } catch {
@@ -82,7 +71,9 @@ export async function getReservationById(id: string): Promise<Reservation | null
   }
 }
 
-export async function createReservation(reservation: Omit<Reservation, 'created_at'>): Promise<Reservation> {
+export async function createReservation(
+  reservation: Omit<Reservation, 'created_at'>
+): Promise<Reservation> {
   const { data, error } = await supabase
     .from('reservations')
     .insert({
@@ -109,12 +100,12 @@ export async function createReservation(reservation: Omit<Reservation, 'created_
   return normalizeReservation(data);
 }
 
-export async function updateReservationStatus(id: string, status: Reservation['status']): Promise<boolean> {
+export async function updateReservationStatus(
+  id: string,
+  status: Reservation['status']
+): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('reservations')
-      .update({ status })
-      .eq('id', id);
+    const { error } = await supabase.from('reservations').update({ status }).eq('id', id);
     if (error) throw error;
     return true;
   } catch {
@@ -124,10 +115,7 @@ export async function updateReservationStatus(id: string, status: Reservation['s
 
 export async function markCashPaid(id: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('reservations')
-      .update({ fully_paid: true })
-      .eq('id', id);
+    const { error } = await supabase.from('reservations').update({ fully_paid: true }).eq('id', id);
     if (error) throw error;
     return true;
   } catch {
@@ -135,14 +123,13 @@ export async function markCashPaid(id: string): Promise<boolean> {
   }
 }
 
-
 export async function confirmAndMarkPaid(id: string): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('reservations')
       .update({
         status: 'confirmed',
-        fully_paid: true
+        fully_paid: true,
       })
       .eq('id', id);
     if (error) throw error;
@@ -154,10 +141,7 @@ export async function confirmAndMarkPaid(id: string): Promise<boolean> {
 
 export async function deleteReservation(id: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('reservations')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('reservations').delete().eq('id', id);
     if (error) throw error;
     return true;
   } catch {
@@ -180,11 +164,7 @@ export async function getExtras() {
 }
 
 export async function upsertExtra(extra: Record<string, unknown>) {
-  const { data, error } = await supabase
-    .from('extras')
-    .upsert(extra)
-    .select()
-    .single();
+  const { data, error } = await supabase.from('extras').upsert(extra).select().single();
 
   if (error) throw error;
   return data;
@@ -230,7 +210,11 @@ function normalizeApartment(d: any): Apartment {
     minStay: d.min_stay ?? d.minStay ?? 2,
     active: d.active ?? true,
     color: d.color || '#1a5f6e',
-    gradient: d.gradient || (d.color ? `linear-gradient(135deg, ${d.color} 0%, #2C4A5E 100%)` : 'linear-gradient(135deg, #1a3a4e 0%, #2C4A5E 100%)'),
+    gradient:
+      d.gradient ||
+      (d.color
+        ? `linear-gradient(135deg, ${d.color} 0%, #2C4A5E 100%)`
+        : 'linear-gradient(135deg, #1a3a4e 0%, #2C4A5E 100%)'),
     amenities: d.amenities || [],
     description: d.description || '',
     descriptionEn: d.description_en || d.descriptionEn || d.description || '',
@@ -241,6 +225,7 @@ function normalizeApartment(d: any): Apartment {
     cancellation_days: d.cancellation_days ?? 14,
     deposit_percentage: d.deposit_percentage ?? 50,
     maps_url: d.maps_url || null,
+    internalName: d.internal_name || d.internalName || d.name,
   };
 }
 

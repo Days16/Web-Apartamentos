@@ -14,11 +14,10 @@
 // ─── TEMPLATES ───────────────────────────────────────────────────────────────
 
 export const emailTemplates = {
-
   bookingConfirmation: {
-    subject: (id) => `Confirmacion de reserva ${id} — Illa Pancha Ribadeo`,
+    subject: (id: string) => `Confirmacion de reserva ${id} — Illa Pancha Ribadeo`,
     // Variables: guestName, reservationId, aptName, checkin, checkout, nights, total, deposit
-    html: (vars) => `
+    html: (vars: Record<string, unknown>) => `
       <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; color: #0f172a;">
         <div style="background: #1a5f6e; padding: 32px; text-align: center;">
           <h1 style="color: #ffffff; font-weight: 300; margin: 0; font-size: 28px;">Illa Pancha Ribadeo</h1>
@@ -77,7 +76,7 @@ export const emailTemplates = {
   },
 
   bookingCancellation: {
-    subject: (id) => `Cancelacion de reserva ${id} — Illa Pancha Ribadeo`,
+    subject: (id: string) => `Cancelacion de reserva ${id} — Illa Pancha Ribadeo`,
   },
 
   contactFormReply: {
@@ -85,9 +84,8 @@ export const emailTemplates = {
   },
 
   paymentReminder: {
-    subject: (id) => `Recordatorio de pago — Reserva ${id}`,
+    subject: (id: string) => `Recordatorio de pago — Reserva ${id}`,
   },
-
 };
 
 // ─── EJEMPLO DE SUPABASE EDGE FUNCTION ───────────────────────────────────────

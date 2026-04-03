@@ -24,13 +24,67 @@ serve(async (req) => {
             total,
             deposit,
             reservationId,
-            portalUrl
+            portalUrl,
+            lockCode,
+            address,
+            contactPhone,
+            whatsapp,
+            accessInfo,
+            houseRules,
         } = await req.json();
 
         const depositFormatted = typeof deposit === 'number' ? deposit.toFixed(2) : deposit;
         const totalFormatted = typeof total === 'number' ? total.toFixed(2) : total;
         const remaining = (parseFloat(total) - parseFloat(deposit)).toFixed(2);
         const portalLink = portalUrl ? `${portalUrl}?id=${reservationId}` : `https://apartamentosillapancha.com/mi-reserva?id=${reservationId}`;
+
+        const parseDate = (dateInput: string | undefined | null): Date | null => {
+          if (!dateInput) return null;
+          const s = dateInput.toString().trim();
+
+          // Intentar parse nativo
+          let d = new Date(s);
+          if (!isNaN(d.getTime())) return d;
+
+          // dd/mm/yyyy
+          const slash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (slash) {
+            const [, day, month, year] = slash;
+            d = new Date(Number(year), Number(month) - 1, Number(day));
+            if (!isNaN(d.getTime())) return d;
+          }
+
+          // yyyy-mm-dd (sin time)
+          const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+          if (iso) {
+            const [, year, month, day] = iso;
+            d = new Date(Number(year), Number(month) - 1, Number(day));
+            if (!isNaN(d.getTime())) return d;
+          }
+
+          return null;
+        };
+
+        // Formatear fecha con día de la semana en español
+        const formatDateWithDay = (dateStr: string): string => {
+          const d = parseDate(dateStr);
+          if (!d) return dateStr || 'Fecha no disponible';
+          return d.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          });
+        };
+
+        const checkinFormatted  = formatDateWithDay(checkin);
+        const checkoutFormatted = formatDateWithDay(checkout);
+        const formattedAddress   = address || 'Calle Illa Pancha 1, 27700 Ribadeo';
+        const formattedLockCode  = lockCode || '101010';
+        const formattedWhatsApp  = whatsapp || '34600000000';
+        const formattedPhone     = contactPhone || '+34 600 000 000';
+        const instructionsText   = accessInfo || 'La caja de llaves está junto a la puerta principal. Introduce el código en el teclado numérico.';
+        const fincaRulesText     = houseRules || 'Normas de la finca disponibles en el portal.';
 
         const result = await resend.emails.send({
             from: "Illa Pancha Ribadeo <info@apartamentosillapancha.com>",
@@ -87,11 +141,15 @@ serve(async (req) => {
               </tr>
               <tr>
                 <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px;">Check-in</td>
-                <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#0f172a;font-size:13px;">${checkin}</td>
+                <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#0f172a;font-size:13px;">${checkinFormatted}</td>
               </tr>
               <tr>
                 <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px;">Check-out</td>
-                <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#0f172a;font-size:13px;">${checkout}</td>
+                <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#0f172a;font-size:13px;">${checkoutFormatted}</td>
+              </tr>
+              <tr>
+                <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px;">Portada 48h antes</td>
+                <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#0f172a;font-size:13px;">Se mostrará en el portal 48h antes</td>
               </tr>
               <tr>
                 <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px;">Duración</td>
@@ -125,6 +183,30 @@ serve(async (req) => {
         </tr>
 
         <!-- CTA BOTÓN -->
+        <tr>
+          <td style="padding:0 40px 24px;text-align:left;">
+            <h3 style="margin:0 0 8px;color:#0f172a;font-size:17px;font-weight:700;">Información práctica para tu llegada</h3>
+            <ul style="margin:0;padding-left:18px;color:#475569;font-size:14px;line-height:1.7;">
+              <li>Se muestra al huésped 48h antes de su llegada en el portal de reservas</li>
+              <li>Código de cerradura: <strong>🔔${formattedLockCode}🔔</strong></li>
+              <li>Dirección del alojamiento: <strong>${formattedAddress}</strong></li>
+              <li>Teléfono de contacto: <strong>${formattedPhone}</strong></li>
+              <li>WhatsApp: <strong>${formattedWhatsApp}</strong></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 40px 24px;text-align:left;">
+            <h3 style="margin:0 0 8px;color:#0f172a;font-size:17px;font-weight:700;">Instrucciones de acceso</h3>
+            <p style="margin:0;color:#475569;font-size:14px;line-height:1.7;white-space:pre-line;">${instructionsText}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 40px 24px;text-align:left;">
+            <h3 style="margin:0 0 8px;color:#0f172a;font-size:17px;font-weight:700;">Normas de la finca</h3>
+            <p style="margin:0;color:#475569;font-size:14px;line-height:1.7;white-space:pre-line;">${fincaRulesText}</p>
+          </td>
+        </tr>
         <tr>
           <td style="padding:0 40px 40px;text-align:center;">
             <p style="margin:0 0 24px;color:#64748b;font-size:14px;line-height:1.6;">Puedes consultar y gestionar tu reserva en cualquier momento desde nuestro portal de clientes.</p>

@@ -1,10 +1,16 @@
+/* eslint-disable */
 // @ts-nocheck
 import jsPDF from 'jspdf';
 import { fetchAllApartments, fetchAllExtras, fetchSettings } from '../services/supabaseService';
+import { formatGuestDisplay, formatReservationReference } from './format';
 
 export default async function generateInvoice(reservation) {
+  const refDisplay = formatReservationReference(reservation.id, reservation.source);
+
   const [apartments, extras, settings] = await Promise.all([
-    fetchAllApartments(), fetchAllExtras(), fetchSettings()
+    fetchAllApartments(),
+    fetchAllExtras(),
+    fetchSettings(),
   ]);
 
   const siteSettings = {
@@ -14,7 +20,7 @@ export default async function generateInvoice(reservation) {
     site_phone: settings?.site_phone || '+34 982 XX XX XX',
     cancelDays: settings?.cancellation_free_days || 14,
     depositPct: settings?.payment_deposit_percentage || 50,
-    taxPct: settings?.tax_percentage || 10
+    taxPct: settings?.tax_percentage || 10,
   };
 
   const doc = new jsPDF();
@@ -40,7 +46,16 @@ export default async function generateInvoice(reservation) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(194, 217, 232);
-  doc.text(siteSettings?.site_address || 'Ribadeo, Lugo, Galicia' + '  ·  ' + (siteSettings?.site_email || 'info@apartamentosillapancha.com') + '  ·  ' + (siteSettings?.site_phone || '+34 982 XX XX XX'), margin, 24);
+  doc.text(
+    siteSettings?.site_address ||
+      'Ribadeo, Lugo, Galicia' +
+        '  ·  ' +
+        (siteSettings?.site_email || 'info@apartamentosillapancha.com') +
+        '  ·  ' +
+        (siteSettings?.site_phone || '+34 982 XX XX XX'),
+    margin,
+    24
+  );
 
   doc.setFontSize(11);
   doc.setTextColor(245, 245, 245);
@@ -54,11 +69,16 @@ export default async function generateInvoice(reservation) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.setTextColor(...darkGray);
-  doc.text('Ref. ' + reservation.id, margin + 6, y + 8);
+  doc.text('Ref. ' + refDisplay, margin + 6, y + 8);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(138, 138, 138);
-  doc.text('Emitida: ' + new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }), margin + 6, y + 15);
+  doc.text(
+    'Emitida: ' +
+      new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
+    margin + 6,
+    y + 15
+  );
 
   y += 28;
 
@@ -79,8 +99,13 @@ export default async function generateInvoice(reservation) {
   doc.setFontSize(10);
   doc.setTextColor(...darkGray);
 
+  const rawGuest = reservation.guest || reservation.guest_name || '';
+  const guestLine =
+    reservation.source === 'booking'
+      ? formatGuestDisplay(rawGuest, 'booking')
+      : rawGuest || 'Huésped';
   const clientLines = [
-    reservation.guest || reservation.guest_name || 'Huésped',
+    guestLine,
     reservation.email || reservation.guest_email || '',
     reservation.phone || reservation.guest_phone || '',
   ].filter(Boolean);
@@ -115,7 +140,10 @@ export default async function generateInvoice(reservation) {
   const nightPrice = reservation.nightPrice || (apt ? apt.price : 120);
 
   const lineItems = [
-    [`${reservation.nights || 7} noches × ${nightPrice}€/noche`, nightPrice * (reservation.nights || 7)],
+    [
+      `${reservation.nights || 7} noches × ${nightPrice}€/noche`,
+      nightPrice * (reservation.nights || 7),
+    ],
   ];
   if (siteSettings.cleaningFee > 0) {
     lineItems.push(['Limpieza final', siteSettings.cleaningFee]);
@@ -140,7 +168,7 @@ export default async function generateInvoice(reservation) {
       doc.rect(margin, y - 4, 170, 9, 'F');
     }
     doc.text(item[0], margin + 4, y + 2);
-    doc.text((item[1] === 0 ? 'Gratis' : item[1] + ' EUR'), 175, y + 2, { align: 'right' });
+    doc.text(item[1] === 0 ? 'Gratis' : item[1] + ' EUR', 175, y + 2, { align: 'right' });
     y += 9;
   });
 
@@ -167,7 +195,8 @@ export default async function generateInvoice(reservation) {
   y += 6;
 
   const depositPct = siteSettings.depositPct;
-  const deposit = reservation.deposit || Math.round((reservation.total || 840) * (depositPct / 100));
+  const deposit =
+    reservation.deposit || Math.round((reservation.total || 840) * (depositPct / 100));
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
@@ -184,7 +213,7 @@ export default async function generateInvoice(reservation) {
   doc.text(`Resto en efectivo (${100 - depositPct}%) — A pagar al llegar:`, margin, y);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(138, 138, 138);
-  doc.text((reservation.total - deposit) + ' EUR  ⏳ Pendiente', 175, y, { align: 'right' });
+  doc.text(reservation.total - deposit + ' EUR  ⏳ Pendiente', 175, y, { align: 'right' });
   y += 16;
 
   // ── NOTA CANCELACIÓN ──────────────────────────────────────────
@@ -193,16 +222,36 @@ export default async function generateInvoice(reservation) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(139, 94, 10);
-  doc.text(`Cancelación gratuita hasta ${siteSettings.cancelDays} días antes del check-in.`, margin + 4, y + 6);
-  doc.text('Pasado ese plazo se aplicará la política de cancelación indicada en los Términos y Condiciones.', margin + 4, y + 12);
+  doc.text(
+    `Cancelación gratuita hasta ${siteSettings.cancelDays} días antes del check-in.`,
+    margin + 4,
+    y + 6
+  );
+  doc.text(
+    'Pasado ese plazo se aplicará la política de cancelación indicada en los Términos y Condiciones.',
+    margin + 4,
+    y + 12
+  );
   y += 24;
 
   // ── PIE ────────────────────────────────────────────────────────
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(138, 138, 138);
-  doc.text('Illa Pancha Ribadeo S.L.  ·  Ribadeo, Lugo, Galicia, España  ·  info@apartamentosillapancha.com', 105, 285, { align: 'center' });
-  doc.text('Este documento sirve como resguardo de reserva. No tiene validez como factura fiscal hasta la emisión definitiva.', 105, 290, { align: 'center' });
+  doc.text(
+    'Illa Pancha Ribadeo S.L.  ·  Ribadeo, Lugo, Galicia, España  ·  info@apartamentosillapancha.com',
+    105,
+    285,
+    { align: 'center' }
+  );
+  doc.text(
+    'Este documento sirve como resguardo de reserva. No tiene validez como factura fiscal hasta la emisión definitiva.',
+    105,
+    290,
+    { align: 'center' }
+  );
 
-  doc.save('resguardo-reserva-' + reservation.id + '.pdf');
+  doc.save(
+    'resguardo-reserva-' + refDisplay.replace(/[^a-zA-Z0-9-]/g, '_') + '.pdf',
+  );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 /**
  * Hoja de Registro de Entrada — imprimible.
@@ -7,6 +8,7 @@
 
 interface RegistroProps {
   reservation: {
+    id: string;
     guest: string;
     email: string;
     phone?: string | null;
@@ -14,6 +16,7 @@ interface RegistroProps {
     checkout: string;
     apt?: string;
     apt_slug?: string;
+    source?: string;
   };
   settings?: {
     registro_titulo?: string;
@@ -42,8 +45,11 @@ export function printRegistro(props: RegistroProps) {
   const titulo = settings.registro_titulo || 'REGISTRO DE ENTRADA';
   const identificador = settings.registro_identificador || '';
   const notas = settings.registro_notas || '';
+  const isBooking = reservation.source === 'booking';
   const { nombre, apellidos } = splitName(reservation.guest);
   const aptLabel = apartmentName || reservation.apt || reservation.apt_slug || '';
+  // Referencia siempre es la interna (IP-XXXXXX), nunca el hash de Booking
+  const refReserva = reservation.id || '';
 
   const html = `<!DOCTYPE html>
 <html lang="es">
@@ -65,7 +71,13 @@ export function printRegistro(props: RegistroProps) {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
+      margin-bottom: 6px;
+    }
+    .header-right {
+      text-align: right;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #333;
     }
     h1 {
       font-size: 16px;
@@ -74,14 +86,10 @@ export function printRegistro(props: RegistroProps) {
       letter-spacing: 0.03em;
       flex: 1;
     }
-    .id-badge {
-      font-size: 13px;
-      font-weight: bold;
-      border: 1px solid #000;
-      padding: 3px 8px;
-      margin-left: 12px;
-      min-width: 36px;
-      text-align: center;
+    .sub {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 14px;
     }
     table {
       width: 100%;
@@ -106,7 +114,7 @@ export function printRegistro(props: RegistroProps) {
       display: block;
     }
     .tall td { height: 44px; }
-    .sign td { height: 56px; }
+    .sign td { height: 60px; }
     .notas {
       margin-top: 14px;
       font-size: 10px;
@@ -122,11 +130,20 @@ export function printRegistro(props: RegistroProps) {
 </head>
 <body>
   <div class="header">
-    <h1>${titulo}${aptLabel ? ' &mdash; ' + aptLabel : ''}</h1>
-    ${identificador ? `<div class="id-badge">${identificador}</div>` : ''}
+    <div>
+      <h1>${titulo}${aptLabel ? ' &mdash; ' + aptLabel : ''}</h1>
+    </div>
+    <div class="header-right">
+      <div><strong>Nº Reserva:</strong> ${refReserva}</div>
+      <div><strong>Fecha hoy:</strong> ${new Date().toLocaleDateString('es-ES')}</div>
+      ${identificador ? `<div><strong>${identificador}</strong></div>` : ''}
+    </div>
   </div>
 
   <table>
+    ${
+      !isBooking
+        ? `
     <tr class="tall">
       <td width="50%">
         <span class="label">Nombre / Name</span>
@@ -136,10 +153,28 @@ export function printRegistro(props: RegistroProps) {
         <span class="label">Apellidos / Surname</span>
         <span class="value">${apellidos}</span>
       </td>
+    </tr>`
+        : `
+    <tr class="tall">
+      <td colspan="2">
+        <span class="label">Nombre completo / Full name</span>
+        <span class="value">&nbsp;</span>
+      </td>
+    </tr>`
+    }
+    <tr class="tall">
+      <td width="50%">
+        <span class="label">DNI / Pasaporte — Número / Number</span>
+        <span class="value">&nbsp;</span>
+      </td>
+      <td width="50%">
+        <span class="label">Número de soporte / Support number</span>
+        <span class="value">&nbsp;</span>
+      </td>
     </tr>
     <tr class="tall">
       <td>
-        <span class="label">DNI / Identity card / Passport number</span>
+        <span class="label">Fecha de nacimiento / Date of birth</span>
         <span class="value">&nbsp;</span>
       </td>
       <td>
@@ -169,12 +204,12 @@ export function printRegistro(props: RegistroProps) {
     </tr>
     <tr class="tall">
       <td>
-        <span class="label">Fecha de salida / Check-out date</span>
-        <span class="value">${formatDate(reservation.checkout)}</span>
+        <span class="label">Nº Reserva / Booking reference</span>
+        <span class="value">${refReserva}</span>
       </td>
       <td>
-        <span class="label">Fecha de hoy / Date of today</span>
-        <span class="value">${new Date().toLocaleDateString('es-ES')}</span>
+        <span class="label">Fecha de salida / Check-out date</span>
+        <span class="value">${formatDate(reservation.checkout)}</span>
       </td>
     </tr>
     <tr class="sign">

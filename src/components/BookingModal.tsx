@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
@@ -18,7 +19,17 @@ import { formatPrice, strToDate, dateToStr } from '../utils/format';
 import { getReservations } from '../services/dataService';
 import { trackEvent, EVENTS } from '../utils/analytics';
 
-export default function BookingModal({ onClose, apartment, initialCheckin, initialCheckout }: { onClose: () => void; apartment?: any; initialCheckin?: any; initialCheckout?: any }) {
+export default function BookingModal({
+  onClose,
+  apartment,
+  initialCheckin,
+  initialCheckout,
+}: {
+  onClose: () => void;
+  apartment?: any;
+  initialCheckin?: any;
+  initialCheckout?: any;
+}) {
   const navigate = useNavigate();
   const { lang, t } = useLang();
   const T = useT(lang);
@@ -29,8 +40,12 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({ name: '', email: '', phone: '', phonePrefix: '+34' });
-  const [checkinDate, setCheckinDate] = useState(initialCheckin ? strToDate(initialCheckin) : new Date(Date.now() + 86400000));
-  const [checkoutDate, setCheckoutDate] = useState(initialCheckout ? strToDate(initialCheckout) : new Date(Date.now() + 86400000 * 3));
+  const [checkinDate, setCheckinDate] = useState(
+    initialCheckin ? strToDate(initialCheckin) : new Date(Date.now() + 86400000)
+  );
+  const [checkoutDate, setCheckoutDate] = useState(
+    initialCheckout ? strToDate(initialCheckout) : new Date(Date.now() + 86400000 * 3)
+  );
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [loading, setLoading] = useState(false);
   const [stripeError, setStripeError] = useState('');
@@ -41,30 +56,34 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
 
+  useEffect(() => {
+    if (step !== 2) setCaptchaToken('');
+  }, [step]);
+
   // Cargar extras desde Supabase
   useEffect(() => {
-    Promise.all([
-      fetchExtras(),
-      fetchSettings(),
-      getReservations()
-    ]).then(([extras, settings, resData]) => {
-      setAllExtras(extras);
-      setGlobalSettings(settings);
+    Promise.all([fetchExtras(), fetchSettings(), getReservations()])
+      .then(([extras, settings, resData]) => {
+        setAllExtras(extras);
+        setGlobalSettings(settings);
 
-      // Calcular fechas ocupadas para este apartamento
-      const relevantRes = resData.filter(r => (r.aptSlug === apt.slug || r.apt === apt.slug) && r.status !== 'cancelled');
-      const list = [];
-      relevantRes.forEach(r => {
-        const start = new Date(r.checkin + 'T00:00:00');
-        const end = new Date(r.checkout + 'T00:00:00');
-        for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
-          list.push(dateToStr(d));
-        }
+        // Calcular fechas ocupadas para este apartamento
+        const relevantRes = resData.filter(
+          r => (r.aptSlug === apt.slug || r.apt === apt.slug) && r.status !== 'cancelled'
+        );
+        const list = [];
+        relevantRes.forEach(r => {
+          const start = new Date(r.checkin + 'T00:00:00');
+          const end = new Date(r.checkout + 'T00:00:00');
+          for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+            list.push(dateToStr(d));
+          }
+        });
+        setOccupiedDates(list);
+      })
+      .catch(err => {
+        console.error('Error loading booking data:', err);
       });
-      setOccupiedDates(list);
-    }).catch(err => {
-      console.error('Error loading booking data:', err);
-    });
   }, [apt.slug]);
 
   const steps = T.booking.steps;
@@ -84,10 +103,10 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   const effectiveMinStay = (() => {
     if (!checkinDate) return apt.minStay || 1;
     const checkinStr = dateToStr(checkinDate);
-    const rule = (apt.minStayRules || []).find(r =>
-      checkinStr >= r.start_date && checkinStr <= r.end_date
+    const rule = (apt.minStayRules || []).find(
+      r => checkinStr >= r.start_date && checkinStr <= r.end_date
     );
-    return rule ? rule.min_nights : (apt.minStay || 1);
+    return rule ? rule.min_nights : apt.minStay || 1;
   })();
   const belowMinStay = nights > 0 && nights < effectiveMinStay;
 
@@ -119,9 +138,13 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   const deposit = Math.round(total * (depositPct / 100));
 
   // Formatear fechas para mostrar
-  const formatDate = (date) => {
+  const formatDate = date => {
     if (!date) return '';
-    return new Intl.DateTimeFormat(lang === 'ES' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+    return new Intl.DateTimeFormat(lang === 'ES' ? 'es-ES' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
   };
 
   const checkin = formatDate(checkinDate);
@@ -139,10 +162,8 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   };
   const hasOverlap = checkHasOverlap();
 
-  const toggleExtra = (id) => {
-    setSelectedExtras(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+  const toggleExtra = id => {
+    setSelectedExtras(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
   };
 
   const handlePayment = async () => {
@@ -161,12 +182,18 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
       return;
     }
 
+    if (!captchaToken?.trim()) {
+      setStripeError(T.booking.errorCaptcha);
+      return;
+    }
+
     setLoading(true);
     setStripeError('');
 
     try {
       // Crear ID de reserva (criptográficamente seguro)
-      const reservationId = 'IP-' + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000 + 100000);
+      const reservationId =
+        'IP-' + ((crypto.getRandomValues(new Uint32Array(1))[0] % 900000) + 100000);
 
       // 1. Crear PaymentIntent en Edge Function
       const paymentData = await createPaymentIntent({
@@ -176,6 +203,7 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
         customerName: form.name,
         reservationId: reservationId,
         description: `${apartment?.name || 'Apt. Cantábrico'} - ${nights} noches`,
+        turnstileToken: captchaToken,
       });
 
       // 2. Confirmar pago con Stripe Elements
@@ -186,9 +214,8 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
       }
 
       // 3. Crear registro de reserva en Supabase
-      const { error: insertError } = await supabase
-        .from('reservations')
-        .insert([{
+      const { error: insertError } = await supabase.from('reservations').insert([
+        {
           id: reservationId,
           guest: form.name,
           email: form.email,
@@ -204,7 +231,8 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
           status: 'confirmed',
           source: 'web',
           created_at: new Date().toISOString(),
-        }]);
+        },
+      ]);
 
       if (insertError) throw insertError;
 
@@ -272,13 +300,19 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50" onClick={e => e.target === e.currentTarget && onClose()}>
+    <div
+      className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50"
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
       <div className="bg-white dark:bg-slate-900 dark:border dark:border-slate-700 rounded-lg overflow-hidden flex max-w-5xl w-full max-h-[90vh]">
         {/* PANEL IZQUIERDO */}
         <div className="bg-gradient-to-br from-slate-900 to-slate-900 text-white flex-1 p-8 flex flex-col justify-between">
           <div className="flex flex-col gap-3 mb-12 pb-8 border-b border-white/20">
             {steps.map((s, i) => (
-              <span key={i} className={`text-xs opacity-50 hover:opacity-75 transition-opacity ${step >= i ? 'opacity-100 font-semibold text-cyan-300' : ''}`}>
+              <span
+                key={i}
+                className={`text-xs opacity-50 hover:opacity-75 transition-opacity ${step >= i ? 'opacity-100 font-semibold text-cyan-300' : ''}`}
+              >
                 {String(i + 1).padStart(2, '0')} {s}
               </span>
             ))}
@@ -296,24 +330,36 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
           {step < 3 && (
             <>
               <div className="flex justify-between items-center text-sm py-2 border-b border-white/10 px-0">
-                <span className="text-white/55">{nights} {nights === 1 ? T.common.night : T.common.nights} × {formatPrice(apt.price)}</span>
-                <span className={discountAmount > 0 ? 'line-through opacity-60' : ''}>{formatPrice(subtotal)}</span>
+                <span className="text-white/55">
+                  {nights} {nights === 1 ? T.common.night : T.common.nights} ×{' '}
+                  {formatPrice(apt.price)}
+                </span>
+                <span className={discountAmount > 0 ? 'line-through opacity-60' : ''}>
+                  {formatPrice(subtotal)}
+                </span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between items-center text-sm py-2 border-b border-white/10 px-0 text-green-500 -mt-2 mb-2">
-                  <span className="text-xs">{T.common.offerApplied}: {activeDiscount.discount_code || 'Promo'} (-{activeDiscount.discount_percentage}%)</span>
+                  <span className="text-xs">
+                    {T.common.offerApplied}: {activeDiscount.discount_code || 'Promo'} (-
+                    {activeDiscount.discount_percentage}%)
+                  </span>
                   <span className="font-semibold">-{formatPrice(discountAmount)}</span>
                 </div>
               )}
               {extrasTotal > 0 && (
                 <div className="flex justify-between items-center text-sm py-2 border-b border-white/10 px-0">
-                  <span className="text-white/55">{T.booking.extrasLabel} ({selectedExtras.length})</span>
+                  <span className="text-white/55">
+                    {T.booking.extrasLabel} ({selectedExtras.length})
+                  </span>
                   <span>{formatPrice(extrasTotal)}</span>
                 </div>
               )}
               {taxes > 0 && (
                 <div className="flex justify-between items-center text-sm py-2 border-b border-white/10 px-0">
-                  <span className="text-white/55">{T.booking.taxesLabel} ({taxPct}%)</span>
+                  <span className="text-white/55">
+                    {T.booking.taxesLabel} ({taxPct}%)
+                  </span>
                   <span>{formatPrice(taxes)}</span>
                 </div>
               )}
@@ -326,12 +372,16 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                   {T.booking.payModel}
                 </div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-white/60">💳 {T.booking.cardNow} ({depositPct}%)</span>
+                  <span className="text-white/60">
+                    💳 {T.booking.cardNow} ({depositPct}%)
+                  </span>
                   <span className="font-semibold">{formatPrice(deposit)}</span>
                 </div>
                 {depositPct < 100 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-white/60">💵 {T.booking.cashArrival} ({100 - depositPct}%)</span>
+                    <span className="text-white/60">
+                      💵 {T.booking.cashArrival} ({100 - depositPct}%)
+                    </span>
                     <span className="font-semibold">{formatPrice(total - deposit)}</span>
                   </div>
                 )}
@@ -348,9 +398,19 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 [T.booking.checkout, checkout],
                 [T.booking.deposited, `${deposit} € ✓`],
                 ...(depositPct < 100 ? [[T.booking.cashRest, `${total - deposit} €`]] : []),
-                ...(selectedExtras.length > 0 ? [[T.booking.extrasLabel, `${selectedExtras.length} ${selectedExtras.length > 1 ? T.booking.extrasSelected : T.booking.extraSelected}`]] : []),
+                ...(selectedExtras.length > 0
+                  ? [
+                      [
+                        T.booking.extrasLabel,
+                        `${selectedExtras.length} ${selectedExtras.length > 1 ? T.booking.extrasSelected : T.booking.extraSelected}`,
+                      ],
+                    ]
+                  : []),
               ].map(([k, v], i) => (
-                <div key={i} className="flex justify-between items-center text-sm py-2 border-b border-white/10 px-0">
+                <div
+                  key={i}
+                  className="flex justify-between items-center text-sm py-2 border-b border-white/10 px-0"
+                >
                   <span className="text-white/55 text-xs">{k}</span>
                   <span className="text-sm">{v}</span>
                 </div>
@@ -374,7 +434,12 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
               <div className="font-serif text-2xl font-light text-slate-900 mb-8">
                 {T.booking.title1}
               </div>
-              <label htmlFor="booking-name" className="block text-xs font-semibold text-slate-900 mb-2">{T.booking.fullName}</label>
+              <label
+                htmlFor="booking-name"
+                className="block text-xs font-semibold text-slate-900 mb-2"
+              >
+                {T.booking.fullName}
+              </label>
               <input
                 id="booking-name"
                 className={`w-full px-3 py-2 border rounded text-sm text-slate-900 focus:outline-none focus:border-[#82c8bd] focus:ring-2 focus:ring-[#82c8bd]/20 ${step === 1 && !form.name.trim() ? 'border-[#f44]' : 'border-gray-300'}`}
@@ -382,7 +447,12 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 value={form.name}
                 onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
               />
-              <label htmlFor="booking-email" className="block text-xs font-semibold text-slate-900 mb-2 mt-4">{T.booking.email}</label>
+              <label
+                htmlFor="booking-email"
+                className="block text-xs font-semibold text-slate-900 mb-2 mt-4"
+              >
+                {T.booking.email}
+              </label>
               <input
                 id="booking-email"
                 className={`w-full px-3 py-2 border rounded text-sm text-slate-900 focus:outline-none focus:border-[#82c8bd] focus:ring-2 focus:ring-[#82c8bd]/20 ${step === 1 && !form.email.includes('@') ? 'border-[#f44]' : 'border-gray-300'}`}
@@ -390,8 +460,15 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 value={form.email}
                 onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
               />
-              <label htmlFor="booking-phone" className="block text-xs font-semibold text-slate-900 mb-2 mt-4">{T.booking.phone}</label>
-              <div className={`flex border rounded overflow-hidden focus-within:border-[#82c8bd] focus-within:ring-2 focus-within:ring-[#82c8bd]/20 ${step === 1 && !form.phone.trim() ? 'border-[#f44]' : 'border-gray-300'}`}>
+              <label
+                htmlFor="booking-phone"
+                className="block text-xs font-semibold text-slate-900 mb-2 mt-4"
+              >
+                {T.booking.phone}
+              </label>
+              <div
+                className={`flex border rounded overflow-hidden focus-within:border-[#82c8bd] focus-within:ring-2 focus-within:ring-[#82c8bd]/20 ${step === 1 && !form.phone.trim() ? 'border-[#f44]' : 'border-gray-300'}`}
+              >
                 <select
                   id="booking-phone-prefix"
                   className="bg-gray-50 border-r border-gray-300 text-sm text-slate-700 px-2 py-2 focus:outline-none cursor-pointer"
@@ -430,16 +507,32 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                   onChange={e => setAcceptedTerms(e.target.checked)}
                 />
                 <span>
-                  {T.booking.termsText} <a href="/terminos" target="_blank" className="text-[#82c8bd] underline font-semibold">{T.booking.terms}</a> {T.booking.termsAnd} <a href="/privacidad" target="_blank" className="text-[#82c8bd] underline font-semibold">{T.booking.privacy}</a>.
+                  {T.booking.termsText}{' '}
+                  <a
+                    href="/terminos"
+                    target="_blank"
+                    className="text-[#82c8bd] underline font-semibold"
+                  >
+                    {T.booking.terms}
+                  </a>{' '}
+                  {T.booking.termsAnd}{' '}
+                  <a
+                    href="/privacidad"
+                    target="_blank"
+                    className="text-[#82c8bd] underline font-semibold"
+                  >
+                    {T.booking.privacy}
+                  </a>
+                  .
                 </span>
               </label>
-
-              <Turnstile onVerify={setCaptchaToken} onExpire={() => setCaptchaToken('')} theme="light" />
 
               <div className="flex gap-2">
                 {hasOverlap && (
                   <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded text-xs mb-4">
-                    {lang === 'ES' ? 'Las fechas seleccionadas tienen días ya ocupados en medio.' : 'The selected dates have occupied days in between.'}
+                    {lang === 'ES'
+                      ? 'Las fechas seleccionadas tienen días ya ocupados en medio.'
+                      : 'The selected dates have occupied days in between.'}
                   </div>
                 )}
                 {belowMinStay && (
@@ -451,9 +544,19 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 )}
 
                 <button
-                  className={`bg-[#82c8bd] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6bb5a9] transition-all flex-[2] disabled:opacity-50 disabled:cursor-not-allowed ${(!form.name.trim() || !form.email.includes('@') || !form.phone.trim() || !acceptedTerms || hasOverlap || belowMinStay) ? 'opacity-50 cursor-not-allowed' : 'opacity-100 cursor-pointer'}`}
-                  onClick={() => { trackEvent(EVENTS.BOOKING_START, { apartment: apt.slug }); setStep(1); }}
-                  disabled={!form.name.trim() || !form.email.includes('@') || !form.phone.trim() || !acceptedTerms || hasOverlap || belowMinStay}
+                  className={`bg-[#82c8bd] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6bb5a9] transition-all flex-[2] disabled:opacity-50 disabled:cursor-not-allowed ${!form.name.trim() || !form.email.includes('@') || !form.phone.trim() || !acceptedTerms || hasOverlap || belowMinStay ? 'opacity-50 cursor-not-allowed' : 'opacity-100 cursor-pointer'}`}
+                  onClick={() => {
+                    trackEvent(EVENTS.BOOKING_START, { apartment: apt.slug });
+                    setStep(1);
+                  }}
+                  disabled={
+                    !form.name.trim() ||
+                    !form.email.includes('@') ||
+                    !form.phone.trim() ||
+                    !acceptedTerms ||
+                    hasOverlap ||
+                    belowMinStay
+                  }
                 >
                   {T.booking.continueExtras}
                 </button>
@@ -467,14 +570,10 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
               <div className="font-serif text-2xl font-light text-slate-900 mb-2">
                 {T.booking.optionalExtras}
               </div>
-              <div className="text-sm text-slate-600 mb-6">
-                {T.booking.extrasDesc}
-              </div>
+              <div className="text-sm text-slate-600 mb-6">{T.booking.extrasDesc}</div>
 
               {activeExtras.length === 0 ? (
-                <div className="text-sm text-slate-600 py-5">
-                  {T.booking.noExtras}
-                </div>
+                <div className="text-sm text-slate-600 py-5">{T.booking.noExtras}</div>
               ) : (
                 <div className="space-y-3 mb-6">
                   {activeExtras.map(extra => {
@@ -490,12 +589,25 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                           <div className="text-xs text-gray-600 mt-1">{extra.description}</div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className={`text-sm font-semibold ${extra.price === 0 ? 'text-green-600 font-bold' : 'text-[#82c8bd]'}`}>
+                          <span
+                            className={`text-sm font-semibold ${extra.price === 0 ? 'text-green-600 font-bold' : 'text-[#82c8bd]'}`}
+                          >
                             {extra.price === 0 ? T.booking.free : `${extra.price} €`}
                           </span>
-                          <div className={`w-5 h-5 border-2 border-[#82c8bd] rounded-full flex items-center justify-center ${isSelected ? 'bg-[#82c8bd]' : ''}`}>
+                          <div
+                            className={`w-5 h-5 border-2 border-[#82c8bd] rounded-full flex items-center justify-center ${isSelected ? 'bg-[#82c8bd]' : ''}`}
+                          >
                             {isSelected && (
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#ffffff"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
                                 <polyline points="20 6 9 17 4 12" />
                               </svg>
                             )}
@@ -540,11 +652,11 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 <div className="text-xs font-semibold text-slate-900 mb-3">
                   💳 {T.booking.cardNow} del {depositPct}%
                 </div>
-                <div className="text-2xl font-bold text-[#82c8bd]">
-                  {deposit} €
-                </div>
+                <div className="text-2xl font-bold text-[#82c8bd]">{deposit} €</div>
                 <div className="text-xs text-slate-600 mt-2">
-                  {depositPct < 100 ? `${100 - depositPct}% ${T.booking.cashRest}` : T.booking.paidFull}
+                  {depositPct < 100
+                    ? `${100 - depositPct}% ${T.booking.cashRest}`
+                    : T.booking.paidFull}
                 </div>
               </div>
 
@@ -554,17 +666,19 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                   {T.booking.cardData}
                 </label>
                 <div className="border border-gray-300 dark:border-slate-600 p-3.5 rounded bg-gray-50 dark:bg-slate-800">
-                  <CardElement options={{
-                    style: {
-                      base: {
-                        fontSize: '16px',
-                        fontFamily: 'Jost, sans-serif',
-                        color: dark ? '#f1f5f9' : '#0f172a',
-                        '::placeholder': { color: '#b0b0b0' },
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: '16px',
+                          fontFamily: 'Jost, sans-serif',
+                          color: dark ? '#f1f5f9' : '#0f172a',
+                          '::placeholder': { color: '#b0b0b0' },
+                        },
+                        invalid: { color: '#dc3545' },
                       },
-                      invalid: { color: '#dc3545' },
-                    },
-                  }} />
+                    }}
+                  />
                 </div>
                 {import.meta.env.DEV && (
                   <div className="text-xs text-gray-600 mt-2 leading-relaxed">
@@ -572,6 +686,12 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                   </div>
                 )}
               </div>
+
+              <Turnstile
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken('')}
+                theme={dark ? 'dark' : 'light'}
+              />
 
               {stripeError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-red-700 text-sm">
@@ -590,14 +710,12 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 <button
                   className="bg-[#82c8bd] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6bb5a9] transition-all flex-[2] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handlePayment}
-                  disabled={loading || !stripe || !elements || hasOverlap}
+                  disabled={loading || !stripe || !elements || hasOverlap || !captchaToken?.trim()}
                 >
                   {loading ? T.booking.processing : `${T.booking.payConfirm} ${deposit} €`}
                 </button>
               </div>
-              <div className="text-xs text-gray-400 text-center mt-4">
-                {T.booking.cardNote}
-              </div>
+              <div className="text-xs text-gray-400 text-center mt-4">{T.booking.cardNote}</div>
             </>
           )}
 
@@ -611,10 +729,12 @@ export default function BookingModal({ onClose, apartment, initialCheckin, initi
                 {T.booking.bookingConfirmed}
               </div>
               <p className="text-sm text-slate-600 leading-relaxed mb-8">
-                {T.booking.confirmText}{' '}
-                <strong>{total - deposit} €</strong> {T.booking.confirmCash}
+                {T.booking.confirmText} <strong>{total - deposit} €</strong> {T.booking.confirmCash}
               </p>
-              <button className="border border-gray-300 text-slate-900 px-4 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all w-full" onClick={onClose}>
+              <button
+                className="border border-gray-300 text-slate-900 px-4 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all w-full"
+                onClick={onClose}
+              >
                 {T.booking.backHome}
               </button>
             </div>

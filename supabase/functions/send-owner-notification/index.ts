@@ -20,12 +20,26 @@ serve(async (req) => {
     const data = await req.json();
     const { type, panelUrl } = data;
 
+    // Formatear fecha con día de la semana en español: "lunes, 5 de mayo de 2025"
+    const formatDateWithDay = (dateStr: string): string => {
+      try {
+        const [y, m, d] = (dateStr || '').slice(0, 10).split('-').map(Number);
+        if (!y) return dateStr;
+        const date = new Date(y, m - 1, d);
+        return date.toLocaleDateString('es-ES', {
+          weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+        });
+      } catch { return dateStr; }
+    };
+
     let subject = "";
     let html = "";
 
     if (type === "booking") {
       const { reservationId, guestName, guestEmail, apartmentName, checkin, checkout, nights, total, deposit } = data;
       subject = `Nueva reserva ${reservationId} — ${apartmentName}`;
+      const checkinFmt  = formatDateWithDay(checkin);
+      const checkoutFmt = formatDateWithDay(checkout);
       html = `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;">
           <div style="background:#1a5f6e;padding:32px;border-radius:8px 8px 0 0;text-align:center;">
@@ -36,7 +50,7 @@ serve(async (req) => {
               <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Referencia</td><td style="text-align:right;border-bottom:1px solid #eee;font-weight:bold;">${reservationId}</td></tr>
               <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Apartamento</td><td style="text-align:right;border-bottom:1px solid #eee;">${apartmentName}</td></tr>
               <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Huésped</td><td style="text-align:right;border-bottom:1px solid #eee;">${guestName}<br><span style="font-size:12px;color:#888;">${guestEmail}</span></td></tr>
-              <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Fechas</td><td style="text-align:right;border-bottom:1px solid #eee;">${checkin} → ${checkout}<br><span style="font-size:12px;color:#888;">${nights} noches</span></td></tr>
+              <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Fechas</td><td style="text-align:right;border-bottom:1px solid #eee;">${checkinFmt} → ${checkoutFmt}<br><span style="font-size:12px;color:#888;">${nights} noches</span></td></tr>
               <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Total</td><td style="text-align:right;border-bottom:1px solid #eee;font-weight:bold;color:#1a5f6e;font-size:18px;">${total}€</td></tr>
               <tr><td style="padding:8px 0;color:#666;">Depósito cobrado</td><td style="text-align:right;color:#16a34a;font-weight:bold;">${deposit}€ ✓</td></tr>
             </table>
@@ -70,6 +84,8 @@ serve(async (req) => {
     } else if (type === "cancellation") {
       const { reservationId, guestName, guestEmail, apartmentName, checkin, checkout, nights, total } = data;
       subject = `❌ Reserva cancelada ${reservationId} — ${apartmentName}`;
+      const checkinFmt2  = formatDateWithDay(checkin);
+      const checkoutFmt2 = formatDateWithDay(checkout);
       html = `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;">
           <div style="background:#b91c1c;padding:32px;border-radius:8px 8px 0 0;text-align:center;">
@@ -80,7 +96,7 @@ serve(async (req) => {
               <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Referencia</td><td style="text-align:right;border-bottom:1px solid #eee;font-weight:bold;">${reservationId}</td></tr>
               <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Apartamento</td><td style="text-align:right;border-bottom:1px solid #eee;">${apartmentName}</td></tr>
               <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Huésped</td><td style="text-align:right;border-bottom:1px solid #eee;">${guestName}<br><span style="font-size:12px;color:#888;">${guestEmail}</span></td></tr>
-              <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Fechas</td><td style="text-align:right;border-bottom:1px solid #eee;">${checkin} → ${checkout}<br><span style="font-size:12px;color:#888;">${nights} noches</span></td></tr>
+              <tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;">Fechas</td><td style="text-align:right;border-bottom:1px solid #eee;">${checkinFmt2} → ${checkoutFmt2}<br><span style="font-size:12px;color:#888;">${nights} noches</span></td></tr>
               <tr><td style="padding:8px 0;color:#666;">Total</td><td style="text-align:right;color:#b91c1c;font-weight:bold;font-size:18px;">${total}€</td></tr>
             </table>
             <a href="${panelUrl}" style="display:inline-block;background:#1a5f6e;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;">

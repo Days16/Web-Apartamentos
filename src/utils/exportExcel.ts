@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { fetchExtras } from '../services/supabaseService';
+import { formatGuestDisplay, formatReservationReference } from './format';
 
 // Estilo de cabeceras genérico (Fondo verde corporativo y texto blanco)
 const headerStyle = {
@@ -9,10 +10,21 @@ const headerStyle = {
   alignment: { horizontal: 'center' as const, vertical: 'middle' as const },
 };
 
-const fmt = (n: number) => typeof n === 'number' ? n.toFixed(2) : n;
+const fmt = (n: number) => (typeof n === 'number' ? n.toFixed(2) : n);
 
 // ─── EXPORTAR ANALÍTICAS ───────────────────────────────────────────────────
-export async function exportAnalytics({ byMonth, aptStats, bySource, byStatus, year, totalRevenue, yearRevenue, totalNights, avgStay, avgTicket }: any) {
+export async function exportAnalytics({
+  byMonth,
+  aptStats,
+  bySource,
+  byStatus,
+  year,
+  totalRevenue,
+  yearRevenue,
+  totalNights,
+  avgStay,
+  avgTicket,
+}: any) {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'Illa Pancha';
   wb.created = new Date();
@@ -21,20 +33,20 @@ export async function exportAnalytics({ byMonth, aptStats, bySource, byStatus, y
   const addSheet = (data: any[], name: string, columnWidths: number[] = []) => {
     if (!data || !data.length) return;
     const ws = wb.addWorksheet(name);
-    
+
     // Obtener las claves (cabeceras) de la primera fila
     const headers = Object.keys(data[0]);
-    
+
     // Insertar las cabeceras
     ws.addRow(headers);
     const headerRow = ws.getRow(1);
-    
+
     headers.forEach((h, i) => {
       const cell = headerRow.getCell(i + 1);
       cell.font = headerStyle.font;
       cell.fill = headerStyle.fill;
       cell.alignment = headerStyle.alignment;
-      
+
       // Anchos por defecto o personalizados
       ws.getColumn(i + 1).width = columnWidths[i] || 22;
     });
@@ -51,18 +63,18 @@ export async function exportAnalytics({ byMonth, aptStats, bySource, byStatus, y
 
   // Hoja 1: Resumen
   const summaryData = [
-    { 'Métrica': 'Año analizado', 'Valor': year },
-    { 'Métrica': 'Ingresos totales histórico (€)', 'Valor': fmt(totalRevenue) },
-    { 'Métrica': `Ingresos ${year} (€)`, 'Valor': fmt(yearRevenue) },
-    { 'Métrica': 'Total noches vendidas (histórico)', 'Valor': totalNights },
-    { 'Métrica': 'Estancia media (noches)', 'Valor': avgStay },
-    { 'Métrica': 'Ticket medio (€)', 'Valor': fmt(avgTicket) },
+    { Métrica: 'Año analizado', Valor: year },
+    { Métrica: 'Ingresos totales histórico (€)', Valor: fmt(totalRevenue) },
+    { Métrica: `Ingresos ${year} (€)`, Valor: fmt(yearRevenue) },
+    { Métrica: 'Total noches vendidas (histórico)', Valor: totalNights },
+    { Métrica: 'Estancia media (noches)', Valor: avgStay },
+    { Métrica: 'Ticket medio (€)', Valor: fmt(avgTicket) },
   ];
 
   // Hoja 2: Ingresos por mes
   const monthData = byMonth.map((m: any) => ({
-    'Mes': m.label,
-    'Reservas': m.count,
+    Mes: m.label,
+    Reservas: m.count,
     'Ingresos (€)': fmt(m.revenue),
     'Noches vendidas': m.nights,
     'Ocupación (%)': m.rate ?? '',
@@ -70,24 +82,24 @@ export async function exportAnalytics({ byMonth, aptStats, bySource, byStatus, y
 
   // Hoja 3: Por apartamento
   const aptData = (aptStats || []).map((a: any) => ({
-    'Apartamento': a.name,
-    'Reservas': a.count,
+    Apartamento: a.name,
+    Reservas: a.count,
     'Ingresos (€)': fmt(a.revenue),
-    'Noches': a.nights,
+    Noches: a.nights,
   }));
 
   // Hoja 4: Por canal
   const sourceData = (bySource || []).map((s: any) => ({
-    'Canal': s.label,
-    'Reservas': s.count,
+    Canal: s.label,
+    Reservas: s.count,
     'Ingresos (€)': fmt(s.revenue || 0),
     '% del total': s.pct ?? '',
   }));
 
   // Hoja 5: Por estado (histórico)
   const statusData = (byStatus || []).map((s: any) => ({
-    'Estado': s.label,
-    'Reservas': s.count,
+    Estado: s.label,
+    Reservas: s.count,
   }));
 
   addSheet(summaryData, 'Resumen', [30, 20]);
@@ -98,26 +110,47 @@ export async function exportAnalytics({ byMonth, aptStats, bySource, byStatus, y
 
   // Generar y descargar el archivo final en el navegador
   const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
   saveAs(blob, `analiticas-illa-pancha-${year}.xlsx`);
 }
 
 // ─── EXPORTAR RESERVAS INDIVIDUALES ──────────────────────────────────────────
-export default async function exportReservationsExcel(reservations: any[], filename = 'reservas-illa-pancha.xlsx') {
+export default async function exportReservationsExcel(
+  reservations: any[],
+  filename = 'reservas-illa-pancha.xlsx'
+) {
   const extras = await fetchExtras();
-  const statusLabel: Record<string, string> = { confirmed: 'Confirmada', pending: 'Pendiente', cancelled: 'Cancelada' };
+  const statusLabel: Record<string, string> = {
+    confirmed: 'Confirmada',
+    pending: 'Pendiente',
+    cancelled: 'Cancelada',
+  };
   const sourceLabel: Record<string, string> = { web: 'Directa', booking: 'Booking.com' };
 
   const wb = new ExcelJS.Workbook();
   wb.creator = 'Illa Pancha';
   wb.created = new Date();
-  
+
   const ws = wb.addWorksheet('Reservas');
 
   const headers = [
-    'Referencia', 'Huésped', 'Email', 'Teléfono', 'Apartamento', 
-    'Check-in', 'Check-out', 'Noches', 'Total (€)', 'Depósito (€)', 
-    'Estado', 'Origen', 'Efectivo', 'Extras', 'Total Extras (€)'
+    'Referencia',
+    'Huésped',
+    'Email',
+    'Teléfono',
+    'Apartamento',
+    'Check-in',
+    'Check-out',
+    'Noches',
+    'Total (€)',
+    'Depósito (€)',
+    'Estado',
+    'Origen',
+    'Efectivo',
+    'Extras',
+    'Total Extras (€)',
   ];
 
   // Configurar columnas y anchos correctos
@@ -141,7 +174,7 @@ export default async function exportReservationsExcel(reservations: any[], filen
 
   // Formato cabeceras
   const headerRow = ws.getRow(1);
-  headerRow.eachCell((cell) => {
+  headerRow.eachCell(cell => {
     cell.font = headerStyle.font;
     cell.fill = headerStyle.fill;
     cell.alignment = headerStyle.alignment;
@@ -154,8 +187,8 @@ export default async function exportReservationsExcel(reservations: any[], filen
       .join(', ');
 
     ws.addRow([
-      r.id,
-      r.guest_name || r.guest || '',
+      formatReservationReference(r.id, r.source),
+      formatGuestDisplay(r.guest_name || r.guest, r.source),
       r.email || '',
       r.phone || '',
       r.apartment_slug || r.apt || '',
@@ -175,22 +208,33 @@ export default async function exportReservationsExcel(reservations: any[], filen
   // Fila final de Sumatorios Totales
   const confirmed = reservations.filter(r => r.status !== 'cancelled');
   const totalsRow = ws.addRow([
-    '', 'TOTALES', '', '', '', '', '',
+    '',
+    'TOTALES',
+    '',
+    '',
+    '',
+    '',
+    '',
     confirmed.reduce((s, r) => s + (r.nights || 0), 0),
     reservations.reduce((s, r) => s + (r.total_price || r.total || 0), 0),
     confirmed.reduce((s, r) => s + (r.deposit || 0), 0),
-    '', '', '', '',
-    reservations.reduce((s, r) => s + (r.extrasTotal || r.extras_total || 0), 0)
+    '',
+    '',
+    '',
+    '',
+    reservations.reduce((s, r) => s + (r.extrasTotal || r.extras_total || 0), 0),
   ]);
 
   // Estilo fila totales
-  totalsRow.eachCell((cell) => {
+  totalsRow.eachCell(cell => {
     cell.font = { bold: true };
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
   });
 
   // Generar Archivo
   const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
   saveAs(blob, filename);
 }

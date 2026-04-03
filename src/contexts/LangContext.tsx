@@ -11,7 +11,9 @@ function getInitialLang(): Lang {
     // Auto-detect from browser
     const browserLang = navigator.language.slice(0, 2).toUpperCase();
     if (VALID_LANGS.includes(browserLang as Lang)) return browserLang as Lang;
-  } catch {}
+  } catch {
+    /* ignorar errores de localStorage en modo privado */
+  }
   return 'ES';
 }
 
@@ -28,15 +30,15 @@ export function LangProvider({ children }: { children: ReactNode }) {
 
   const setLang = (l: Lang) => {
     setLangState(l);
-    try { localStorage.setItem('illa_lang', l); } catch {}
+    try {
+      localStorage.setItem('illa_lang', l);
+    } catch {
+      /* ignorar */
+    }
   };
 
-  const t = (es: string, en?: string) => lang === 'EN' ? (en || es) : es;
-  return (
-    <LangContext.Provider value={{ lang, setLang, t }}>
-      {children}
-    </LangContext.Provider>
-  );
+  const t = (es: string, en?: string) => (lang === 'EN' ? en || es : es);
+  return <LangContext.Provider value={{ lang, setLang, t }}>{children}</LangContext.Provider>;
 }
 
 export function useLang(): LangContextValue {

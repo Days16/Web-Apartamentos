@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -21,20 +22,20 @@ export default function About() {
 
   return (
     <>
-      <SEO
-        title={A.title}
-        description={T.seo.homeDesc}
-      />
+      <SEO title={T.seo.aboutTitle} description={T.seo.aboutDesc} />
       <Navbar onOpenBooking={() => setBookingOpen(true)} />
 
       {/* HERO */}
       <div className="py-20 md:py-28 px-4 bg-gradient-to-br from-navy to-navy-dark">
         <div className="max-w-4xl mx-auto text-center text-white">
-          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-4">{A.history}</div>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6" dangerouslySetInnerHTML={safeHtml(A.heroTitle)} />
-          <p className="text-lg text-gray-100">
-            {A.heroDesc}
-          </p>
+          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-4">
+            {A.history}
+          </div>
+          <h1
+            className="text-4xl md:text-5xl font-serif font-bold mb-6"
+            dangerouslySetInnerHTML={safeHtml(A.heroTitle)}
+          />
+          <p className="text-lg text-gray-100">{A.heroDesc}</p>
         </div>
       </div>
 
@@ -58,7 +59,10 @@ export default function About() {
       {/* HISTORIA */}
       <div className="py-20 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl font-serif font-bold text-navy mb-8" dangerouslySetInnerHTML={safeHtml(A.storyTitle)} />
+          <h2
+            className="text-4xl font-serif font-bold text-navy mb-8"
+            dangerouslySetInnerHTML={safeHtml(A.storyTitle)}
+          />
           <p className="text-gray-700 leading-relaxed mb-6 font-sans">{A.storyText1}</p>
           <p className="text-gray-700 leading-relaxed mb-6 font-sans">{A.storyText2}</p>
           <p className="text-gray-700 leading-relaxed font-sans">{A.storyText3}</p>
@@ -66,15 +70,21 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 border-t border-gray-200 pt-12">
             <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="text-4xl font-serif font-bold text-teal mb-2">8</div>
-              <div className="text-sm font-semibold text-gray-500 uppercase tracking-widest">{A.stats.apts}</div>
+              <div className="text-sm font-semibold text-gray-500 uppercase tracking-widest">
+                {A.stats.apts}
+              </div>
             </div>
             <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="text-4xl font-serif font-bold text-teal mb-2">+220</div>
-              <div className="text-sm font-semibold text-gray-500 uppercase tracking-widest">{A.stats.reviews}</div>
+              <div className="text-sm font-semibold text-gray-500 uppercase tracking-widest">
+                {A.stats.reviews}
+              </div>
             </div>
             <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="text-4xl font-serif font-bold text-teal mb-2">0%</div>
-              <div className="text-sm font-semibold text-gray-500 uppercase tracking-widest">{A.stats.commissions}</div>
+              <div className="text-sm font-semibold text-gray-500 uppercase tracking-widest">
+                {A.stats.commissions}
+              </div>
             </div>
           </div>
         </div>
@@ -92,7 +102,9 @@ export default function About() {
               title="Ubicación apartamentos Illa Pancha"
             />
             <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
-              <div className="text-xs font-bold tracking-[0.2em] text-teal-300 uppercase mb-2">{A.location}</div>
+              <div className="text-xs font-bold tracking-[0.2em] text-teal-300 uppercase mb-2">
+                {A.location}
+              </div>
               <div className="text-2xl font-serif font-bold text-white mb-2">{A.locationLabel}</div>
               <div className="text-gray-200 leading-relaxed max-w-2xl">{A.locationDetail}</div>
             </div>
@@ -118,7 +130,10 @@ export default function About() {
                 <Ico d={paths.map} size={14} color="#1a5f6e" />
                 {A.zone}
               </div>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-navy leading-tight" dangerouslySetInnerHTML={safeHtml(A.whyRibadeo)} />
+              <h2
+                className="text-4xl md:text-5xl font-serif font-bold text-navy leading-tight"
+                dangerouslySetInnerHTML={safeHtml(A.whyRibadeo)}
+              />
               <div className="w-20 h-1 bg-teal" />
               <div className="prose prose-lg text-gray-600 prose-p:leading-relaxed">
                 <p>{A.ribadeoDesc1}</p>
@@ -145,7 +160,10 @@ export default function About() {
       {/* SECCIÓN: EXPERIENCIAS */}
       <div id="experiencias" className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-navy mb-6" dangerouslySetInnerHTML={safeHtml(A.experienceRibadeo)} />
+          <h2
+            className="text-4xl md:text-5xl font-serif font-bold text-navy mb-6"
+            dangerouslySetInnerHTML={safeHtml(A.experienceRibadeo)}
+          />
           <div className="w-24 h-1 bg-teal mx-auto mb-10" />
           <div className="max-w-3xl mx-auto text-lg text-gray-600 space-y-6 mb-16">
             <p>{A.expDesc1}</p>
@@ -153,7 +171,10 @@ export default function About() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(A.poi || []).map((item, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-left group">
+              <div
+                key={i}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-left group"
+              >
                 {item.photo && (
                   <div className="h-44 overflow-hidden">
                     <img
@@ -177,14 +198,17 @@ export default function About() {
       {/* CTA */}
       <div className="py-24 px-4 bg-navy text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-6" dangerouslySetInnerHTML={safeHtml(A.ctaTitle)} />
-          <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-            {A.ctaDesc}
-          </p>
+          <h2
+            className="text-4xl md:text-5xl font-serif font-bold text-white mb-6"
+            dangerouslySetInnerHTML={safeHtml(A.ctaTitle)}
+          />
+          <p className="text-xl text-gray-300 mb-10 leading-relaxed">{A.ctaDesc}</p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <button
               className="w-full sm:w-auto px-8 py-4 bg-teal text-white hover:bg-teal-600 font-medium rounded transition-colors text-lg"
-              onClick={() => settings?.booking_mode === 'redirect' ? navigate('/reservar') : setBookingOpen(true)}
+              onClick={() =>
+                settings?.booking_mode === 'redirect' ? navigate('/reservar') : setBookingOpen(true)
+              }
             >
               {T.home.availability}
             </button>

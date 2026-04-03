@@ -1,16 +1,29 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { fetchAllReservations, fetchApartments, fetchAllMessages } from '../../services/supabaseService';
-import { formatPrice } from '../../utils/format';
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer
+  fetchAllReservations,
+  fetchApartments,
+  fetchAllMessages,
+} from '../../services/supabaseService';
+import { formatPrice, formatGuestDisplay, formatReservationReference } from '../../utils/format';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts';
 
 const srcBadge = {
   web: ['bg-[#1a5f6e] text-white', 'Web'],
-  booking: ['bg-blue-100 text-blue-800', 'Booking'],
+  booking: ['bg-[#1a5f6e] text-white', 'Web'],
   manual: ['bg-yellow-100 text-yellow-800', 'Manual'],
 };
 
@@ -23,16 +36,14 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      fetchAllReservations(),
-      fetchApartments(),
-      fetchAllMessages('unread')
-    ]).then(([res, apts, msgs]) => {
-      setReservations(res || []);
-      setApartments(apts || []);
-      setMessages(msgs || []);
-      setLoading(false);
-    });
+    Promise.all([fetchAllReservations(), fetchApartments(), fetchAllMessages('unread')]).then(
+      ([res, apts, msgs]) => {
+        setReservations(res || []);
+        setApartments(apts || []);
+        setMessages(msgs || []);
+        setLoading(false);
+      }
+    );
   }, []);
 
   const confirmed = reservations.filter(r => r.status === 'confirmed');
@@ -45,7 +56,7 @@ export default function Dashboard() {
   const currentYear = today.getFullYear();
 
   // Parsers — soporta ISO "2026-07-12" (Supabase) y legado "12 Ene 2026"
-  const parseStorageDate = (dateStr) => {
+  const parseStorageDate = dateStr => {
     if (!dateStr) return null;
     // ISO format (Supabase)
     if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
@@ -56,7 +67,20 @@ export default function Dashboard() {
     const parts = dateStr.split(' ');
     if (parts.length < 2) return null;
     const day = parseInt(parts[0], 10);
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
     const monthIndex = months.findIndex(m => m.toLowerCase() === parts[1].toLowerCase());
     if (monthIndex === -1) return null;
     let year = currentYear;
@@ -115,7 +139,20 @@ export default function Dashboard() {
   const adr = totalNights > 0 ? Math.round(totalIncome / totalNights) : 0;
 
   // Datos mensuales — últimos 12 meses
-  const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const MESES = [
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dic',
+  ];
   const monthlyData = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(currentYear, currentMonth - 11 + i, 1);
     const y = d.getFullYear();
@@ -134,7 +171,8 @@ export default function Dashboard() {
         const amount = r.total_price || r.total || 0;
         income += amount;
         const src = r.source || 'web';
-        if (src in bySource) bySource[src] += amount; else bySource.web += amount;
+        if (src in bySource) bySource[src] += amount;
+        else bySource.web += amount;
       }
       // ocupación: días solapados con este mes
       const co = parseStorageDate(r.check_out || r.checkout);
@@ -152,7 +190,12 @@ export default function Dashboard() {
     return { label, income, occ, ...bySource };
   });
 
-  const formatterDate = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const formatterDate = new Intl.DateTimeFormat('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
   const formattedToday = formatterDate.format(today);
   const formattedTodayCap = formattedToday.charAt(0).toUpperCase() + formattedToday.slice(1);
 
@@ -163,7 +206,10 @@ export default function Dashboard() {
           <div className="text-2xl font-bold text-gray-800">Dashboard</div>
           <div className="text-gray-500 text-sm mt-1">{formattedTodayCap}</div>
         </div>
-        <button className="bg-[#1a5f6e] text-white px-4 py-2 rounded font-medium hover:bg-opacity-90 transition-colors" onClick={() => navigate('/gestion/reservas')}>
+        <button
+          className="bg-[#1a5f6e] text-white px-4 py-2 rounded font-medium hover:bg-opacity-90 transition-colors"
+          onClick={() => navigate('/gestion/reservas')}
+        >
           + Nueva reserva manual
         </button>
       </div>
@@ -173,13 +219,44 @@ export default function Dashboard() {
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {[
-            { l: 'Check-ins y outs hoy', v: checkinsoutsTodayCount, s: checkinsToday.length > 0 ? `${checkinsToday.length} entradas / ${checkoutsToday.length} salidas` : 'Sin movimiento hoy', accent: true },
-            { l: 'Reservas esta semana', v: bookingsThisWeek.length.toString(), s: 'creadas en los últimos 7 días', accent: false },
-            { l: 'Ingresos mes actual', v: formatPrice(incomeThisMonth), s: 'reservas con check-in en este mes', accent: false },
-            { l: 'Ocupación hoy', v: occupancyText, s: 'sobre los apartamentos activos', accent: true },
-            { l: 'ADR — precio medio/noche', v: formatPrice(adr), s: `${totalNights} noches confirmadas en total`, accent: false },
+            {
+              l: 'Check-ins y outs hoy',
+              v: checkinsoutsTodayCount,
+              s:
+                checkinsToday.length > 0
+                  ? `${checkinsToday.length} entradas / ${checkoutsToday.length} salidas`
+                  : 'Sin movimiento hoy',
+              accent: true,
+            },
+            {
+              l: 'Reservas esta semana',
+              v: bookingsThisWeek.length.toString(),
+              s: 'creadas en los últimos 7 días',
+              accent: false,
+            },
+            {
+              l: 'Ingresos mes actual',
+              v: formatPrice(incomeThisMonth),
+              s: 'reservas con check-in en este mes',
+              accent: false,
+            },
+            {
+              l: 'Ocupación hoy',
+              v: occupancyText,
+              s: 'sobre los apartamentos activos',
+              accent: true,
+            },
+            {
+              l: 'ADR — precio medio/noche',
+              v: formatPrice(adr),
+              s: `${totalNights} noches confirmadas en total`,
+              accent: false,
+            },
           ].map((k, i) => (
-            <div key={i} className={`bg-white p-6 rounded-lg shadow-sm border border-gray-200 ${k.accent ? 'border-l-4 border-l-[#1a5f6e]' : ''}`}>
+            <div
+              key={i}
+              className={`bg-white p-6 rounded-lg shadow-sm border border-gray-200 ${k.accent ? 'border-l-4 border-l-[#1a5f6e]' : ''}`}
+            >
               <div className="text-sm font-medium text-gray-500 mb-1">{k.l}</div>
               <div className="text-3xl font-bold text-gray-900 mb-1">{k.v}</div>
               <div className="text-xs text-gray-400">{k.s}</div>
@@ -201,22 +278,37 @@ export default function Dashboard() {
               </button>
             </div>
             <div>
-              {(checkinsToday.length > 0 || checkoutsToday.length > 0) ? [...checkinsToday, ...checkoutsToday].slice(0, 5).map((r, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-[1fr_1fr_auto] gap-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-                  onClick={() => navigate('/gestion/reservas')}
-                >
-                  <div>
-                    <div className="text-sm font-medium text-slate-900">{r.guest_name || r.guest}</div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">{r.apartment_slug || r.apt} · {r.nights} noches</div>
+              {checkinsToday.length > 0 || checkoutsToday.length > 0 ? (
+                [...checkinsToday, ...checkoutsToday].slice(0, 5).map((r, i) => (
+                  <div
+                    key={i}
+                    className="grid grid-cols-[1fr_1fr_auto] gap-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+                    onClick={() => navigate('/gestion/reservas')}
+                  >
+                    <div>
+                      <div className="text-sm font-medium text-slate-900">
+                        {formatGuestDisplay(r.guest_name || r.guest, r.source)}
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        {apartments.find(a => a.slug === (r.apartment_slug || r.apt))
+                          ?.internal_name ||
+                          apartments.find(a => a.slug === (r.apartment_slug || r.apt))?.name ||
+                          r.apartment_slug ||
+                          r.apt}{' '}
+                        · {r.nights} noches
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      {r.check_in || r.checkin} → {r.check_out || r.checkout}
+                    </div>
+                    <span
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium ${r.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}
+                    >
+                      {r.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                    </span>
                   </div>
-                  <div className="text-xs text-slate-600">{r.check_in || r.checkin} → {r.check_out || r.checkout}</div>
-                  <span className={`px-2.5 py-1 rounded text-[11px] font-medium ${r.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                    {r.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                  </span>
-                </div>
-              )) : (
+                ))
+              ) : (
                 <div className="p-5 text-center text-slate-500 text-sm">
                   No hay entradas ni salidas para hoy.
                 </div>
@@ -230,34 +322,41 @@ export default function Dashboard() {
               <div className="text-lg font-semibold text-gray-900">Ocupación por apartamento</div>
             </div>
             <div className="p-6">
-              {apartments.length > 0 ? apartments.map(apt => {
-                const aptReservations = confirmed.filter(r => (r.apartment_slug || r.aptSlug) === apt.slug);
-                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                const monthStart = new Date(currentYear, currentMonth, 1);
-                const monthEnd = new Date(currentYear, currentMonth, daysInMonth);
-                let occupiedDays = 0;
-                aptReservations.forEach(r => {
-                  const ci = parseStorageDate(r.check_in || r.checkin);
-                  const co = parseStorageDate(r.check_out || r.checkout);
-                  if (!ci || !co) return;
-                  const start = ci < monthStart ? monthStart : ci;
-                  const end = co > monthEnd ? monthEnd : co;
-                  if (end > start) occupiedDays += Math.round((end - start) / 86400000);
-                });
-                const p = Math.min(100, Math.round((occupiedDays / daysInMonth) * 100));
+              {apartments.length > 0 ? (
+                apartments.map(apt => {
+                  const aptReservations = confirmed.filter(
+                    r => (r.apartment_slug || r.aptSlug) === apt.slug
+                  );
+                  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                  const monthStart = new Date(currentYear, currentMonth, 1);
+                  const monthEnd = new Date(currentYear, currentMonth, daysInMonth);
+                  let occupiedDays = 0;
+                  aptReservations.forEach(r => {
+                    const ci = parseStorageDate(r.check_in || r.checkin);
+                    const co = parseStorageDate(r.check_out || r.checkout);
+                    if (!ci || !co) return;
+                    const start = ci < monthStart ? monthStart : ci;
+                    const end = co > monthEnd ? monthEnd : co;
+                    if (end > start) occupiedDays += Math.round((end - start) / 86400000);
+                  });
+                  const p = Math.min(100, Math.round((occupiedDays / daysInMonth) * 100));
 
-                return (
-                  <div key={apt.slug} className="mb-3">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-700">{apt.name}</span>
-                      <span className="font-semibold text-slate-900">{p}%</span>
+                  return (
+                    <div key={apt.slug} className="mb-3">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-700">{apt.internal_name || apt.name}</span>
+                        <span className="font-semibold text-slate-900">{p}%</span>
+                      </div>
+                      <div className="bg-slate-100 h-1 rounded-full overflow-hidden">
+                        <div
+                          className="bg-[#1a5f6e] h-full transition-all duration-500"
+                          style={{ width: `${p}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="bg-slate-100 h-1 rounded-full overflow-hidden">
-                      <div className="bg-[#1a5f6e] h-full transition-all duration-500" style={{ width: `${p}%` }} />
-                    </div>
-                  </div>
-                );
-              }) : (
+                  );
+                })
+              ) : (
                 <div className="px-5 text-slate-500 text-sm">No hay apartamentos activos.</div>
               )}
             </div>
@@ -274,12 +373,21 @@ export default function Dashboard() {
               <BarChart data={monthlyData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-                <Tooltip formatter={(v) => formatPrice(v)} />
+                <YAxis
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={v => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v)}
+                />
+                <Tooltip formatter={v => formatPrice(v)} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="web" name="Web" stackId="a" fill="#1a5f6e" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="booking" name="Booking" stackId="a" fill="#3b82f6" />
-                <Bar dataKey="manual" name="Manual" stackId="a" fill="#D4A843" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="booking" name="Booking" stackId="a" fill="#1a5f6e" />
+                <Bar
+                  dataKey="manual"
+                  name="Manual"
+                  stackId="a"
+                  fill="#D4A843"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -287,16 +395,23 @@ export default function Dashboard() {
           {/* Tasa de ocupación mensual */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="text-lg font-semibold text-gray-900 mb-1">Ocupación mensual</div>
-            <div className="text-xs text-gray-400 mb-4">Últimos 12 meses · % de noches ocupadas</div>
+            <div className="text-xs text-gray-400 mb-4">
+              Últimos 12 meses · % de noches ocupadas
+            </div>
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={monthlyData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v) => `${v}%`} />
+                <Tooltip formatter={v => `${v}%`} />
                 <Line
-                  type="monotone" dataKey="occ" name="Ocupación"
-                  stroke="#1a5f6e" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }}
+                  type="monotone"
+                  dataKey="occ"
+                  name="Ocupación"
+                  stroke="#1a5f6e"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -319,32 +434,53 @@ export default function Dashboard() {
               <div key={h}>{h}</div>
             ))}
           </div>
-          {reservations.length > 0 ? reservations.slice(0, 5).map((r, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-[80px_1.5fr_1fr_1fr_100px_100px_100px] px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center text-sm"
-              onClick={() => navigate('/gestion/reservas')}
-            >
-              <div className="font-mono text-[11px] text-slate-500">{r.id.split('-').pop() || r.id}</div>
-              <div className="font-medium text-gray-900 text-[13px]">{r.guest_name || r.guest}</div>
-              <div className="text-[13px] text-slate-700">{r.apartment_slug || r.apt}</div>
-              <div className="text-xs text-slate-500">{r.check_in || r.checkin} → {r.check_out || r.checkout}</div>
-              <div className="text-[13px] font-semibold">{formatPrice(r.total_price || r.total)}</div>
-              <div>
-                <span className={`px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap ${srcBadge[r.source || 'web']?.[0] || 'bg-yellow-100 text-yellow-800'}`}>
-                  {srcBadge[r.source || 'web']?.[1] || r.source || 'Web'}
-                </span>
+          {reservations.length > 0 ? (
+            reservations.slice(0, 5).map((r, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-[80px_1.5fr_1fr_1fr_100px_100px_100px] px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center text-sm"
+                onClick={() => navigate('/gestion/reservas')}
+              >
+                <div className="font-mono text-[11px] text-slate-500">
+                  {formatReservationReference(r.id, r.source)}
+                </div>
+                <div className="font-medium text-gray-900 text-[13px]">
+                  {formatGuestDisplay(r.guest_name || r.guest, r.source)}
+                </div>
+                <div className="text-[13px] text-slate-700">
+                  {apartments.find(a => a.slug === (r.apartment_slug || r.apt))?.internal_name ||
+                    apartments.find(a => a.slug === (r.apartment_slug || r.apt))?.name ||
+                    r.apartment_slug ||
+                    r.apt}
+                </div>
+                <div className="text-xs text-slate-500">
+                  {r.check_in || r.checkin} → {r.check_out || r.checkout}
+                </div>
+                <div className="text-[13px] font-semibold">
+                  {formatPrice(r.total_price || r.total)}
+                </div>
+                <div>
+                  <span
+                    className={`px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap ${srcBadge[r.source || 'web']?.[0] || 'bg-yellow-100 text-yellow-800'}`}
+                  >
+                    {srcBadge[r.source || 'web']?.[1] || r.source || 'Web'}
+                  </span>
+                </div>
+                <div>
+                  <span
+                    className={`px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap ${r.status === 'confirmed' ? 'bg-green-100 text-green-800' : r.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}
+                  >
+                    {r.status === 'confirmed'
+                      ? 'Confirmada'
+                      : r.status === 'pending'
+                        ? 'Pendiente'
+                        : 'Cancelada'}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className={`px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap ${r.status === 'confirmed' ? 'bg-green-100 text-green-800' : r.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                  {r.status === 'confirmed' ? 'Confirmada' : r.status === 'pending' ? 'Pendiente' : 'Cancelada'}
-                </span>
-              </div>
-            </div>
-          )) : (
-            <div className="p-5 text-center text-slate-500 text-sm">
-              No hay reservas.
-            </div>
+            ))
+          ) : (
+            <div className="p-5 text-center text-slate-500 text-sm">No hay reservas.</div>
           )}
         </div>
 
@@ -359,7 +495,10 @@ export default function Dashboard() {
             </div>
             {messages.length > 0 && (
               <div className="text-xs text-slate-500">
-                {messages.slice(0, 2).map(m => m.name).join(' · ')}
+                {messages
+                  .slice(0, 2)
+                  .map(m => m.name)
+                  .join(' · ')}
                 {messages.length > 2 && ' ...'}
               </div>
             )}

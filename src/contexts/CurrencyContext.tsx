@@ -11,9 +11,9 @@ export interface CurrencyOption {
 }
 
 export const CURRENCIES: CurrencyOption[] = [
-  { code: 'EUR', symbol: '€', label: 'Euro',          locale: 'es-ES' },
-  { code: 'GBP', symbol: '£', label: 'Libra',         locale: 'en-GB' },
-  { code: 'USD', symbol: '$', label: 'Dólar USD',     locale: 'en-US' },
+  { code: 'EUR', symbol: '€', label: 'Euro', locale: 'es-ES' },
+  { code: 'GBP', symbol: '£', label: 'Libra', locale: 'en-GB' },
+  { code: 'USD', symbol: '$', label: 'Dólar USD', locale: 'en-US' },
   { code: 'CHF', symbol: 'Fr', label: 'Franco suizo', locale: 'de-CH' },
   { code: 'SEK', symbol: 'kr', label: 'Corona sueca', locale: 'sv-SE' },
 ];
@@ -23,7 +23,7 @@ const FALLBACK_RATES: Record<Currency, number> = {
   GBP: 0.86,
   USD: 1.08,
   CHF: 0.97,
-  SEK: 11.50,
+  SEK: 11.5,
 };
 
 interface CurrencyContextValue {
@@ -42,15 +42,19 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [rates, setRates] = useState<Record<Currency, number>>(FALLBACK_RATES);
 
   useEffect(() => {
-    const targets = CURRENCIES.map(c => c.code).filter(c => c !== 'EUR').join(',');
-    fetch(`https://api.frankfurter.app/latest?from=EUR&to=${targets}`)
+    const targets = CURRENCIES.map(c => c.code)
+      .filter(c => c !== 'EUR')
+      .join(',');
+    fetch(`/api/frankfurter/latest?from=EUR&to=${targets}`)
       .then(r => r.json())
       .then((data: { rates?: Partial<Record<Currency, number>> }) => {
         if (data?.rates) {
-          setRates({ EUR: 1, ...FALLBACK_RATES, ...data.rates });
+          setRates({ ...FALLBACK_RATES, ...data.rates, EUR: 1 });
         }
       })
-      .catch(() => {/* usa fallback */});
+      .catch(() => {
+        /* usa fallback */
+      });
   }, []);
 
   const setCurrency = (c: Currency) => {

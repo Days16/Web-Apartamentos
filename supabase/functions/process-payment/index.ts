@@ -11,6 +11,23 @@ const corsHeaders = {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const TURNSTILE_SECRET = Deno.env.get("TURNSTILE_SECRET_KEY") || "";
+
+async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
+    if (!TURNSTILE_SECRET) return true;
+    if (!token?.trim()) return false;
+    const form = new FormData();
+    form.append("secret", TURNSTILE_SECRET);
+    form.append("response", token);
+    form.append("remoteip", ip);
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        body: form,
+    });
+    const data = await res.json();
+    return data.success === true;
+}
+
 // Rate limiting: 3 intentos por IP cada 10 minutos
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 3;
@@ -42,7 +59,25 @@ serve(async (req) => {
     }
 
     try {
-        const { amount, currency, customerEmail, customerName, reservationId, description } = await req.json();
+        const {
+            amount,
+            currency,
+            customerEmail,
+            customerName,
+            reservationId,
+            description,
+            turnstileToken,
+        } = await req.json();
+
+        const turnstileOk = await verifyTurnstile(turnstileToken || "", ip);
+        if (!turnstileOk) {
+            return new Response(
+                JSON.stringify({
+                    error: "Verificación de seguridad no válida. Completa el captcha e inténtalo de nuevo.",
+                }),
+                { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+            );
+        }
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount,

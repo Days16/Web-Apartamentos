@@ -19,7 +19,9 @@ export function useWebContent(lang: Lang): { wc: (baseKey: string) => string | u
   useEffect(() => {
     fetchWebsiteContent().then(rows => {
       const m: Record<string, ContentRow> = {};
-      rows.forEach((r: ContentRow) => { m[r.section_key] = r; });
+      rows.forEach((r: ContentRow) => {
+        m[r.section_key] = r;
+      });
       setMap(m);
     });
   }, []);

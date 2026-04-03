@@ -15,7 +15,7 @@ const LANGS: { code: Lang; label: string; flag: string }[] = [
   { code: 'PT', label: 'Português', flag: '🇵🇹' },
 ];
 
-export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }) {
+export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBooking?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -29,7 +29,7 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
   const { currency, setCurrency } = useCurrency();
   const location = useLocation();
   const navigate = useNavigate();
-  const navRef = useRef(null);
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -44,14 +44,14 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (mobileOpen && navRef.current && !navRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (mobileOpen && navRef.current && !navRef.current.contains(e.target as Node)) {
         setMobileOpen(false);
       }
-      if (langOpen && langRef.current && !langRef.current.contains(e.target)) {
+      if (langOpen && langRef.current && !langRef.current.contains(e.target as Node)) {
         setLangOpen(false);
       }
-      if (currencyOpen && currencyRef.current && !currencyRef.current.contains(e.target)) {
+      if (currencyOpen && currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
         setCurrencyOpen(false);
       }
     };
@@ -72,7 +72,7 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
     };
   }, [mobileOpen]);
 
-  const isActive = (path) => {
+  const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
@@ -93,14 +93,24 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
       className={`sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 dark:border-b dark:border-slate-700 transition-[box-shadow] duration-300 ${scrolled ? 'shadow-[0_2px_20px_rgba(15,23,42,0.08)] dark:shadow-slate-900/50' : 'shadow-none'}`}
       ref={navRef}
     >
-      <Link to="/"><img src="/logo_lineas.png" alt="Illa Pancha" className="h-10 w-auto" /></Link>
+      <Link to="/">
+        <img src="/logo_lineas.png" alt="Illa Pancha" className="h-10 w-auto" />
+      </Link>
 
       {/* Links - escritorio y menú móvil */}
-      <div className={`flex flex-col md:flex-row md:items-center md:gap-8 absolute top-16 md:top-1/2 md:-translate-y-1/2 left-0 md:left-1/2 md:-translate-x-1/2 right-0 md:right-auto w-full md:w-auto bg-white dark:bg-slate-900 dark:border-slate-700 md:bg-transparent md:dark:bg-transparent px-6 md:px-0 py-4 md:py-0 border-b md:border-0 transition-all duration-300 ${mobileOpen ? 'max-h-64 opacity-100' : 'md:max-h-full md:opacity-100 max-h-0 opacity-0 overflow-hidden md:overflow-visible'}`}>
-        <Link to="/apartamentos" className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/apartamentos') ? 'text-teal border-b-2 border-teal' : ''}`}>
+      <div
+        className={`flex flex-col md:flex-row md:items-center md:gap-8 absolute top-16 md:top-1/2 md:-translate-y-1/2 left-0 md:left-1/2 md:-translate-x-1/2 right-0 md:right-auto w-full md:w-auto bg-white dark:bg-slate-900 dark:border-slate-700 md:bg-transparent md:dark:bg-transparent px-6 md:px-0 py-4 md:py-0 border-b md:border-0 transition-all duration-300 ${mobileOpen ? 'max-h-64 opacity-100' : 'md:max-h-full md:opacity-100 max-h-0 opacity-0 overflow-hidden md:overflow-visible'}`}
+      >
+        <Link
+          to="/apartamentos"
+          className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/apartamentos') ? 'text-teal border-b-2 border-teal' : ''}`}
+        >
           {T.nav.apartments}
         </Link>
-        <Link to="/nosotros" className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/nosotros') ? 'text-teal border-b-2 border-teal' : ''}`}>
+        <Link
+          to="/nosotros"
+          className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/nosotros') ? 'text-teal border-b-2 border-teal' : ''}`}
+        >
           {T.nav.ribadeo}
         </Link>
         <span
@@ -121,12 +131,18 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
         >
           {T.nav.experiences}
         </span>
-        <Link to="/contacto" className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/contacto') ? 'text-teal border-b-2 border-teal' : ''}`}>
+        <Link
+          to="/contacto"
+          className={`py-2 md:py-0 text-navy hover:text-teal transition-colors font-medium ${isActive('/contacto') ? 'text-teal border-b-2 border-teal' : ''}`}
+        >
           {T.nav.contact}
         </Link>
 
         {/* Botón reservar visible solo en el menú móvil */}
-        <button className="md:hidden bg-teal text-white px-5 py-3 rounded hover:bg-teal-600 transition-all font-semibold mt-2 w-full" onClick={handleBook}>
+        <button
+          className="md:hidden bg-teal text-white px-5 py-3 rounded hover:bg-teal-600 transition-all font-semibold mt-2 w-full"
+          onClick={handleBook}
+        >
           {T.nav.book}
         </button>
       </div>
@@ -141,14 +157,25 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
           >
             <span>{LANGS.find(l => l.code === lang)?.flag}</span>
             <span className="text-teal">{lang}</span>
-            <svg className={`w-3 h-3 transition-transform ${langOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            <svg
+              className={`w-3 h-3 transition-transform ${langOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
           {langOpen && (
             <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px]">
               {LANGS.map(l => (
                 <button
                   key={l.code}
-                  onClick={() => { setLang(l.code); setLangOpen(false); }}
+                  onClick={() => {
+                    setLang(l.code);
+                    setLangOpen(false);
+                  }}
                   className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 ${lang === l.code ? 'font-semibold text-teal bg-teal/5' : 'text-slate-700 dark:text-slate-300'}`}
                 >
                   <span className="text-base">{l.flag}</span>
@@ -168,14 +195,25 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
           >
             <span>{CURRENCIES.find(c => c.code === currency)?.symbol}</span>
             <span>{currency}</span>
-            <svg className={`w-2.5 h-2.5 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            <svg
+              className={`w-2.5 h-2.5 transition-transform ${currencyOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
           {currencyOpen && (
             <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[150px]">
               {CURRENCIES.map(c => (
                 <button
                   key={c.code}
-                  onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
+                  onClick={() => {
+                    setCurrency(c.code);
+                    setCurrencyOpen(false);
+                  }}
                   className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 ${currency === c.code ? 'font-semibold text-teal bg-teal/5' : 'text-slate-700 dark:text-slate-300'}`}
                 >
                   <span className="w-5 text-center font-bold">{c.symbol}</span>
@@ -193,14 +231,39 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
           className="text-slate-900 dark:text-slate-200 hover:text-teal transition-colors p-1"
         >
           {dark ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
           )}
@@ -222,9 +285,13 @@ export default function Navbar({ onOpenBooking }: { onOpenBooking?: () => void }
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
         >
-          <span className={`w-6 h-0.5 bg-navy transition-all transform origin-center ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
+          <span
+            className={`w-6 h-0.5 bg-navy transition-all transform origin-center ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`}
+          />
           <span className={`w-6 h-0.5 bg-navy transition-all ${mobileOpen ? 'opacity-0' : ''}`} />
-          <span className={`w-6 h-0.5 bg-navy transition-all transform origin-center ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+          <span
+            className={`w-6 h-0.5 bg-navy transition-all transform origin-center ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`}
+          />
         </button>
       </div>
     </nav>

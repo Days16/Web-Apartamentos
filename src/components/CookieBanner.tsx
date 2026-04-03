@@ -8,7 +8,7 @@ export default function CookieBanner() {
 
   if (accepted) return null;
 
-  const accept = (all) => {
+  const accept = (all: boolean) => {
     localStorage.setItem('cookieConsent', all ? 'all' : 'essential');
     setAccepted(true);
   };
@@ -17,7 +17,9 @@ export default function CookieBanner() {
     <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white py-4 px-6 flex flex-col md:flex-row items-center justify-between gap-4 z-50 shadow-lg">
       <div className="text-sm leading-relaxed flex-1">
         Usamos cookies propias y de terceros para mejorar tu experiencia y analizar el tráfico.{' '}
-        <Link to="/cookies" className="text-gold hover:opacity-80 transition-opacity">Más información →</Link>
+        <Link to="/cookies" className="text-gold hover:opacity-80 transition-opacity">
+          Más información →
+        </Link>
       </div>
       <div className="flex gap-3">
         <button

@@ -4,7 +4,9 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.warn('⚠ Supabase no configurado — usando datos de demostración. Añade VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY al archivo .env');
+  console.warn(
+    '⚠ Supabase no configurado — usando datos de demostración. Añade VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY al archivo .env'
+  );
 }
 
 export const supabase = createClient(
@@ -12,7 +14,10 @@ export const supabase = createClient(
   supabaseKey || 'placeholder-key',
   {
     auth: { persistSession: true },
-    global: { fetch: (...args: Parameters<typeof fetch>) => fetch(...args).catch(() => new Response('{}', { status: 503 })) },
+    global: {
+      fetch: (...args: Parameters<typeof fetch>) =>
+        fetch(...args).catch(() => new Response('{}', { status: 503 })),
+    },
   }
 );
 

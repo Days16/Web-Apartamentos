@@ -13,9 +13,9 @@ interface Toast {
 interface ToastApi {
   show: (message: string, type?: ToastType, duration?: number) => void;
   success: (msg: string, duration?: number) => void;
-  error:   (msg: string, duration?: number) => void;
-  warn:    (msg: string, duration?: number) => void;
-  info:    (msg: string, duration?: number) => void;
+  error: (msg: string, duration?: number) => void;
+  warn: (msg: string, duration?: number) => void;
+  info: (msg: string, duration?: number) => void;
 }
 
 const ToastContext = createContext<ToastApi | null>(null);
@@ -24,16 +24,16 @@ let nextId = 0;
 
 const STYLES: Record<ToastType, string> = {
   success: 'bg-green-600',
-  error:   'bg-red-600',
-  warn:    'bg-amber-500',
-  info:    'bg-slate-700',
+  error: 'bg-red-600',
+  warn: 'bg-amber-500',
+  info: 'bg-slate-700',
 };
 
 const ICONS: Record<ToastType, string> = {
   success: '✓',
-  error:   '✕',
-  warn:    '⚠',
-  info:    'ℹ',
+  error: '✕',
+  warn: '⚠',
+  info: 'ℹ',
 };
 
 function ToastItem({ id, message, type, onDismiss }: Toast & { onDismiss: (id: number) => void }) {
@@ -47,7 +47,9 @@ function ToastItem({ id, message, type, onDismiss }: Toast & { onDismiss: (id: n
         onClick={() => onDismiss(id)}
         className="shrink-0 text-white/60 hover:text-white text-lg leading-none ml-1"
         aria-label="Cerrar"
-      >×</button>
+      >
+        ×
+      </button>
     </div>
   );
 }
@@ -59,19 +61,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  const show = useCallback((message: string, type: ToastType = 'info', duration = 4000) => {
-    const id = ++nextId;
-    setToasts(prev => [...prev, { id, message, type }]);
-    if (duration > 0) setTimeout(() => dismiss(id), duration);
-  }, [dismiss]);
+  const show = useCallback(
+    (message: string, type: ToastType = 'info', duration = 4000) => {
+      const id = ++nextId;
+      setToasts(prev => [...prev, { id, message, type }]);
+      if (duration > 0) setTimeout(() => dismiss(id), duration);
+    },
+    [dismiss]
+  );
 
-  const api = useMemo<ToastApi>(() => ({
-    show,
-    success: (msg, dur) => show(msg, 'success', dur),
-    error:   (msg, dur) => show(msg, 'error', dur),
-    warn:    (msg, dur) => show(msg, 'warn', dur),
-    info:    (msg, dur) => show(msg, 'info', dur),
-  }), [show]);
+  const api = useMemo<ToastApi>(
+    () => ({
+      show,
+      success: (msg, dur) => show(msg, 'success', dur),
+      error: (msg, dur) => show(msg, 'error', dur),
+      warn: (msg, dur) => show(msg, 'warn', dur),
+      info: (msg, dur) => show(msg, 'info', dur),
+    }),
+    [show]
+  );
 
   return (
     <ToastContext.Provider value={api}>

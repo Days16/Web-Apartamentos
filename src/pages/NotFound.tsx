@@ -12,7 +12,7 @@ export default function NotFound() {
 
   return (
     <>
-      <SEO title={`${L.code} — ${L.title}`} description={L.desc} />
+      <SEO title={`${L.code} — ${L.title}`} description={L.desc} noIndex />
       <Navbar />
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 py-24 text-center bg-white dark:bg-slate-900">
         <div className="text-[120px] font-serif font-bold leading-none text-gray-100 dark:text-slate-800 select-none">
@@ -21,9 +21,7 @@ export default function NotFound() {
         <h1 className="text-3xl font-serif font-bold text-navy dark:text-white -mt-6 mb-4">
           {L.title}
         </h1>
-        <p className="text-gray-500 dark:text-slate-400 max-w-sm mb-10">
-          {L.desc}
-        </p>
+        <p className="text-gray-500 dark:text-slate-400 max-w-sm mb-10">{L.desc}</p>
         <div className="flex gap-3 flex-wrap justify-center">
           <Link
             to="/"

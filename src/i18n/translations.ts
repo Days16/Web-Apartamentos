@@ -15,4 +15,6 @@ export const ui = {
   PT: pt,
 };
 
-export const useT = (lang) => ui[lang] || ui.ES;
+import type { Lang } from '../types';
+
+export const useT = (lang: Lang) => ui[lang] || ui.ES;

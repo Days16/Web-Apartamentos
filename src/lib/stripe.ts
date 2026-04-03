@@ -18,14 +18,28 @@ export const stripePromise = loadStripe(stripePublicKey);
  * @param {string} paymentData.description - Descripción del pago
  * @returns {Promise<Object>} {clientSecret, paymentIntentId}
  */
-export async function createPaymentIntent(paymentData) {
+interface PaymentData {
+  amount: number;
+  currency?: string;
+  customerEmail: string;
+  customerName: string;
+  reservationId: string;
+  description?: string;
+  turnstileToken?: string;
+}
+
+export async function createPaymentIntent(paymentData: PaymentData) {
   try {
     // Validar Supabase y que la función existe
     if (!supabase) {
-      throw new Error('Supabase no está inicializado. Revisa VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env');
+      throw new Error(
+        'Supabase no está inicializado. Revisa VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env'
+      );
     }
     if (typeof supabase.functions?.invoke !== 'function') {
-      throw new Error('supabase.functions.invoke no es una función. Revisa tu configuración de Supabase');
+      throw new Error(
+        'supabase.functions.invoke no es una función. Revisa tu configuración de Supabase'
+      );
     }
 
     const { data, error } = await supabase.functions.invoke('process-payment', {
@@ -36,6 +50,7 @@ export async function createPaymentIntent(paymentData) {
         customerName: paymentData.customerName,
         reservationId: paymentData.reservationId,
         description: paymentData.description,
+        turnstileToken: paymentData.turnstileToken,
       },
       headers: {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
@@ -44,7 +59,11 @@ export async function createPaymentIntent(paymentData) {
 
     if (error) {
       console.error('Supabase error response:', error);
-      throw new Error(error.message || 'Error creando PaymentIntent en Supabase');
+      const bodyErr =
+        data && typeof data === 'object' && 'error' in data
+          ? String((data as { error: string }).error)
+          : '';
+      throw new Error(bodyErr || error.message || 'Error creando PaymentIntent en Supabase');
     }
 
     if (!data || !data.clientSecret) {
@@ -68,7 +87,16 @@ export async function createPaymentIntent(paymentData) {
  * @param {string} clientSecret - Client secret del PaymentIntent
  * @returns {Promise<Object>} Resultado de confirmación
  */
-export async function confirmPayment(stripe, elements, clientSecret) {
+export async function confirmPayment(
+  stripe: {
+    confirmCardPayment: (
+      secret: string,
+      opts: unknown
+    ) => Promise<{ error?: { message: string }; paymentIntent?: unknown }>;
+  },
+  elements: { getElement: (type: string) => unknown },
+  clientSecret: string
+) {
   try {
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {

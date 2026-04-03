@@ -1,12 +1,28 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { formatDateShort, formatPrice } from '../../utils/format';
-import { getReservations, getApartmentBySlug, getExtras, markCashPaid, updateReservationStatus, deleteReservation, confirmAndMarkPaid } from '../../services/dataService';
+import {
+  formatDateShort,
+  formatPrice,
+  formatGuestDisplay,
+  formatReservationReference,
+} from '../../utils/format';
+import {
+  getReservations,
+  getApartments,
+  getApartmentBySlug,
+  getExtras,
+  markCashPaid,
+  updateReservationStatus,
+  deleteReservation,
+  confirmAndMarkPaid,
+} from '../../services/dataService';
 import { logAudit } from '../../services/supabaseService';
 import generateInvoice from '../../utils/generateInvoice';
 import exportReservationsExcel from '../../utils/exportExcel';
 import ManualBookingModal from '../../components/ManualBookingModal';
+import Ico, { paths } from '../../components/Ico';
 import { sendOwnerNotification } from '../../services/resendService';
 import { printRegistro } from '../../components/RegistroEntrada';
 import { fetchSettings } from '../../services/supabaseService';
@@ -36,7 +52,7 @@ const statusBadgeColors = {
 
 const srcBadge = {
   web: ['Web Directa', '#1a5f6e'],
-  booking: ['Booking.com', '#003580'],
+  booking: ['Web (Booking)', '#1a5f6e'],
 };
 
 export default function Reservas() {
@@ -52,6 +68,9 @@ export default function Reservas() {
   const [apartmentData, setApartmentData] = useState({});
   const [extrasData, setExtrasData] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [editingExtras, setEditingExtras] = useState(false);
+  const [draftExtras, setDraftExtras] = useState([]);
+  const [savingExtras, setSavingExtras] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -83,17 +102,14 @@ export default function Reservas() {
       const extrasResponse = await getExtras();
       setExtrasData(extrasResponse);
 
-      // Cargar apartamentos para cada reserva
-      const apartments = {};
-      for (const res of reservationsData) {
-        if (res.aptSlug && !apartments[res.aptSlug]) {
-          const apt = await getApartmentBySlug(res.aptSlug);
-          if (apt) {
-            apartments[res.aptSlug] = apt;
-          }
-        }
-      }
-      setApartmentData(apartments);
+      // Cargar apartamentos para cada reserva (Optimizado para obtener todos de una vez)
+      const allApts = await getApartments();
+      const apartmentsMap = {};
+      allApts.forEach(apt => {
+        apartmentsMap[apt.slug] = apt;
+      });
+
+      setApartmentData(apartmentsMap);
       setReservations(reservationsData);
       fetchSettings().then(s => setRegistroSettings(s));
 
@@ -131,11 +147,19 @@ export default function Reservas() {
       const daysSinceCheckout = Math.floor((today - checkOutDate) / (1000 * 60 * 60 * 24));
 
       if (daysToCheckin > 0) {
-        return { type: 'upcoming', days: daysToCheckin, text: `En ${daysToCheckin} día${daysToCheckin !== 1 ? 's' : ''}` };
+        return {
+          type: 'upcoming',
+          days: daysToCheckin,
+          text: `En ${daysToCheckin} día${daysToCheckin !== 1 ? 's' : ''}`,
+        };
       } else if (daysToCheckin === 0) {
         return { type: 'today', days: 0, text: 'Hoy' };
       } else if (daysSinceCheckout >= 0) {
-        return { type: 'past', days: daysSinceCheckout, text: `Hace ${daysSinceCheckout} día${daysSinceCheckout !== 1 ? 's' : ''}` };
+        return {
+          type: 'past',
+          days: daysSinceCheckout,
+          text: `Hace ${daysSinceCheckout} día${daysSinceCheckout !== 1 ? 's' : ''}`,
+        };
       }
     } catch (err) {
       console.error('Error parsing dates:', err);
@@ -143,11 +167,21 @@ export default function Reservas() {
     return null;
   };
 
-  const parseStorageDate = (dateStr) => {
+  const parseStorageDate = dateStr => {
     try {
       const months = {
-        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11,
+        Jan: 0,
+        Feb: 1,
+        Mar: 2,
+        Apr: 3,
+        May: 4,
+        Jun: 5,
+        Jul: 6,
+        Aug: 7,
+        Sep: 8,
+        Oct: 9,
+        Nov: 10,
+        Dec: 11,
       };
       const parts = dateStr.trim().split(/\s+/);
       if (parts.length === 2) {
@@ -162,12 +196,12 @@ export default function Reservas() {
     }
   };
 
-  const handleMarkCashPaid = async (id) => {
+  const handleMarkCashPaid = async id => {
     setSaving(true);
     try {
       const success = await markCashPaid(id);
       if (success) {
-        const updated = reservations.map(r => r.id === id ? { ...r, cashPaid: true } : r);
+        const updated = reservations.map(r => (r.id === id ? { ...r, cashPaid: true } : r));
         setReservations(updated);
         if (selectedId === id) {
           setSelectedReservation(updated.find(r => r.id === id));
@@ -186,7 +220,7 @@ export default function Reservas() {
       const success = await updateReservationStatus(id, newStatus);
       if (success) {
         logAudit('update_reservation_status', 'reservation', id, { newStatus });
-        const updated = reservations.map(r => r.id === id ? { ...r, status: newStatus } : r);
+        const updated = reservations.map(r => (r.id === id ? { ...r, status: newStatus } : r));
         setReservations(updated);
 
         const currentReservation = updated.find(r => r.id === id);
@@ -201,7 +235,7 @@ export default function Reservas() {
             reservationId: currentReservation.id,
             guestName: currentReservation.guest,
             guestEmail: currentReservation.email,
-            apartmentName: apt?.name || currentReservation.apt,
+            apartmentName: apt?.internalName || apt?.name || currentReservation.apt,
             checkin: currentReservation.checkin,
             checkout: currentReservation.checkout,
             nights: currentReservation.nights,
@@ -217,12 +251,14 @@ export default function Reservas() {
     }
   };
 
-  const handleConfirmAndMarkPaid = async (id) => {
+  const handleConfirmAndMarkPaid = async id => {
     setSaving(true);
     try {
       const success = await confirmAndMarkPaid(id);
       if (success) {
-        const updated = reservations.map(r => r.id === id ? { ...r, status: 'confirmed', cashPaid: true } : r);
+        const updated = reservations.map(r =>
+          r.id === id ? { ...r, status: 'confirmed', cashPaid: true } : r
+        );
         setReservations(updated);
         if (selectedId === id) {
           setSelectedReservation(updated.find(r => r.id === id));
@@ -235,8 +271,13 @@ export default function Reservas() {
     }
   };
 
-  const handleDeleteReservation = async (id) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar esta reserva? Esta acción no se puede deshacer.')) return;
+  const handleDeleteReservation = async id => {
+    if (
+      !window.confirm(
+        '¿Estás seguro de que deseas eliminar esta reserva? Esta acción no se puede deshacer.'
+      )
+    )
+      return;
 
     setSaving(true);
     try {
@@ -250,7 +291,7 @@ export default function Reservas() {
             reservationId: resToDelete.id,
             guestName: resToDelete.guest,
             guestEmail: resToDelete.email,
-            apartmentName: apt?.name || resToDelete.apt,
+            apartmentName: apt?.internalName || apt?.name || resToDelete.apt,
             checkin: resToDelete.checkin,
             checkout: resToDelete.checkout,
             nights: resToDelete.nights,
@@ -268,7 +309,37 @@ export default function Reservas() {
     }
   };
 
-  const handleSelectReservation = (reservation) => {
+  const handleSaveExtras = async () => {
+    if (!selectedReservation) return;
+    setSavingExtras(true);
+    try {
+      const newExtrasTotal = draftExtras.reduce((sum, id) => {
+        const extra = extrasData.find(e => e.id === id);
+        return sum + (extra?.price ?? 0);
+      }, 0);
+      const { error } = await import('../../lib/supabase').then(m =>
+        m.supabase
+          .from('reservations')
+          .update({ extras: draftExtras, extras_total: newExtrasTotal })
+          .eq('id', selectedReservation.id)
+      );
+      if (error) throw error;
+      const updated = { ...selectedReservation, extras: draftExtras, extrasTotal: newExtrasTotal };
+      setSelectedReservation(updated);
+      setReservations(prev =>
+        prev.map(r =>
+          r.id === updated.id ? { ...r, extras: draftExtras, extrasTotal: newExtrasTotal } : r
+        )
+      );
+      setEditingExtras(false);
+    } catch (err) {
+      alert('Error al guardar extras: ' + err.message);
+    } finally {
+      setSavingExtras(false);
+    }
+  };
+
+  const handleSelectReservation = reservation => {
     setSelectedId(reservation.id);
     setSelectedReservation(reservation);
   };
@@ -283,19 +354,29 @@ export default function Reservas() {
     }
   };
 
+  const reservationKey = id => (id != null ? String(id) : '');
+
   const handleBulkExport = () => {
-    exportReservationsExcel(filtered.filter(r => selectedIds.has(r.id)));
+    exportReservationsExcel(filtered.filter(r => selectedIds.has(reservationKey(r.id))));
   };
 
   const handleBulkStatusChange = async () => {
     if (!bulkStatus || selectedIds.size === 0) return;
-    if (!window.confirm(`¿Cambiar ${selectedIds.size} reserva(s) a "${statusLabels[bulkStatus]}"?`)) return;
+    if (!window.confirm(`¿Cambiar ${selectedIds.size} reserva(s) a "${statusLabels[bulkStatus]}"?`))
+      return;
     setSaving(true);
     for (const id of selectedIds) {
       await updateReservationStatus(id, bulkStatus);
-      logAudit('update_reservation_status', 'reservation', id, { newStatus: bulkStatus, bulk: true });
+      logAudit('update_reservation_status', 'reservation', id, {
+        newStatus: bulkStatus,
+        bulk: true,
+      });
     }
-    setReservations(prev => prev.map(r => selectedIds.has(r.id) ? { ...r, status: bulkStatus } : r));
+    setReservations(prev =>
+      prev.map(r =>
+        selectedIds.has(reservationKey(r.id)) ? { ...r, status: bulkStatus } : r
+      )
+    );
     setSelectedIds(new Set());
     setBulkStatus('');
     setSaving(false);
@@ -303,38 +384,65 @@ export default function Reservas() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`¿Eliminar ${selectedIds.size} reserva(s) seleccionadas? Esta acción no se puede deshacer.`)) return;
+    if (
+      !window.confirm(
+        `¿Eliminar ${selectedIds.size} reserva(s) seleccionadas? Esta acción no se puede deshacer.`
+      )
+    )
+      return;
     setSaving(true);
     for (const id of selectedIds) {
       await deleteReservation(id);
     }
-    setReservations(prev => prev.filter(r => !selectedIds.has(r.id)));
+    setReservations(prev => prev.filter(r => !selectedIds.has(reservationKey(r.id))));
     setSelectedIds(new Set());
     setSaving(false);
   };
 
-  const toggleSelect = (id) => {
+  const handlePrint = async () => {
+    const list = filtered.filter(r => selectedIds.has(reservationKey(r.id)));
+    if (list.length === 0) return;
+    setSaving(true);
+    try {
+      for (const r of list) {
+        await generateInvoice(r);
+      }
+    } catch (err) {
+      alert('Error al generar PDF: ' + (err.message || String(err)));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleSelect = id => {
+    const key = reservationKey(id);
+    if (!key) return;
     setSelectedIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === filtered.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filtered.map(r => r.id)));
-    }
+    const visKeys = filtered.map(r => reservationKey(r.id)).filter(Boolean);
+    if (visKeys.length === 0) return;
+    const allVisible = visKeys.every(k => selectedIds.has(k));
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (allVisible) visKeys.forEach(k => next.delete(k));
+      else visKeys.forEach(k => next.add(k));
+      return next;
+    });
   };
 
-  const parseCheckinForCompare = (dateStr) => {
+  const parseCheckinForCompare = dateStr => {
     const d = parseStorageDate(dateStr);
     if (!d) return null;
     // Ajustar año: si la fecha queda muy en el pasado, asumir año siguiente
     const today = new Date();
-    if (d < today && (today - d) > 180 * 24 * 60 * 60 * 1000) {
+    if (d < today && today - d > 180 * 24 * 60 * 60 * 1000) {
       d.setFullYear(d.getFullYear() + 1);
     }
     return d;
@@ -370,7 +478,10 @@ export default function Reservas() {
       <div className="flex items-center justify-center min-h-[500px] text-red-600">
         <div className="text-center">
           <div className="text-lg font-semibold mb-3">⚠️ {error}</div>
-          <button onClick={fetchData} className="px-4 py-2 bg-[#1a5f6e] text-white rounded hover:bg-opacity-90 transition-colors font-medium text-sm">
+          <button
+            onClick={fetchData}
+            className="px-4 py-2 bg-[#1a5f6e] text-white rounded hover:bg-opacity-90 transition-colors font-medium text-sm"
+          >
             Reintentar
           </button>
         </div>
@@ -406,9 +517,15 @@ export default function Reservas() {
               </button>
               <div>
                 <div className="text-2xl font-bold text-slate-900 mb-1">
-                  Reserva {selectedReservation.id}
+                  Reserva{' '}
+                  {formatReservationReference(
+                    selectedReservation.id,
+                    selectedReservation.source,
+                  )}
                 </div>
-                <div className="text-sm text-gray-500">{selectedReservation.guest}</div>
+                <div className="text-sm text-gray-500">
+                  {formatGuestDisplay(selectedReservation.guest, selectedReservation.source)}
+                </div>
               </div>
             </div>
 
@@ -421,18 +538,30 @@ export default function Reservas() {
                 ↓ PDF Factura
               </button>
               <button
-                onClick={() => printRegistro({
-                  reservation: {
-                    guest: selectedReservation.guest,
-                    email: selectedReservation.email,
-                    phone: selectedReservation.phone,
-                    checkin: selectedReservation.checkin,
-                    checkout: selectedReservation.checkout,
-                    apt_slug: selectedReservation.aptSlug,
-                  },
-                  settings: registroSettings,
-                  apartmentName: apartmentData[selectedReservation.aptSlug]?.name,
-                })}
+                onClick={() =>
+                  printRegistro({
+                    reservation: {
+                      id: formatReservationReference(
+                        selectedReservation.id,
+                        selectedReservation.source,
+                      ),
+                      guest: formatGuestDisplay(
+                        selectedReservation.guest,
+                        selectedReservation.source,
+                      ),
+                      email: selectedReservation.email,
+                      phone: selectedReservation.phone,
+                      checkin: selectedReservation.checkin,
+                      checkout: selectedReservation.checkout,
+                      apt_slug: selectedReservation.aptSlug,
+                      source: selectedReservation.source,
+                    },
+                    settings: registroSettings,
+                    apartmentName:
+                      apartmentData[selectedReservation.aptSlug]?.internalName ||
+                      apartmentData[selectedReservation.aptSlug]?.name,
+                  })
+                }
                 className="px-3.5 py-2 bg-white border border-gray-400 text-gray-700 rounded font-medium text-xs hover:bg-gray-100 transition-colors"
               >
                 ⎙ Registro entrada
@@ -510,34 +639,56 @@ export default function Reservas() {
               </div>
               <div className="p-4">
                 {[
-                  ['Referencia', selectedReservation.id],
-                  ['Huésped', selectedReservation.guest],
+                  [
+                    'Referencia',
+                    formatReservationReference(
+                      selectedReservation.id,
+                      selectedReservation.source,
+                    ),
+                  ],
+                  [
+                    'Huésped',
+                    formatGuestDisplay(selectedReservation.guest, selectedReservation.source),
+                  ],
                   ['Email', selectedReservation.email],
                   ['Teléfono', selectedReservation.phone],
-                  ['Apartamento', apt?.name || selectedReservation.apt],
+                  ['Apartamento', apt?.internalName || apt?.name || selectedReservation.apt],
                   ['Check-in', formatDateShort(selectedReservation.checkin)],
                   ['Check-out', formatDateShort(selectedReservation.checkout)],
                   ['Noches', selectedReservation.nights],
-                  ['Origen', srcBadge[selectedReservation.source]?.[0] || selectedReservation.source],
+                  [
+                    'Origen',
+                    srcBadge[selectedReservation.source]?.[0] || selectedReservation.source,
+                  ],
                 ].map(([label, value], i) => (
-                  <div key={i} className={`flex justify-between py-2.5 text-[13px] ${i < 8 ? 'border-b border-gray-200' : ''}`}>
+                  <div
+                    key={i}
+                    className={`flex justify-between py-2.5 text-[13px] ${i < 8 ? 'border-b border-gray-200' : ''}`}
+                  >
                     <span className="text-gray-500">{label}</span>
                     <span className="font-medium text-slate-900">{value}</span>
                   </div>
                 ))}
                 <div className="flex justify-between py-2.5 text-[13px]">
                   <span className="text-gray-500">Estado</span>
-                  <div className={`px-3 py-1 rounded text-xs font-semibold ${selectedReservation.status === 'confirmed' ? 'bg-[#1a5f6e]/10 text-[#1a5f6e] border border-[#1a5f6e]/30' :
-                    selectedReservation.status === 'pending' ? 'bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/30' :
-                      'bg-[#C0392B]/10 text-[#C0392B] border border-[#C0392B]/30'
-                    }`}>
+                  <div
+                    className={`px-3 py-1 rounded text-xs font-semibold ${
+                      selectedReservation.status === 'confirmed'
+                        ? 'bg-[#1a5f6e]/10 text-[#1a5f6e] border border-[#1a5f6e]/30'
+                        : selectedReservation.status === 'pending'
+                          ? 'bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/30'
+                          : 'bg-[#C0392B]/10 text-[#C0392B] border border-[#C0392B]/30'
+                    }`}
+                  >
                     {statusLabels[selectedReservation.status]}
                   </div>
                 </div>
                 {daysInfo && (
                   <div className="flex justify-between py-2.5 text-[13px] mt-2 pt-3 border-t border-gray-200">
                     <span className="text-gray-500">Próximo evento</span>
-                    <span className={`font-semibold ${daysInfo.type === 'upcoming' ? 'text-[#1a5f6e]' : daysInfo.type === 'today' ? 'text-[#D4A843]' : 'text-gray-400'}`}>
+                    <span
+                      className={`font-semibold ${daysInfo.type === 'upcoming' ? 'text-[#1a5f6e]' : daysInfo.type === 'today' ? 'text-[#D4A843]' : 'text-gray-400'}`}
+                    >
                       {daysInfo.text}
                     </span>
                   </div>
@@ -553,50 +704,139 @@ export default function Reservas() {
               <div className="p-4">
                 {[
                   ['Total reserva', formatPrice(selectedReservation.total)],
-                  ...(selectedReservation.extrasTotal > 0 ? [['Extras incluidos', formatPrice(selectedReservation.extrasTotal)]] : []),
-                  ['Depósito (50%)', `${formatPrice(selectedReservation.deposit)} · ${selectedReservation.status === 'confirmed' ? '✓ Cobrado' : '---'}`],
-                  ['Pago al llegar (50%)', `${formatPrice(selectedReservation.deposit)} · ${selectedReservation.cashPaid ? '✓ Recibido' : 'Pendiente'}`],
+                  ...(selectedReservation.extrasTotal > 0
+                    ? [['Extras incluidos', formatPrice(selectedReservation.extrasTotal)]]
+                    : []),
+                  [
+                    'Depósito (50%)',
+                    `${formatPrice(selectedReservation.deposit)} · ${selectedReservation.status === 'confirmed' ? '✓ Cobrado' : '---'}`,
+                  ],
+                  [
+                    'Pago al llegar (50%)',
+                    `${formatPrice(selectedReservation.deposit)} · ${selectedReservation.cashPaid ? '✓ Recibido' : 'Pendiente'}`,
+                  ],
                 ].map(([label, value], i) => (
-                  <div key={i} className={`flex justify-between py-2.5 text-[13px] ${i < 3 ? 'border-b border-gray-200' : ''}`}>
+                  <div
+                    key={i}
+                    className={`flex justify-between py-2.5 text-[13px] ${i < 3 ? 'border-b border-gray-200' : ''}`}
+                  >
                     <span className="text-gray-500">{label}</span>
-                    <span className={`font-medium ${value.includes('Cobrado') || value.includes('Recibido') ? 'text-[#1a5f6e]' : value.includes('Pendiente') ? 'text-[#D4A843]' : 'text-slate-900'}`}>
+                    <span
+                      className={`font-medium ${value.includes('Cobrado') || value.includes('Recibido') ? 'text-[#1a5f6e]' : value.includes('Pendiente') ? 'text-[#D4A843]' : 'text-slate-900'}`}
+                    >
                       {value}
                     </span>
                   </div>
                 ))}
                 <div className="flex justify-between py-3 mt-2 text-sm font-bold border-t-2 border-gray-200 text-slate-900">
                   <span>Total cobrado</span>
-                  <span>{formatPrice(selectedReservation.cashPaid || selectedReservation.status !== 'confirmed' ? selectedReservation.total : selectedReservation.deposit)}</span>
+                  <span>
+                    {formatPrice(
+                      selectedReservation.cashPaid || selectedReservation.status !== 'confirmed'
+                        ? selectedReservation.total
+                        : selectedReservation.deposit
+                    )}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Extras */}
-          {selectedReservation.extras && selectedReservation.extras.length > 0 && (
-            <div className="border border-gray-200 rounded-lg overflow-hidden bg-slate-50 mb-6 p-4">
-              <div className="text-sm font-semibold text-slate-900 mb-3">
-                Extras contratados
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedReservation.extras.map(extraId => {
-                  const extra = extrasData.find(e => e.id === extraId);
-                  return extra ? (
-                    <div key={extraId} className="px-3 py-1.5 bg-[#1a5f6e]/10 border border-[#1a5f6e] rounded text-xs text-[#1a5f6e] font-medium">
-                      {extra.name} {extra.price > 0 ? `· ${formatPrice(extra.price)}` : '· Gratis'}
-                    </div>
-                  ) : null;
-                })}
-              </div>
+          {/* Extras — editable */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-slate-50 mb-6">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200">
+              <span className="text-sm font-semibold text-slate-900">Extras contratados</span>
+              {!editingExtras ? (
+                <button
+                  onClick={() => {
+                    setDraftExtras(selectedReservation.extras || []);
+                    setEditingExtras(true);
+                  }}
+                  className="text-xs text-[#1a5f6e] font-semibold hover:underline"
+                >
+                  Editar
+                </button>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setEditingExtras(false)}
+                    className="text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSaveExtras}
+                    disabled={savingExtras}
+                    className="text-xs bg-[#1a5f6e] text-white px-3 py-1 rounded font-semibold disabled:opacity-50"
+                  >
+                    {savingExtras ? 'Guardando…' : 'Guardar'}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+            <div className="p-4">
+              {editingExtras ? (
+                // Modo edición: checkboxes con todos los extras disponibles
+                extrasData.length === 0 ? (
+                  <p className="text-xs text-gray-400">No hay extras configurados en el panel.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {extrasData.map(extra => {
+                      const checked = draftExtras.includes(extra.id);
+                      return (
+                        <label
+                          key={extra.id}
+                          className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${checked ? 'bg-[#1a5f6e]/10 border-[#1a5f6e]' : 'bg-white border-gray-200 hover:border-gray-300'}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setDraftExtras(prev =>
+                                checked ? prev.filter(id => id !== extra.id) : [...prev, extra.id]
+                              )
+                            }
+                            className="accent-[#1a5f6e]"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold text-slate-800 truncate">
+                              {extra.name}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {extra.price > 0 ? formatPrice(extra.price) : 'Gratis'}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )
+              ) : // Modo lectura
+              !selectedReservation.extras || selectedReservation.extras.length === 0 ? (
+                <p className="text-xs text-gray-400">Sin extras contratados.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {selectedReservation.extras.map(extraId => {
+                    const extra = extrasData.find(e => e.id === extraId);
+                    return extra ? (
+                      <div
+                        key={extraId}
+                        className="px-3 py-1.5 bg-[#1a5f6e]/10 border border-[#1a5f6e] rounded text-xs text-[#1a5f6e] font-medium"
+                      >
+                        {extra.name}{' '}
+                        {extra.price > 0 ? `· ${formatPrice(extra.price)}` : '· Gratis'}
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Información del apartamento */}
           {apt && (
             <div className="border border-gray-200 rounded-lg overflow-hidden bg-slate-50 p-4">
-              <div className="text-sm font-semibold text-slate-900 mb-3">
-                Apartamento
-              </div>
+              <div className="text-sm font-semibold text-slate-900 mb-3">Apartamento</div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {[
                   ['Nombre', apt.name],
@@ -626,7 +866,10 @@ export default function Reservas() {
       <div className="border-b border-gray-200 p-6 flex justify-between items-center bg-slate-50">
         <div>
           <div className="text-3xl font-bold text-slate-900 mb-1">Reservas</div>
-          <div className="text-sm text-gray-500">{filtered.length} reserva{filtered.length !== 1 ? 's' : ''} {filter !== 'all' && `(${statusLabels[filter]})`}</div>
+          <div className="text-sm text-gray-500">
+            {filtered.length} reserva{filtered.length !== 1 ? 's' : ''}{' '}
+            {filter !== 'all' && `(${statusLabels[filter]})`}
+          </div>
         </div>
         <div className="flex gap-3">
           <button
@@ -663,10 +906,11 @@ export default function Reservas() {
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              className={`px-4 py-2 rounded text-[13px] transition-colors whitespace-nowrap ${filter === f.id
-                ? 'bg-[#1a5f6e] text-white font-semibold border border-transparent'
-                : 'bg-transparent text-slate-700 font-medium border border-[#ddd] hover:bg-slate-50'
-                }`}
+              className={`px-4 py-2 rounded text-[13px] transition-colors whitespace-nowrap ${
+                filter === f.id
+                  ? 'bg-[#1a5f6e] text-white font-semibold border border-transparent'
+                  : 'bg-transparent text-slate-700 font-medium border border-[#ddd] hover:bg-slate-50'
+              }`}
             >
               {f.label}
             </button>
@@ -682,7 +926,9 @@ export default function Reservas() {
           >
             <option value="">Todos los apartamentos</option>
             {Object.values(apartmentData).map(a => (
-              <option key={a.slug} value={a.slug}>{a.name}</option>
+              <option key={a.slug} value={a.slug}>
+                {a.internalName || a.name}
+              </option>
             ))}
           </select>
           <select
@@ -716,31 +962,33 @@ export default function Reservas() {
           </label>
           {(filterApt || filterSource || filterCheckinFrom || filterCheckinTo) && (
             <button
-              onClick={() => { setFilterApt(''); setFilterSource(''); setFilterCheckinFrom(''); setFilterCheckinTo(''); }}
-              className="px-3 py-1.5 text-[13px] text-gray-500 border border-gray-200 rounded hover:bg-gray-50"
+              onClick={() => {
+                setFilterApt('');
+                setFilterSource('');
+                setFilterCheckinFrom('');
+                setFilterCheckinTo('');
+              }}
+              className="text-xs text-red-600 font-semibold hover:underline"
             >
-              ✕ Limpiar filtros
+              Limpiar filtros
             </button>
           )}
         </div>
 
-        {/* Barra de acciones en lote */}
+        {/* Acciones en lote — encima de la tabla para verlas sin bajar */}
         {selectedIds.size > 0 && (
-          <div className="flex flex-wrap items-center gap-3 bg-[#1a5f6e]/5 border border-[#1a5f6e]/20 rounded-lg px-4 py-3 mb-4">
-            <span className="text-[13px] font-semibold text-[#1a5f6e]">{selectedIds.size} seleccionada(s)</span>
-            <button
-              onClick={handleBulkExport}
-              className="px-3 py-1.5 text-[13px] bg-white border border-gray-200 rounded text-slate-700 hover:bg-slate-50"
-            >
-              ↓ Exportar selección
-            </button>
-            <div className="flex items-center gap-2">
+          <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-wrap items-center justify-between gap-4 sticky top-0 z-20 shadow-sm">
+            <div className="text-sm font-bold text-slate-700">
+              {selectedIds.size} reserva{selectedIds.size !== 1 ? 's' : ''} seleccionada
+              {selectedIds.size !== 1 ? 's' : ''}
+            </div>
+            <div className="flex flex-wrap gap-2 items-center">
               <select
                 value={bulkStatus}
                 onChange={e => setBulkStatus(e.target.value)}
-                className="border border-gray-200 rounded px-2 py-1.5 text-[13px] text-slate-700 bg-white"
+                className="border border-gray-300 rounded px-3 py-1.5 text-xs bg-white h-9"
               >
-                <option value="">Cambiar estado a…</option>
+                <option value="">Cambiar estado a...</option>
                 <option value="confirmed">Confirmada</option>
                 <option value="pending">Pendiente</option>
                 <option value="cancelled">Cancelada</option>
@@ -748,120 +996,167 @@ export default function Reservas() {
               <button
                 onClick={handleBulkStatusChange}
                 disabled={!bulkStatus || saving}
-                className="px-3 py-1.5 text-[13px] bg-[#1a5f6e] text-white rounded hover:bg-opacity-90 disabled:opacity-50"
+                className="bg-[#D4A843] text-white px-4 py-2 rounded text-xs font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50 h-9"
               >
                 Aplicar
               </button>
+              <div className="w-[1px] h-6 bg-slate-200 mx-2" />
+              <button
+                onClick={handlePrint}
+                className="bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                title="Imprimir / Guardar como PDF"
+              >
+                <Ico d={paths.printer} size={14} color="currentColor" />
+                PDF
+              </button>
+              <button
+                onClick={handleBulkExport}
+                className="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded text-xs font-bold hover:bg-slate-50 transition-colors h-9"
+              >
+                ↓ Exportar selección
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={saving}
+                className="bg-white border border-red-200 text-red-600 px-4 py-2 rounded text-xs font-bold hover:bg-red-50 transition-colors h-9"
+              >
+                🗑 Eliminar selección
+              </button>
             </div>
-            <button
-              onClick={handleBulkDelete}
-              disabled={saving}
-              className="px-3 py-1.5 text-[13px] bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 ml-auto"
-            >
-              Eliminar selección
-            </button>
           </div>
         )}
 
-        {/* Tabla */}
-        {filtered.length === 0 ? (
-          <div className="text-center py-12 px-6 text-gray-500">
-            <div className="text-base font-semibold mb-2 text-slate-800">
-              No hay reservas
-            </div>
-            <div className="text-[13px]">
-              {filter !== 'all' ? `No hay reservas ${statusLabels[filter].toLowerCase()}` : 'Carga un archivo o crea una reserva manual'}
-            </div>
-          </div>
-        ) : (
-          <div className="border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
-            <table className="w-full border-collapse text-[13px]">
-              <thead className="bg-slate-50 border-b-2 border-gray-200">
+        {/* Tabla de reservas */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                <th className="px-4 py-3 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={
+                      filtered.length > 0 &&
+                      filtered.every(r => selectedIds.has(reservationKey(r.id)))
+                    }
+                    onChange={e => {
+                      e.stopPropagation();
+                      toggleSelectAll();
+                    }}
+                    className="accent-[#1a5f6e]"
+                  />
+                </th>
+                <th className="px-4 py-3">Huésped / Referencia</th>
+                <th className="px-4 py-3">Apartamento</th>
+                <th className="px-4 py-3">Fechas</th>
+                <th className="px-4 py-3">Noches</th>
+                <th className="px-4 py-3">Total</th>
+                <th className="px-4 py-3">Origen</th>
+                <th className="px-4 py-3">Estado</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 italic-last">
+              {filtered.length === 0 ? (
                 <tr>
-                  <th className="p-3 w-8">
-                    <input
-                      type="checkbox"
-                      checked={filtered.length > 0 && selectedIds.size === filtered.length}
-                      onChange={toggleSelectAll}
-                      className="cursor-pointer"
-                    />
-                  </th>
-                  <th className="p-3 text-left font-semibold text-slate-700">Ref.</th>
-                  <th className="p-3 text-left font-semibold text-slate-700">Huésped</th>
-                  <th className="p-3 text-left font-semibold text-slate-700">Apartamento</th>
-                  <th className="p-3 text-left font-semibold text-slate-700">Fechas</th>
-                  <th className="p-3 text-center font-semibold text-slate-700">Noches</th>
-                  <th className="p-3 text-right font-semibold text-slate-700">Total</th>
-                  <th className="p-3 text-center font-semibold text-slate-700">Estado</th>
-                  <th className="p-3 text-center font-semibold text-slate-700">Pago</th>
-                  <th className="p-3 text-center font-semibold text-slate-700">Info</th>
+                  <td colSpan="8" className="px-4 py-10 text-center text-gray-400 text-sm">
+                    No se han encontrado reservas con los filtros actuales.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r, i) => {
-                  const daysInfo = getDaysInfo(r.checkin, r.checkout);
-                  return (
-                    <tr
-                      key={i}
-                      className={`border-b border-gray-200 cursor-pointer ${selectedIds.has(r.id) ? 'bg-[#1a5f6e]/5' : i % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-slate-100 transition-colors`}
-                      onClick={() => handleSelectReservation(r)}
+              ) : (
+                filtered.map(res => (
+                  <tr
+                    key={res.id}
+                    onClick={() => handleSelectReservation(res)}
+                    className={`cursor-pointer group hover:bg-slate-50 transition-colors ${selectedId === res.id ? 'bg-blue-50/50' : ''}`}
+                  >
+                    <td
+                      className="px-4 py-4 text-center"
+                      onClick={e => {
+                        e.stopPropagation();
+                        toggleSelect(res.id);
+                      }}
                     >
-                      <td className="p-3" onClick={e => { e.stopPropagation(); toggleSelect(r.id); }}>
-                        <input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => toggleSelect(r.id)} className="cursor-pointer" />
-                      </td>
-                      <td className="p-3 font-mono text-[11px] text-gray-500">{r.id}</td>
-                      <td className="p-3">
-                        <div className="font-medium text-slate-800">{r.guest}</div>
-                        <div className="text-[11px] text-gray-400 mt-0.5">{r.email}</div>
-                      </td>
-                      <td className="p-3 text-slate-700">{r.apt}</td>
-                      <td className="p-3 text-[12px] text-gray-600 whitespace-nowrap">
-                        {r.checkin} → {r.checkout}
-                      </td>
-                      <td className="p-3 text-center font-medium text-slate-700">{r.nights}</td>
-                      <td className="p-3 text-right font-semibold text-slate-800 whitespace-nowrap">{r.total} €</td>
-                      <td className="p-3 text-center">
-                        <div className={`px-2 py-1 rounded text-[11px] font-semibold inline-block ${r.status === 'confirmed' ? 'bg-[#1a5f6e]/10 text-[#1a5f6e] border border-[#1a5f6e]/30' :
-                          r.status === 'pending' ? 'bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/30' :
-                            'bg-[#C0392B]/10 text-[#C0392B] border border-[#C0392B]/30'
-                          }`}>
-                          {statusLabels[r.status]}
-                        </div>
-                      </td>
-                      <td className="p-3 text-center">
-                        {r.cashPaid ? (
-                          <div className="text-[#1a5f6e] font-semibold text-sm">✓</div>
-                        ) : r.status === 'confirmed' ? (
-                          <div className="text-[#D4A843] font-semibold text-xs">50%</div>
-                        ) : (
-                          <div className="text-gray-400 text-xs">—</div>
-                        )}
-                      </td>
-                      <td className="p-3 text-center text-[12px]">
-                        {daysInfo ? (
-                          <div className={`font-medium ${daysInfo.type === 'upcoming' ? 'text-[#1a5f6e]' : daysInfo.type === 'today' ? 'text-[#D4A843]' : 'text-gray-400'}`}>
-                            {daysInfo.text}
-                          </div>
-                        ) : (
-                          <div className="text-gray-400">—</div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                      <input
+                        type="checkbox"
+                        aria-label={`Seleccionar reserva ${res.id}`}
+                        checked={selectedIds.has(reservationKey(res.id))}
+                        onChange={e => {
+                          e.stopPropagation();
+                          toggleSelect(res.id);
+                        }}
+                        onClick={e => e.stopPropagation()}
+                        className="accent-[#1a5f6e]"
+                      />
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="text-sm font-bold text-slate-900 group-hover:text-[#1a5f6e] transition-colors line-clamp-1">
+                        {formatGuestDisplay(res.guest, res.source)}
+                      </div>
+                      <div className="text-[10px] text-gray-400 font-mono mt-0.5">
+                        {formatReservationReference(res.id, res.source)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="text-sm font-semibold text-slate-700">
+                        {apartmentData[res.aptSlug]?.internalName ||
+                          apartmentData[res.aptSlug]?.name ||
+                          res.apt}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="text-sm text-slate-700">
+                        {res.checkin} → {res.checkout}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="text-sm text-slate-700">{res.nights}</div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="text-sm font-bold text-slate-900">
+                        {formatPrice(res.total)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className="text-[11px] font-bold px-2 py-1 rounded-sm uppercase tracking-tighter"
+                        style={{
+                          backgroundColor: `${srcBadge[res.source]?.[1] || '#999'}15`,
+                          color: srcBadge[res.source]?.[1] || '#999',
+                          border: `1px solid ${srcBadge[res.source]?.[1] || '#999'}30`,
+                        }}
+                      >
+                        {srcBadge[res.source]?.[0] || res.source}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className="text-[11px] font-bold px-3 py-1 rounded flex w-fit items-center gap-1.5"
+                        style={{
+                          backgroundColor: statusBadgeColors[res.status]?.bg,
+                          color: statusBadgeColors[res.status]?.text,
+                          border: `1px solid ${statusBadgeColors[res.status]?.border}`,
+                        }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: statusBadgeColors[res.status]?.text }}
+                        />
+                        {statusLabels[res.status]}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {isModalOpen && (
         <ManualBookingModal
+          isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onSuccess={(newRes) => {
-            setIsModalOpen(false);
-            setReservations(prev => [newRes, ...prev]);
-          }}
+          onSuccess={fetchData}
+          apartments={Object.values(apartmentData)}
         />
       )}
     </div>

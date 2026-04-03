@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 /**
  * Hook to detect responsive breakpoints
  * Returns an object with boolean flags for different screen sizes
- * 
+ *
  * @returns {Object} Object with properties: isMobile, isTablet, isDesktop, screenWidth
  */
 interface ScreenSize {
@@ -39,16 +39,16 @@ export const useResponsive = (): ScreenSize => {
     handleResize();
 
     // Add event listener with debounce
-    let resizeTimer;
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const debouncedResize = () => {
-      clearTimeout(resizeTimer);
+      if (resizeTimer !== null) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(handleResize, 150);
     };
 
     window.addEventListener('resize', debouncedResize);
     return () => {
       window.removeEventListener('resize', debouncedResize);
-      clearTimeout(resizeTimer);
+      if (resizeTimer !== null) clearTimeout(resizeTimer);
     };
   }, []);
 
@@ -90,7 +90,12 @@ export const useTouchDevice = () => {
  */
 export const useOrientation = () => {
   const [orientation, setOrientation] = useState({
-    orientation: typeof window !== 'undefined' ? window.innerHeight > window.innerWidth ? 'portrait' : 'landscape' : 'portrait',
+    orientation:
+      typeof window !== 'undefined'
+        ? window.innerHeight > window.innerWidth
+          ? 'portrait'
+          : 'landscape'
+        : 'portrait',
     isPortrait: typeof window !== 'undefined' ? window.innerHeight > window.innerWidth : true,
     isLandscape: typeof window !== 'undefined' ? window.innerHeight <= window.innerWidth : false,
   });
@@ -128,7 +133,7 @@ export const usePrefersReducedMotion = () => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
 
-    const handleChange = (e) => setPrefersReducedMotion(e.matches);
+    const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addListener(handleChange);
 
     return () => mediaQuery.removeListener(handleChange);
@@ -148,7 +153,7 @@ export const usePrefersDarkMode = () => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     setPrefersDarkMode(mediaQuery.matches);
 
-    const handleChange = (e) => setPrefersDarkMode(e.matches);
+    const handleChange = (e: MediaQueryListEvent) => setPrefersDarkMode(e.matches);
     mediaQuery.addListener(handleChange);
 
     return () => mediaQuery.removeListener(handleChange);

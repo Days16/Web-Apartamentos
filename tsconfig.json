@@ -12,8 +12,21 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@services/*": ["./src/services/*"],
+      "@contexts/*": ["./src/contexts/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@i18n/*": ["./src/i18n/*"],
+      "@lib/*": ["./src/lib/*"]
+    }
   },
   "include": ["src"]
 }

@@ -18,11 +18,11 @@ export function trackEvent(name: string, props: Record<string, unknown> = {}): v
 }
 
 export const EVENTS = {
-  APARTMENT_VIEW:   'apartment_view',
-  BOOKING_START:    'booking_start',
+  APARTMENT_VIEW: 'apartment_view',
+  BOOKING_START: 'booking_start',
   BOOKING_COMPLETE: 'booking_complete',
-  SEARCH:           'search',
-  CONTACT_SUBMIT:   'contact_submit',
+  SEARCH: 'search',
+  CONTACT_SUBMIT: 'contact_submit',
 } as const;
 
-export type EventName = typeof EVENTS[keyof typeof EVENTS];
+export type EventName = (typeof EVENTS)[keyof typeof EVENTS];

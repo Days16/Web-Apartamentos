@@ -15,6 +15,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -35,8 +36,14 @@ scripts/crear-reserva-prueba.js
 scripts/test-email.js
 scripts/test-monthly-report.js
 scripts/test-review-flow.js
+scripts/test-checkin-reminder.js
+scripts/test-ical-sync.js
+scripts/test-checkin-info.js
 scripts/test-stripe-payment.js
 illa-pancha-web-e549a08b5e61.json
 test-results
 playwright-report
 CLAUDE.md
+.agents
+.vscode
+skills-lock.json

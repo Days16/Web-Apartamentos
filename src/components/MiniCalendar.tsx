@@ -3,7 +3,12 @@ import { dateToStr, MESES } from '../utils/format';
 
 const DAY_NAMES = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
-export default function MiniCalendar({ occupiedDays, T }) {
+interface CalT {
+  common: { occupied: string; available: string; past: string };
+  detail: { available: string; occupied: string };
+}
+
+export default function MiniCalendar({ occupiedDays, T }: { occupiedDays: string[]; T: CalT }) {
   const [monthOffset, setMonthOffset] = useState(0);
   const base = new Date();
   base.setDate(1);
@@ -19,9 +24,11 @@ export default function MiniCalendar({ occupiedDays, T }) {
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  const isPast = (day) => {
+  const isPast = (day: number | null) => {
     if (!day) return false;
-    return new Date(year, month, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return (
+      new Date(year, month, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    );
   };
 
   return (
@@ -30,17 +37,25 @@ export default function MiniCalendar({ occupiedDays, T }) {
         <button
           onClick={() => setMonthOffset(o => o - 1)}
           className="bg-white border border-gray-300 px-2.5 py-1 cursor-pointer text-xs text-gray-700 hover:bg-gray-50 rounded"
-        >‹</button>
+        >
+          ‹
+        </button>
         <div className="font-serif text-lg text-navy font-bold">
           {MESES[month].charAt(0).toUpperCase() + MESES[month].slice(1)} {year}
         </div>
         <button
           onClick={() => setMonthOffset(o => o + 1)}
           className="bg-white border border-gray-300 px-2.5 py-1 cursor-pointer text-xs text-gray-700 hover:bg-gray-50 rounded"
-        >›</button>
+        >
+          ›
+        </button>
       </div>
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {DAY_NAMES.map(d => <div key={d} className="text-center text-xs font-semibold text-gray-600">{d}</div>)}
+        {DAY_NAMES.map(d => (
+          <div key={d} className="text-center text-xs font-semibold text-gray-600">
+            {d}
+          </div>
+        ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {cells.map((day, i) => {

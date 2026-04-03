@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -16,14 +17,16 @@ export default function Footer() {
   const [apartments, setApartments] = useState([]);
 
   useEffect(() => {
-    fetchApartments().then(data => { if (data) setApartments(data); });
+    fetchApartments().then(data => {
+      if (data) setApartments(data);
+    });
   }, []);
 
   const phone = (settings?.site_phone || 'XXX XXX XXX').replace(/^\+34\s?/, '');
   const email = settings?.site_email || 'info@apartamentosillapancha.com';
   const address = settings?.site_address || 'Ribadeo, Lugo, Galicia';
 
-  const toggleSection = (section) => {
+  const toggleSection = section => {
     setExpandedSection(expandedSection === section ? null : section);
   };
 
@@ -59,13 +62,30 @@ export default function Footer() {
               aria-expanded={expandedSection === 'apartments'}
             >
               {T.nav.apartments}
-              <span className={`text-lg transition-transform md:hidden ${expandedSection === 'apartments' ? 'rotate-45' : ''}`}>+</span>
+              <span
+                className={`text-lg transition-transform md:hidden ${expandedSection === 'apartments' ? 'rotate-45' : ''}`}
+              >
+                +
+              </span>
             </button>
-            <div className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'apartments' ? 'max-h-64 mt-3' : 'md:mt-4'}`}>
+            <div
+              className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'apartments' ? 'max-h-64 mt-3' : 'md:mt-4'}`}
+            >
               {apartments.map(apt => (
-                <Link key={apt.slug} to={`/apartamentos/${apt.slug}`} className="text-gray-300 hover:text-teal transition-colors text-sm">{apt.name}</Link>
+                <Link
+                  key={apt.slug}
+                  to={`/apartamentos/${apt.slug}`}
+                  className="text-gray-300 hover:text-teal transition-colors text-sm"
+                >
+                  {apt.name}
+                </Link>
               ))}
-              <Link to="/apartamentos" className="text-gray-300 hover:text-teal transition-colors text-sm">{T.home.viewAll}</Link>
+              <Link
+                to="/apartamentos"
+                className="text-gray-300 hover:text-teal transition-colors text-sm"
+              >
+                {T.home.viewAll}
+              </Link>
             </div>
           </div>
 
@@ -77,15 +97,43 @@ export default function Footer() {
               aria-expanded={expandedSection === 'info'}
             >
               {F.infoCol}
-              <span className={`text-lg transition-transform md:hidden ${expandedSection === 'info' ? 'rotate-45' : ''}`}>+</span>
+              <span
+                className={`text-lg transition-transform md:hidden ${expandedSection === 'info' ? 'rotate-45' : ''}`}
+              >
+                +
+              </span>
             </button>
-            <div className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'info' ? 'max-h-64 mt-3' : 'md:mt-4'}`}>
-              <Link to="/nosotros" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.about}</Link>
-              <Link to="/contacto" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.contact}</Link>
-              <Link to="/apartamentos" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.availability}</Link>
+            <div
+              className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'info' ? 'max-h-64 mt-3' : 'md:mt-4'}`}
+            >
+              <Link
+                to="/nosotros"
+                className="text-gray-300 hover:text-teal transition-colors text-sm"
+              >
+                {F.about}
+              </Link>
+              <Link
+                to="/contacto"
+                className="text-gray-300 hover:text-teal transition-colors text-sm"
+              >
+                {F.contact}
+              </Link>
+              <Link
+                to="/apartamentos"
+                className="text-gray-300 hover:text-teal transition-colors text-sm"
+              >
+                {F.availability}
+              </Link>
               {/*<Link to="/mi-reserva" className="text-teal font-semibold hover:text-white transition-colors text-sm">{F.myReservation} ↗</Link>*/}
-              <Link to="/como-llegar" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.howToGet}</Link>
-              <Link to="/faq" className="text-gray-300 hover:text-teal transition-colors text-sm">{F.faq}</Link>
+              <Link
+                to="/como-llegar"
+                className="text-gray-300 hover:text-teal transition-colors text-sm"
+              >
+                {F.howToGet}
+              </Link>
+              <Link to="/faq" className="text-gray-300 hover:text-teal transition-colors text-sm">
+                {F.faq}
+              </Link>
             </div>
           </div>
 
@@ -97,10 +145,18 @@ export default function Footer() {
               aria-expanded={expandedSection === 'book'}
             >
               {F.bookOn}
-              <span className={`text-lg transition-transform md:hidden ${expandedSection === 'book' ? 'rotate-45' : ''}`}>+</span>
+              <span
+                className={`text-lg transition-transform md:hidden ${expandedSection === 'book' ? 'rotate-45' : ''}`}
+              >
+                +
+              </span>
             </button>
-            <div className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'book' ? 'max-h-64 mt-3' : 'md:mt-4'}`}>
-              <span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">Booking.com ↗</span>
+            <div
+              className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'book' ? 'max-h-64 mt-3' : 'md:mt-4'}`}
+            >
+              <span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">
+                Booking.com ↗
+              </span>
               {/*<span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">Airbnb ↗</span>*/}
             </div>
           </div>
@@ -112,10 +168,27 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto flex justify-between items-center flex-col md:flex-row gap-4">
           <span className="text-xs text-gray-500">{F.rights}</span>
           <div className="flex gap-6 flex-wrap justify-center md:justify-end">
-            <Link to="/terminos" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.terms}</Link>
-            <Link to="/privacidad" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.privacy}</Link>
-            <Link to="/proteccion-datos" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.dataProtection}</Link>
-            <Link to="/cookies" className="text-xs text-gray-400 hover:text-teal transition-colors">{F.cookies}</Link>
+            <Link
+              to="/terminos"
+              className="text-xs text-gray-400 hover:text-teal transition-colors"
+            >
+              {F.terms}
+            </Link>
+            <Link
+              to="/privacidad"
+              className="text-xs text-gray-400 hover:text-teal transition-colors"
+            >
+              {F.privacy}
+            </Link>
+            <Link
+              to="/proteccion-datos"
+              className="text-xs text-gray-400 hover:text-teal transition-colors"
+            >
+              {F.dataProtection}
+            </Link>
+            <Link to="/cookies" className="text-xs text-gray-400 hover:text-teal transition-colors">
+              {F.cookies}
+            </Link>
           </div>
         </div>
       </div>

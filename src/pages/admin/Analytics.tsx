@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { fetchAllReservations, fetchAllApartments } from '../../services/supabaseService';
@@ -6,14 +7,18 @@ import Ico, { paths } from '../../components/Ico';
 import { exportAnalytics } from '../../utils/exportExcel';
 import { useToast } from '../../contexts/ToastContext';
 
-const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 function diffDays(a: string, b: string) {
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 }
 
 function fmt(n: number) {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 function pct(n: number, total: number) {
@@ -52,11 +57,16 @@ export default function Analytics() {
   // ── Filtrar por año seleccionado ──────────────────────────────────────────
   const confirmed = reservations.filter(r => r.status !== 'cancelled');
   const yearRes = confirmed.filter(r => r.checkin?.startsWith(String(year)));
-  const allYears = [...new Set(reservations.map(r => r.checkin?.slice(0, 4)).filter(Boolean))].sort().reverse();
+  const allYears = [...new Set(reservations.map(r => r.checkin?.slice(0, 4)).filter(Boolean))]
+    .sort()
+    .reverse();
 
   // ── KPIs globales (todos los años, solo confirmadas) ──────────────────────
   const totalRevenue = confirmed.reduce((s, r) => s + (r.total || 0), 0);
-  const totalNights = confirmed.reduce((s, r) => s + (r.nights || diffDays(r.checkin, r.checkout)), 0);
+  const totalNights = confirmed.reduce(
+    (s, r) => s + (r.nights || diffDays(r.checkin, r.checkout)),
+    0
+  );
   const avgStay = confirmed.length ? (totalNights / confirmed.length).toFixed(1) : '0';
   const avgTicket = confirmed.length ? Math.round(totalRevenue / confirmed.length) : 0;
 
@@ -104,13 +114,15 @@ export default function Analytics() {
 
   // ── Por canal (año seleccionado) ──────────────────────────────────────────
   const allYearRes = reservations.filter(r => r.checkin?.startsWith(String(year)));
-  const bySource = ['web', 'manual', 'booking'].map(s => ({
-    key: s,
-    label: SOURCE_LABEL[s],
-    count: allYearRes.filter(r => r.source === s).length,
-    revenue: yearRes.filter(r => r.source === s).reduce((sum, r) => sum + (r.total || 0), 0),
-    color: SOURCE_COLOR[s],
-  })).filter(s => s.count > 0);
+  const bySource = ['web', 'manual', 'booking']
+    .map(s => ({
+      key: s,
+      label: SOURCE_LABEL[s],
+      count: allYearRes.filter(r => r.source === s).length,
+      revenue: yearRes.filter(r => r.source === s).reduce((sum, r) => sum + (r.total || 0), 0),
+      color: SOURCE_COLOR[s],
+    }))
+    .filter(s => s.count > 0);
   const totalSource = allYearRes.length;
 
   // ── Ocupación por mes (noches ocupadas / días del mes) ────────────────────
@@ -126,8 +138,12 @@ export default function Analytics() {
       {/* Cabecera */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-serif font-semibold text-navy dark:text-white">Analíticas</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Métricas de reservas e ingresos de tus apartamentos</p>
+          <h1 className="text-2xl font-serif font-semibold text-navy dark:text-white">
+            Analíticas
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Métricas de reservas e ingresos de tus apartamentos
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -136,11 +152,26 @@ export default function Analytics() {
             className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-navy dark:text-white"
           >
             {(allYears.length ? allYears : [String(new Date().getFullYear())]).map(y => (
-              <option key={y} value={y}>{y}</option>
+              <option key={y} value={y}>
+                {y}
+              </option>
             ))}
           </select>
           <button
-            onClick={() => exportAnalytics({ byMonth: occupancy, aptStats, bySource, byStatus, year, totalRevenue, yearRevenue, totalNights, avgStay, avgTicket })}
+            onClick={() =>
+              exportAnalytics({
+                byMonth: occupancy,
+                aptStats,
+                bySource,
+                byStatus,
+                year,
+                totalRevenue,
+                yearRevenue,
+                totalNights,
+                avgStay,
+                avgTicket,
+              })
+            }
             className="flex items-center gap-2 px-4 py-2 bg-[#1a5f6e] text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition-colors"
           >
             <Ico d={paths.upload} size={14} color="currentColor" />
@@ -180,15 +211,47 @@ export default function Analytics() {
       {/* KPIs globales */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Ingresos totales', value: fmt(totalRevenue), sub: 'histórico', icon: paths.cash, color: '#1a5f6e' },
-          { label: `Ingresos ${year}`, value: fmt(yearRevenue), sub: `${yearRes.length} reservas`, icon: paths.trend, color: '#D4A843' },
-          { label: 'Estancia media', value: `${avgStay} noches`, sub: 'histórico', icon: paths.cal, color: '#6366f1' },
-          { label: 'Ticket medio', value: fmt(avgTicket), sub: 'por reserva', icon: paths.tag, color: '#0ea5e9' },
+          {
+            label: 'Ingresos totales',
+            value: fmt(totalRevenue),
+            sub: 'histórico',
+            icon: paths.cash,
+            color: '#1a5f6e',
+          },
+          {
+            label: `Ingresos ${year}`,
+            value: fmt(yearRevenue),
+            sub: `${yearRes.length} reservas`,
+            icon: paths.trend,
+            color: '#D4A843',
+          },
+          {
+            label: 'Estancia media',
+            value: `${avgStay} noches`,
+            sub: 'histórico',
+            icon: paths.cal,
+            color: '#6366f1',
+          },
+          {
+            label: 'Ticket medio',
+            value: fmt(avgTicket),
+            sub: 'por reserva',
+            icon: paths.tag,
+            color: '#0ea5e9',
+          },
         ].map(k => (
-          <div key={k.label} className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div
+            key={k.label}
+            className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700"
+          >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{k.label}</span>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: k.color + '20' }}>
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                {k.label}
+              </span>
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: k.color + '20' }}
+              >
                 <Ico d={k.icon} size={16} color={k.color} />
               </div>
             </div>
@@ -200,7 +263,9 @@ export default function Analytics() {
 
       {/* Ingresos por mes — barras */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-        <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">Ingresos por mes — {year}</h2>
+        <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">
+          Ingresos por mes — {year}
+        </h2>
         <div className="flex items-end gap-1 h-40">
           {byMonth.map(m => (
             <div key={m.label} className="flex-1 flex flex-col items-center gap-1 group">
@@ -223,39 +288,56 @@ export default function Analytics() {
           ))}
         </div>
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-4">
-          <span>Total {year}: <strong className="text-navy dark:text-white">{fmt(yearRevenue)}</strong></span>
-          <span>Reservas: <strong className="text-navy dark:text-white">{yearRes.length}</strong></span>
-          <span>Noches vendidas: <strong className="text-navy dark:text-white">{yearNights}</strong></span>
+          <span>
+            Total {year}: <strong className="text-navy dark:text-white">{fmt(yearRevenue)}</strong>
+          </span>
+          <span>
+            Reservas: <strong className="text-navy dark:text-white">{yearRes.length}</strong>
+          </span>
+          <span>
+            Noches vendidas: <strong className="text-navy dark:text-white">{yearNights}</strong>
+          </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Ocupación por mes */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">Ocupación estimada — {year}</h2>
+          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">
+            Ocupación estimada — {year}
+          </h2>
           <div className="space-y-2">
             {occupancy.map(m => (
               <div key={m.label} className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 dark:text-gray-400 w-7 shrink-0">{m.label}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 w-7 shrink-0">
+                  {m.label}
+                </span>
                 <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${m.rate}%`,
-                      backgroundColor: m.rate >= 80 ? '#1a5f6e' : m.rate >= 50 ? '#D4A843' : '#94a3b8',
+                      backgroundColor:
+                        m.rate >= 80 ? '#1a5f6e' : m.rate >= 50 ? '#D4A843' : '#94a3b8',
                     }}
                   />
                 </div>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 w-8 text-right shrink-0">{m.rate}%</span>
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 w-8 text-right shrink-0">
+                  {m.rate}%
+                </span>
               </div>
             ))}
           </div>
-          <p className="text-[10px] text-gray-400 mt-3">*Calculado sobre noches disponibles × apartamentos</p>
+          <p className="text-[10px] text-gray-400 mt-3">
+            *Calculado sobre noches disponibles × apartamentos
+          </p>
         </div>
 
         {/* Por canal */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">Reservas por canal — {year}</h2>
+          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">
+            Reservas por canal — {year}
+          </h2>
           {bySource.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">Sin datos para este año</p>
           ) : (
@@ -264,12 +346,17 @@ export default function Analytics() {
                 <div key={s.key}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                      <div
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: s.color }}
+                      />
                       <span className="text-sm text-gray-700 dark:text-gray-300">{s.label}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-gray-400">{s.count} res.</span>
-                      <span className="text-xs font-semibold text-navy dark:text-white">{pct(s.count, totalSource)}%</span>
+                      <span className="text-xs font-semibold text-navy dark:text-white">
+                        {pct(s.count, totalSource)}%
+                      </span>
                     </div>
                   </div>
                   <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
@@ -279,7 +366,9 @@ export default function Analytics() {
                     />
                   </div>
                   {s.revenue > 0 && (
-                    <div className="text-[11px] text-gray-400 mt-0.5 text-right">{fmt(s.revenue)}</div>
+                    <div className="text-[11px] text-gray-400 mt-0.5 text-right">
+                      {fmt(s.revenue)}
+                    </div>
                   )}
                 </div>
               ))}
@@ -291,18 +380,26 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Por apartamento */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">Por apartamento — {year}</h2>
+          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">
+            Por apartamento — {year}
+          </h2>
           {aptStats.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">Sin reservas confirmadas este año</p>
+            <p className="text-sm text-gray-400 text-center py-8">
+              Sin reservas confirmadas este año
+            </p>
           ) : (
             <div className="space-y-3">
               {aptStats.map((a: any) => (
                 <div key={a.name}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[60%]">{a.name}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[60%]">
+                      {a.name}
+                    </span>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-xs text-gray-400">{a.count} res.</span>
-                      <span className="text-xs font-semibold text-navy dark:text-white">{fmt(a.revenue)}</span>
+                      <span className="text-xs font-semibold text-navy dark:text-white">
+                        {fmt(a.revenue)}
+                      </span>
                     </div>
                   </div>
                   <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
@@ -319,18 +416,25 @@ export default function Analytics() {
 
         {/* Estado de reservas (histórico) */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">Estado de reservas — histórico</h2>
+          <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">
+            Estado de reservas — histórico
+          </h2>
           <div className="space-y-3">
             {byStatus.map(s => (
               <div key={s.key}>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                    <div
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{ backgroundColor: s.color }}
+                    />
                     <span className="text-sm text-gray-700 dark:text-gray-300">{s.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-400">{s.count} reservas</span>
-                    <span className="text-xs font-semibold text-navy dark:text-white">{pct(s.count, totalAll)}%</span>
+                    <span className="text-xs font-semibold text-navy dark:text-white">
+                      {pct(s.count, totalAll)}%
+                    </span>
                   </div>
                 </div>
                 <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
@@ -351,7 +455,9 @@ export default function Analytics() {
 
       {/* Reservas por mes — número */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-        <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">Reservas por mes — {year}</h2>
+        <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">
+          Reservas por mes — {year}
+        </h2>
         <div className="flex items-end gap-1 h-28">
           {byMonth.map(m => (
             <div key={m.label} className="flex-1 flex flex-col items-center gap-1 group">

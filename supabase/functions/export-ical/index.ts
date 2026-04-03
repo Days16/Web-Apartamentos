@@ -21,12 +21,36 @@ function escapeIcal(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+function foldLine(line: string): string {
+  if (line.length <= 75) return line;
+  let result = line.substring(0, 75);
+  let remaining = line.substring(75);
+  while (remaining.length > 0) {
+    result += "\r\n " + remaining.substring(0, 74);
+    remaining = remaining.substring(74);
+  }
+  return result;
+}
+
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
   const url = new URL(req.url);
   const slug = url.searchParams.get("slug");
 
   if (!slug) {
-    return new Response("Falta el parámetro ?slug=", { status: 400 });
+    return new Response("Falta el parámetro ?slug=", { 
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "text/plain" }
+    });
   }
 
   const supabase = createClient(
@@ -42,7 +66,10 @@ serve(async (req) => {
     .eq("status", "confirmed");
 
   if (error) {
-    return new Response("Error obteniendo reservas", { status: 500 });
+    return new Response("Error obteniendo reservas", { 
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "text/plain" }
+    });
   }
 
   const siteUrl = Deno.env.get("VITE_SITE_URL") || "https://www.apartamentosillapancha.com";
@@ -68,7 +95,7 @@ serve(async (req) => {
       "STATUS:CONFIRMED",
       "TRANSP:OPAQUE",
       "END:VEVENT",
-    ].join("\r\n");
+    ].map(foldLine).join("\r\n");
   });
 
   const ical = [
@@ -79,16 +106,20 @@ serve(async (req) => {
     "METHOD:PUBLISH",
     `X-WR-CALNAME:Illa Pancha - ${slug}`,
     "X-WR-TIMEZONE:Europe/Madrid",
+    "X-PUBLISHED-TTL:PT1H",
+    "REFRESH-INTERVAL;VALUE=DURATION:PT1H",
     ...events,
     "END:VCALENDAR",
-  ].join("\r\n");
+  ].map(foldLine).join("\r\n");
 
   return new Response(ical, {
     headers: {
+      ...corsHeaders,
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": `attachment; filename="${slug}.ics"`,
-      "Cache-Control": "no-cache",
-      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
     },
   });
 });

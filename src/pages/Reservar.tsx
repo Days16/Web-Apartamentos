@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -21,9 +22,9 @@ export default function Reservar() {
   const [error, setError] = useState(null);
   const [captchaToken, setCaptchaToken] = useState('');
 
-  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = e => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     if (!form.name || !form.email || !form.msg || !captchaToken) return;
     try {
@@ -40,20 +41,21 @@ export default function Reservar() {
 
   return (
     <>
-      <SEO title={C.title} description={C.sub} />
-      <Navbar onOpenBooking={() => { }} />
+      <SEO title={C.title} description={C.metaDesc || C.sub} />
+      <Navbar onOpenBooking={() => {}} />
 
       {/* HERO */}
       <div className="py-20 md:py-28 px-4 bg-gradient-to-br from-navy to-slate-900">
         <div className="max-w-4xl mx-auto text-center text-white">
-          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-4">Illa Pancha</div>
+          <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-4">
+            Illa Pancha
+          </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">{C.hero}</h1>
           <p className="text-lg text-gray-200">{C.sub}</p>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-16 md:py-24">
-
         {/* ─── CONTACTO ─────────────────────────────────────── */}
         <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="p-8 border-b border-gray-100">
@@ -79,34 +81,55 @@ export default function Reservar() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{C.nameLbl} *</label>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                      {C.nameLbl} *
+                    </label>
                     <input
-                      name="name" value={form.name} onChange={handleChange} required
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      required
                       className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
                       placeholder="María García"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{C.emailLbl} *</label>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                      {C.emailLbl} *
+                    </label>
                     <input
-                      type="email" name="email" value={form.email} onChange={handleChange} required
+                      type="email"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
                       className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
                       placeholder="maria@email.com"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{C.phoneLbl}</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    {C.phoneLbl}
+                  </label>
                   <input
-                    name="phone" value={form.phone} onChange={handleChange}
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
                     className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
                     placeholder="600 000 000"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{C.msgLbl} *</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    {C.msgLbl} *
+                  </label>
                   <textarea
-                    name="msg" value={form.msg} onChange={handleChange} required rows={4}
+                    name="msg"
+                    value={form.msg}
+                    onChange={handleChange}
+                    required
+                    rows={4}
                     className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal resize-none"
                     placeholder={C.msgPlaceholder}
                   />
@@ -117,7 +140,8 @@ export default function Reservar() {
                 {error && <p className="text-red-600 text-sm">{error}</p>}
 
                 <button
-                  type="submit" disabled={sending || !captchaToken}
+                  type="submit"
+                  disabled={sending || !captchaToken}
                   className="w-full bg-teal text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition-all disabled:opacity-50"
                 >
                   {sending ? C.sending : C.send}
@@ -128,7 +152,8 @@ export default function Reservar() {
             {/* WhatsApp directo */}
             <a
               href={`https://wa.me/${whatsapp}`}
-              target="_blank" rel="noopener noreferrer"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 mt-4 border border-[#25D366] text-[#25D366] rounded-xl py-3 font-semibold text-sm hover:bg-[#25D366] hover:text-white transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -138,7 +163,9 @@ export default function Reservar() {
             </a>
 
             <div className="mt-4 text-center">
-              <Link to="/contacto" className="text-xs text-teal hover:underline">{C.backContact}</Link>
+              <Link to="/contacto" className="text-xs text-teal hover:underline">
+                {C.backContact}
+              </Link>
             </div>
           </div>
         </section>

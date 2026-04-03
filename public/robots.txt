@@ -7,4 +7,4 @@ Disallow: /forgot-password
 Disallow: /reserva-confirmada/
 Disallow: /mi-reserva
 
-Sitemap: https://www.apartamentosillapancha.com/sitemap.xml
+Sitemap: https://illapancha.com/sitemap.xml

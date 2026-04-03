@@ -14,9 +14,15 @@ declare global {
 const SCRIPT_ID = 'cf-turnstile-script';
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'; // clave test
 
-export default function Turnstile({ onVerify, onExpire, theme = 'auto' }) {
-  const containerRef = useRef(null);
-  const widgetId = useRef(null);
+interface TurnstileProps {
+  onVerify?: (token: string) => void;
+  onExpire?: () => void;
+  theme?: string;
+}
+
+export default function Turnstile({ onVerify, onExpire, theme = 'auto' }: TurnstileProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const widgetId = useRef<string | null>(null);
 
   useEffect(() => {
     // Bypass para tests E2E o si no hay navegador
@@ -49,18 +55,18 @@ export default function Turnstile({ onVerify, onExpire, theme = 'auto' }) {
         widgetId.current = window.turnstile.render(containerRef.current, {
           sitekey: SITE_KEY,
           theme,
-          callback: (token) => onVerify && onVerify(token),
+          callback: (token: string) => onVerify && onVerify(token),
           'expired-callback': () => {
             widgetId.current = null;
             onExpire && onExpire();
           },
-          'error-callback': (err) => {
+          'error-callback': (err: unknown) => {
             console.error('Turnstile Error:', err);
             widgetId.current = null;
             onExpire && onExpire();
-          }
+          },
         });
-      } catch (e) {
+      } catch (e: unknown) {
         console.warn('Failed to render Turnstile:', e);
       }
     };
@@ -75,12 +81,15 @@ export default function Turnstile({ onVerify, onExpire, theme = 'auto' }) {
     };
 
     // Usar IntersectionObserver para cargar solo cuando sea visible
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        initialize();
-        observer.disconnect();
-      }
-    }, { rootMargin: '150px' }); // Cargar un poco antes de que aparezca
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          initialize();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '150px' }
+    ); // Cargar un poco antes de que aparezca
 
     if (containerRef.current) {
       observer.observe(containerRef.current);
@@ -92,7 +101,7 @@ export default function Turnstile({ onVerify, onExpire, theme = 'auto' }) {
       if (widgetId.current !== null && window.turnstile) {
         try {
           window.turnstile.remove(widgetId.current);
-        } catch (e) {
+        } catch (_e) {
           // ignore
         }
         widgetId.current = null;
@@ -109,12 +118,19 @@ export default function Turnstile({ onVerify, onExpire, theme = 'auto' }) {
       if (window.turnstile) {
         const render = () => {
           if (!containerRef.current || widgetId.current !== null) return;
+          if (!window.turnstile) return;
           widgetId.current = window.turnstile.render(containerRef.current, {
             sitekey: SITE_KEY,
             theme,
-            callback: (token) => onVerify && onVerify(token),
-            'expired-callback': () => { widgetId.current = null; onExpire && onExpire(); },
-            'error-callback': () => { widgetId.current = null; onExpire && onExpire(); }
+            callback: (token: string) => onVerify && onVerify(token),
+            'expired-callback': () => {
+              widgetId.current = null;
+              onExpire && onExpire();
+            },
+            'error-callback': () => {
+              widgetId.current = null;
+              onExpire && onExpire();
+            },
           });
         };
         render();

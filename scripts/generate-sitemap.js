@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Genera public/sitemap.xml con todas las rutas públicas + slugs de apartamentos.
+ * Genera public/sitemap.xml y public/robots.txt (Sitemap: según VITE_SITE_URL).
  * Uso: node scripts/generate-sitemap.js
- * Se puede encadenar en el build: "build": "node scripts/generate-sitemap.js && vite build"
+ * Build: npm run build (ya encadenado antes de vite build)
  */
 
 import { writeFileSync } from 'fs';
@@ -21,9 +21,13 @@ const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 const STATIC_ROUTES = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
   { path: '/apartamentos', priority: '0.9', changefreq: 'weekly' },
+  { path: '/reservar', priority: '0.85', changefreq: 'weekly' },
   { path: '/nosotros', priority: '0.7', changefreq: 'monthly' },
   { path: '/contacto', priority: '0.7', changefreq: 'monthly' },
+  { path: '/como-llegar', priority: '0.65', changefreq: 'monthly' },
+  { path: '/faq', priority: '0.65', changefreq: 'monthly' },
   { path: '/privacidad', priority: '0.3', changefreq: 'yearly' },
+  { path: '/proteccion-datos', priority: '0.3', changefreq: 'yearly' },
   { path: '/cookies', priority: '0.3', changefreq: 'yearly' },
   { path: '/terminos', priority: '0.3', changefreq: 'yearly' },
 ];
@@ -74,6 +78,22 @@ ${entries.join('\n')}
   const outPath = resolve(__dirname, '../public/sitemap.xml');
   writeFileSync(outPath, xml, 'utf-8');
   console.log(`✓ sitemap.xml generado (${entries.length} URLs) → ${outPath}`);
+
+  const base = SITE_URL.replace(/\/$/, '');
+  const robotsBody = `User-agent: *
+Disallow: /admin/
+Disallow: /gestion/
+Disallow: /login
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /reserva-confirmada/
+Disallow: /mi-reserva
+
+Sitemap: ${base}/sitemap.xml
+`;
+  const robotsPath = resolve(__dirname, '../public/robots.txt');
+  writeFileSync(robotsPath, robotsBody, 'utf-8');
+  console.log(`✓ robots.txt (Sitemap: ${base}/sitemap.xml) → ${robotsPath}`);
 }
 
 generateSitemap().catch(err => {
