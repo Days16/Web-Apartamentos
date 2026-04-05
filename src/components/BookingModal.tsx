@@ -664,8 +664,8 @@ export default function BookingModal({
                         onClick={() => toggleExtra(extra.id)}
                       >
                         <div className="flex-1">
-                          <div className="font-semibold text-slate-900">{extra.name}</div>
-                          <div className="text-xs text-gray-600 mt-1">{extra.description}</div>
+                          <div className="font-semibold text-slate-900">{extra[`name_${lang}`] || extra.name}</div>
+                          <div className="text-xs text-gray-600 mt-1">{extra[`description_${lang}`] || extra.description}</div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span

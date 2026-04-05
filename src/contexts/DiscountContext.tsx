@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
 interface Discount {
@@ -29,15 +29,15 @@ export function DiscountProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const applyDiscount = (offer: Discount) => {
+  const applyDiscount = useCallback((offer: Discount) => {
     setActiveDiscount(offer);
     sessionStorage.setItem('active_discount', JSON.stringify(offer));
-  };
+  }, []);
 
-  const removeDiscount = () => {
+  const removeDiscount = useCallback(() => {
     setActiveDiscount(null);
     sessionStorage.removeItem('active_discount');
-  };
+  }, []);
 
   return (
     <DiscountContext.Provider value={{ activeDiscount, applyDiscount, removeDiscount }}>

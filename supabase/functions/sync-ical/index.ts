@@ -265,27 +265,32 @@ serve(async (req) => {
           ev.summary || "",
         );
 
+        // Construir etiqueta de huésped enriquecida (ref + pax) sin columnas extra
+        const guestParts: string[] = [];
+        if (info.bookingRef) guestParts.push(`Ref: ${info.bookingRef}`);
+        if (info.adults)     guestParts.push(`${info.adults} ad.`);
+        if (info.children)   guestParts.push(`${info.children} niños`);
+        const guestLabel = guestParts.length > 0
+          ? `${guestName} (${guestParts.join(", ")})`
+          : guestName;
+
         const reservationData = {
           ical_uid,
-          apt_slug:     source.apartment_slug,
-          apt:          aptName,
-          guest:        guestName,
-          checkin:      ev.dtstart,
-          checkout:     ev.dtend,
+          apt_slug:      source.apartment_slug,
+          apt:           aptName,
+          guest:         guestLabel,
+          checkin:       ev.dtstart,
+          checkout:      ev.dtend,
           nights,
-          total:        estimatedTotal,
-          deposit:      0,
-          status:       "confirmed",
-          source:       "booking", 
-          email:        info.email || "",
-          phone:        info.phone || null,
-          external_id:  info.bookingRef || null,
-          notes:        [
-            info.bookingRef ? `Ref. Booking: ${info.bookingRef}` : "",
-            info.adults     ? `${info.adults} adultos` : "",
-            info.children   ? `${info.children} niños` : "",
-            "Precio calculado automáticamente."
-          ].filter(Boolean).join(" | ") || null,
+          total:         estimatedTotal,
+          deposit:       0,
+          status:        "confirmed",
+          source:        "booking",
+          email:         info.email || "",
+          phone:         info.phone || null,
+          extras:        [],
+          extras_total:  0,
+          cash_paid:     false,
         };
 
         const { data: existing } = await supabase
@@ -295,8 +300,13 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existing?.id) {
-          // Si el total es 0, actualizar con el estimado
-          await supabase.from("reservations").update(reservationData).eq("id", existing.id);
+          const { error: updErr } = await supabase
+            .from("reservations")
+            .update(reservationData)
+            .eq("id", existing.id);
+          if (updErr) {
+            console.error(`Error updating reservation ${existing.id}:`, updErr.message);
+          }
         } else {
           // Nueva con ID estilo web IP-XXXXXX
           const newId = generateWebId();
@@ -304,23 +314,26 @@ serve(async (req) => {
             .from("reservations")
             .insert({ ...reservationData, id: newId });
 
-          if (!insErr) {
-            await supabase.functions.invoke("send-owner-notification", {
-              body: {
-                type: "booking",
-                reservationId: newId,
-                guestName,
-                guestEmail: info.email || "No proporcionado",
-                apartmentName: aptName,
-                checkin: ev.dtstart,
-                checkout: ev.dtend,
-                nights,
-                total: estimatedTotal,
-                deposit: 0,
-                panelUrl: "https://apartamentosillapancha.com/gestion"
-              }
-            }).catch(() => {});
+          if (insErr) {
+            console.error(`Error inserting ical reservation ${ical_uid}:`, insErr.message);
+            throw new Error(`Error al crear reserva iCal: ${insErr.message}`);
           }
+
+          await supabase.functions.invoke("send-owner-notification", {
+            body: {
+              type: "booking",
+              reservationId: newId,
+              guestName,
+              guestEmail: info.email || "No proporcionado",
+              apartmentName: aptName,
+              checkin: ev.dtstart,
+              checkout: ev.dtend,
+              nights,
+              total: estimatedTotal,
+              deposit: 0,
+              panelUrl: "https://apartamentosillapancha.com/gestion"
+            }
+          }).catch(() => {});
         }
       }
 

@@ -80,15 +80,17 @@ export default function OffersBanner() {
     }
   }, [offers.length, closed]);
 
-  // Auto-apply if no code
+  // Auto-apply if no code — usa ref para evitar bucle con activeDiscount como dep
+  const lastAutoAppliedRef = useRef(null);
   useEffect(() => {
     if (offers.length > 0) {
       const current = offers[currentIndex];
-      if (!current.discount_code && activeDiscount?.id !== current.id) {
+      if (!current.discount_code && lastAutoAppliedRef.current !== current.id) {
+        lastAutoAppliedRef.current = current.id;
         applyDiscount(current);
       }
     }
-  }, [currentIndex, offers, activeDiscount, applyDiscount]);
+  }, [currentIndex, offers, applyDiscount]);
 
   // Layout synchronization
   useEffect(() => {
@@ -110,17 +112,17 @@ export default function OffersBanner() {
     };
   }, [offers.length, closed, isAdminPage]);
 
-  // SEC: Clear discount when entering admin/gestion to avoid manual booking interference
+  // SEC: Clear discount when entering admin/gestion
   useEffect(() => {
-    if (isAdminPage && activeDiscount) {
+    if (isAdminPage) {
       removeDiscount();
     }
-  }, [isAdminPage, activeDiscount, removeDiscount]);
+  }, [isAdminPage, removeDiscount]);
 
   if (offers.length === 0 || closed || isAdminPage) return null;
 
   const offer = offers[currentIndex];
-  const title = lang === 'es' || !offer.title_en ? offer.title_es : offer.title_en;
+  const title = offer[`title_${lang}`] || offer.title_es;
 
   const handleApplyDiscount = off => {
     applyDiscount(off);

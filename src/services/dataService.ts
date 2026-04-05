@@ -164,8 +164,9 @@ export async function getExtras() {
 }
 
 export async function upsertExtra(extra: Record<string, unknown>) {
-  const { data, error } = await supabase.from('extras').upsert(extra).select().single();
-
+  const isNew = !extra.id;
+  const payload = isNew ? { ...extra, id: crypto.randomUUID() } : extra;
+  const { data, error } = await supabase.from('extras').upsert(payload).select().single();
   if (error) throw error;
   return data;
 }

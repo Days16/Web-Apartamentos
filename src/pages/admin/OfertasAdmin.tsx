@@ -16,6 +16,7 @@ export default function OfertasAdmin() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [translating, setTranslating] = useState(false);
 
   const [formData, setFormData] = useState({});
 
@@ -52,6 +53,40 @@ export default function OfertasAdmin() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleAutoTranslate = async () => {
+    if (!formData.title_es?.trim()) {
+      setError('Escribe al menos el título en español antes de traducir');
+      return;
+    }
+    setTranslating(true);
+    setError(null);
+    try {
+      const translate = async (text, targetLang) => {
+        if (!text?.trim()) return '';
+        const res = await fetch(
+          `https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
+        );
+        const json = await res.json();
+        // Response: [[["translated","original",...]], ...]
+        return json?.[0]?.map(chunk => chunk?.[0]).filter(Boolean).join('') || text;
+      };
+
+      const langs = ['en', 'fr', 'de', 'pt'];
+      const updates = {};
+      for (const lang of langs) {
+        updates[`title_${lang}`] = await translate(formData.title_es, lang);
+        if (formData.description_es?.trim()) {
+          updates[`description_${lang}`] = await translate(formData.description_es, lang);
+        }
+      }
+      setFormData(prev => ({ ...prev, ...updates }));
+    } catch (err) {
+      setError('Error al traducir automáticamente. Comprueba la conexión.');
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   const startEdit = offer => {
     setFormData({ ...offer });
     setEditing(offer.id);
@@ -75,8 +110,14 @@ export default function OfertasAdmin() {
         .update({
           title_es: formData.title_es,
           title_en: formData.title_en || '',
+          title_fr: formData.title_fr || '',
+          title_de: formData.title_de || '',
+          title_pt: formData.title_pt || '',
           description_es: formData.description_es || '',
           description_en: formData.description_en || '',
+          description_fr: formData.description_fr || '',
+          description_de: formData.description_de || '',
+          description_pt: formData.description_pt || '',
           discount_code: formData.discount_code?.toUpperCase() || '',
           discount_percentage: parseInt(formData.discount_percentage) || 0,
           active: formData.active !== false,
@@ -113,8 +154,14 @@ export default function OfertasAdmin() {
         {
           title_es: formData.title_es,
           title_en: formData.title_en || '',
+          title_fr: formData.title_fr || '',
+          title_de: formData.title_de || '',
+          title_pt: formData.title_pt || '',
           description_es: formData.description_es || '',
           description_en: formData.description_en || '',
+          description_fr: formData.description_fr || '',
+          description_de: formData.description_de || '',
+          description_pt: formData.description_pt || '',
           discount_code: formData.discount_code?.toUpperCase() || '',
           discount_percentage: parseInt(formData.discount_percentage) || 0,
           active: true,
@@ -200,10 +247,29 @@ export default function OfertasAdmin() {
                 Información de la oferta
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-5">
+              {/* Títulos */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Títulos y descripciones</div>
+                <button
+                  type="button"
+                  onClick={handleAutoTranslate}
+                  disabled={translating || !formData.title_es?.trim()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a5f6e]/10 text-[#1a5f6e] border border-[#1a5f6e]/30 rounded text-xs font-semibold hover:bg-[#1a5f6e]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {translating ? (
+                    <>
+                      <span className="inline-block w-3 h-3 border-2 border-[#1a5f6e]/30 border-t-[#1a5f6e] rounded-full animate-spin" />
+                      Traduciendo…
+                    </>
+                  ) : (
+                    <>🌐 Traducir desde ES</>
+                  )}
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-3">
                 <div>
                   <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">
-                    Título (ES) *
+                    Español (ES) *
                   </label>
                   <input
                     type="text"
@@ -215,7 +281,7 @@ export default function OfertasAdmin() {
                 </div>
                 <div>
                   <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">
-                    Título (EN)
+                    English (EN)
                   </label>
                   <input
                     type="text"
@@ -226,28 +292,99 @@ export default function OfertasAdmin() {
                   />
                 </div>
               </div>
-
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">
+                    Français (FR)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title_fr || ''}
+                    onChange={e => handleInputChange('title_fr', e.target.value)}
+                    placeholder="Ej: Réduction d'été"
+                    className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">
+                    Deutsch (DE)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title_de || ''}
+                    onChange={e => handleInputChange('title_de', e.target.value)}
+                    placeholder="Ej: Sommerrabatt"
+                    className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                  />
+                </div>
+              </div>
               <div className="mb-5">
                 <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">
-                  Descripción (ES)
+                  Português (PT)
                 </label>
-                <textarea
-                  value={formData.description_es || ''}
-                  onChange={e => handleInputChange('description_es', e.target.value)}
-                  placeholder="Detalles sobre la oferta"
-                  className="w-full p-3 border border-gray-200 rounded-md text-sm min-h-[80px] font-sans resize-y focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                <input
+                  type="text"
+                  value={formData.title_pt || ''}
+                  onChange={e => handleInputChange('title_pt', e.target.value)}
+                  placeholder="Ej: Desconto de Verão"
+                  className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
                 />
               </div>
 
+              {/* Descripciones */}
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-4">Descripciones</div>
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">Español (ES)</label>
+                  <textarea
+                    value={formData.description_es || ''}
+                    onChange={e => handleInputChange('description_es', e.target.value)}
+                    placeholder="Detalles sobre la oferta"
+                    rows={3}
+                    className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans resize-none focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">English (EN)</label>
+                  <textarea
+                    value={formData.description_en || ''}
+                    onChange={e => handleInputChange('description_en', e.target.value)}
+                    placeholder="Details about the offer"
+                    rows={3}
+                    className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans resize-none focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">Français (FR)</label>
+                  <textarea
+                    value={formData.description_fr || ''}
+                    onChange={e => handleInputChange('description_fr', e.target.value)}
+                    placeholder="Détails de l'offre"
+                    rows={3}
+                    className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans resize-none focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">Deutsch (DE)</label>
+                  <textarea
+                    value={formData.description_de || ''}
+                    onChange={e => handleInputChange('description_de', e.target.value)}
+                    placeholder="Details zum Angebot"
+                    rows={3}
+                    className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans resize-none focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                  />
+                </div>
+              </div>
               <div className="mb-5">
-                <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">
-                  Descripción (EN)
-                </label>
+                <label className="block text-[13px] font-semibold text-[#0f172a] mb-2">Português (PT)</label>
                 <textarea
-                  value={formData.description_en || ''}
-                  onChange={e => handleInputChange('description_en', e.target.value)}
-                  placeholder="Details about the offer"
-                  className="w-full p-3 border border-gray-200 rounded-md text-sm min-h-[80px] font-sans resize-y focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
+                  value={formData.description_pt || ''}
+                  onChange={e => handleInputChange('description_pt', e.target.value)}
+                  placeholder="Detalhes da oferta"
+                  rows={3}
+                  className="w-full p-3 border border-gray-200 rounded-md text-sm font-sans resize-none focus:outline-none focus:border-[#1a5f6e] focus:ring-1 focus:ring-[#1a5f6e]"
                 />
               </div>
 
@@ -362,8 +499,14 @@ export default function OfertasAdmin() {
             setFormData({
               title_es: '',
               title_en: '',
+              title_fr: '',
+              title_de: '',
+              title_pt: '',
               description_es: '',
               description_en: '',
+              description_fr: '',
+              description_de: '',
+              description_pt: '',
               discount_percentage: 10,
               active: true,
             });

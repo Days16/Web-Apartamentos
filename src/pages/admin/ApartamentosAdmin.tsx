@@ -591,7 +591,7 @@ export default function ApartamentosAdmin() {
     return (
       <>
         <div
-          className="flex items-center justify-between pb-6 mb-6 px-8 pt-8"
+          className="apt-admin-edit-header flex items-center justify-between pb-6 mb-6 px-8 pt-8"
           style={{ borderBottom: `4px solid ${PRIMARY_COLOR}` }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -624,13 +624,14 @@ export default function ApartamentosAdmin() {
         </div>
 
         <div
+          className="apt-admin-edit-body"
           style={{
             padding: '24px 24px 80px 24px',
             background: LIGHT_BG,
             minHeight: 'calc(100vh - 120px)',
           }}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24, maxWidth: 1600 }}>
+          <div className="apt-admin-edit-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24, maxWidth: 1600 }}>
             {/* PANEL IZQUIERDO - NAVEGACIÓN Y VISTA PREVIA */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               {/* Tabs navegación */}
@@ -1749,6 +1750,7 @@ export default function ApartamentosAdmin() {
                       Nueva Temporada
                     </div>
                     <div
+                      className="apt-admin-season-form-grid"
                       style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(4, 1fr)',
@@ -1845,6 +1847,7 @@ export default function ApartamentosAdmin() {
                       }}
                     >
                       <div
+                        className="apt-admin-season-table-header"
                         style={{
                           display: 'grid',
                           gridTemplateColumns: '1fr 1fr 1.5fr 1.5fr 80px',
@@ -1867,6 +1870,7 @@ export default function ApartamentosAdmin() {
                         return (
                           <div
                             key={season.id}
+                            className="apt-admin-season-row"
                             style={{
                               display: 'grid',
                               gridTemplateColumns: '1fr 1fr 1.5fr 1.5fr 80px',
@@ -2385,7 +2389,7 @@ export default function ApartamentosAdmin() {
   return (
     <div className="bg-white">
       {/* Header */}
-      <div className="border-b border-gray-200 px-8 pt-8 pb-6 flex justify-between items-center bg-slate-50">
+      <div className="apt-admin-page-header border-b border-gray-200 px-8 pt-8 pb-6 flex justify-between items-center bg-slate-50">
         <div>
           <div className="text-2xl font-bold text-slate-900">Apartamentos</div>
           <div className="text-sm text-gray-400 mt-0.5">
@@ -2414,7 +2418,7 @@ export default function ApartamentosAdmin() {
         ) : (
           <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
             {/* Cabecera tabla */}
-            <div className="grid grid-cols-[40px_1.8fr_1fr_1fr_1fr_auto_auto] px-5 py-3 bg-slate-50 border-b-2 border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider gap-4 items-center">
+            <div className="apt-admin-list-header grid grid-cols-[40px_1.8fr_1fr_1fr_1fr_auto_auto] px-5 py-3 bg-slate-50 border-b-2 border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider gap-4 items-center">
               <div />
               <div>Apartamento</div>
               <div>Precio/noche</div>
@@ -2427,7 +2431,7 @@ export default function ApartamentosAdmin() {
             {apartments.map((apt, index) => (
               <div
                 key={apt.id || apt.slug || index}
-                className={`grid grid-cols-[40px_1.8fr_1fr_1fr_1fr_auto_auto] px-5 py-4 items-center gap-4 hover:bg-gray-50 transition-colors ${index < apartments.length - 1 ? 'border-b border-gray-100' : ''}`}
+                className={`apt-admin-list-row grid grid-cols-[40px_1.8fr_1fr_1fr_1fr_auto_auto] px-5 py-4 items-center gap-4 hover:bg-gray-50 transition-colors ${index < apartments.length - 1 ? 'border-b border-gray-100' : ''}`}
               >
                 {/* Color thumbnail */}
                 <div

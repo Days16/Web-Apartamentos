@@ -134,7 +134,6 @@ export function printRegistro(props: RegistroProps) {
       <h1>${titulo}${aptLabel ? ' &mdash; ' + aptLabel : ''}</h1>
     </div>
     <div class="header-right">
-      <div><strong>Nº Reserva:</strong> ${refReserva}</div>
       <div><strong>Fecha hoy:</strong> ${new Date().toLocaleDateString('es-ES')}</div>
       ${identificador ? `<div><strong>${identificador}</strong></div>` : ''}
     </div>
@@ -204,7 +203,7 @@ export function printRegistro(props: RegistroProps) {
     </tr>
     <tr class="tall">
       <td>
-        <span class="label">Nº Reserva / Booking reference</span>
+        <span class="label">Número de reserva / Reservation Number</span>
         <span class="value">${refReserva}</span>
       </td>
       <td>

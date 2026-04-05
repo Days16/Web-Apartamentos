@@ -45,13 +45,17 @@ export default function Calendario() {
   const [reservations, setReservations] = useState([]);
 
   // Estado para el rango de fechas (por defecto 25 días desde hoy)
-  const [startDate, setStartDate] = useState(
-    new Date().getFullYear() +
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 12);
+    return (
+      d.getFullYear() +
       '-' +
-      String(new Date().getMonth() + 1).padStart(2, '0') +
+      String(d.getMonth() + 1).padStart(2, '0') +
       '-' +
-      String(new Date().getDate()).padStart(2, '0')
-  );
+      String(d.getDate()).padStart(2, '0')
+    );
+  });
   const [daysToShow, setDaysToShow] = useState(25);
 
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
@@ -76,6 +80,60 @@ export default function Calendario() {
       String(t.getDate()).padStart(2, '0')
     );
   };
+
+  const goToToday = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - Math.floor(daysToShow / 2));
+    setStartDate(
+      d.getFullYear() +
+        '-' +
+        String(d.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(d.getDate()).padStart(2, '0')
+    );
+  };
+
+  // Scroll para centrar "hoy" en el área visible
+  useEffect(() => {
+    if (loading) return;
+
+    const todayDStr = new Date().toDateString();
+    const [yS, mS, dS] = startDate.split('-').map(Number);
+    let todayIndex = -1;
+    for (let i = 0; i < daysToShow; i++) {
+      const d = new Date(yS, mS - 1, dS + i);
+      if (d.toDateString() === todayDStr) {
+        todayIndex = i;
+        break;
+      }
+    }
+    if (todayIndex === -1) return;
+
+    // Doble rAF: esperar a que el navegador haya pintado y calculado los tamaños reales
+    const raf1 = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const table = container.querySelector('table');
+        if (!table) return;
+        const allCols = table.querySelectorAll('thead tr:first-child th');
+        if (allCols.length < 2) return;
+
+        const stickyColWidth = (allCols[0] as HTMLElement).getBoundingClientRect().width;
+        const dayColWidth = (allCols[1] as HTMLElement).getBoundingClientRect().width;
+        if (!dayColWidth) return;
+
+        const todayLeft = stickyColWidth + todayIndex * dayColWidth;
+        const containerWidth = container.clientWidth;
+        const scrollLeft = todayLeft - containerWidth / 2 + dayColWidth / 2;
+
+        container.scrollLeft = Math.max(0, scrollLeft);
+      });
+    });
+
+    return () => cancelAnimationFrame(raf1);
+  }, [loading, startDate, daysToShow]);
 
   const shiftDate = offset => {
     const [y, m, d] = startDate.split('-').map(Number);
@@ -292,7 +350,7 @@ export default function Calendario() {
             </button>
             <button
               type="button"
-              onClick={() => setStartDate(todayStr())}
+              onClick={goToToday}
               className="border border-gray-300 rounded px-3 py-1.5 text-sm font-semibold hover:bg-gray-50 transition-colors"
             >
               Hoy
@@ -346,9 +404,9 @@ export default function Calendario() {
         </div>
 
         {/* LINEA DE TIEMPO / CUADRICULA */}
-        <div className="bg-white border-x border-b border-gray-200 shadow-sm overflow-hidden rounded-b-xl print:rounded-none">
-          <div className="g-cal-print overflow-x-auto relative" ref={scrollContainerRef}>
-          <table className="w-full border-collapse table-fixed">
+        <div ref={scrollContainerRef} className="bg-white border-x border-b border-gray-200 shadow-sm rounded-b-xl print:rounded-none" style={{ overflowX: 'auto' }}>
+          <div className="g-cal-print relative">
+          <table className="border-collapse" style={{ minWidth: '100%' }}>
             <thead>
               {/* CABECERA FECHAS */}
               <tr className="bg-gray-50 sticky top-0 z-20">

@@ -104,12 +104,28 @@ export default function BookingWidget({
     }
   };
 
+  const pricePerNightWithDiscount = activeDiscount
+    ? Math.round(apt.price * (1 - activeDiscount.discount_percentage / 100))
+    : null;
+
   if (globalSettings?.booking_mode === 'redirect') {
     return (
       <div className="flex flex-col gap-5 p-6 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800">
         <div>
-          <div className="text-3xl font-serif font-bold text-teal">{convertPrice(apt.price)}</div>
+          {pricePerNightWithDiscount ? (
+            <div className="flex items-baseline gap-2">
+              <div className="text-3xl font-serif font-bold text-teal">{convertPrice(pricePerNightWithDiscount)}</div>
+              <div className="text-lg font-serif text-gray-400 line-through">{convertPrice(apt.price)}</div>
+            </div>
+          ) : (
+            <div className="text-3xl font-serif font-bold text-teal">{convertPrice(apt.price)}</div>
+          )}
           <div className="text-xs text-gray-500 mt-1">{T.detail.pricePerNight}</div>
+          {pricePerNightWithDiscount && (
+            <div className="text-xs text-green-600 font-semibold mt-0.5">
+              -{activeDiscount!.discount_percentage}% {T.common.offerApplied}
+            </div>
+          )}
         </div>
         <div className="h-px bg-gray-100" />
         <button
@@ -129,8 +145,20 @@ export default function BookingWidget({
 
   return (
     <div className="flex flex-col gap-4 p-6 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800">
-      <div className="text-3xl font-serif font-bold text-teal mb-1">{convertPrice(apt.price)}</div>
-      <div className="text-xs text-gray-600 mb-6">{T.detail.pricePerNight}</div>
+      {pricePerNightWithDiscount ? (
+        <div className="flex items-baseline gap-2 mb-0">
+          <div className="text-3xl font-serif font-bold text-teal">{convertPrice(pricePerNightWithDiscount)}</div>
+          <div className="text-lg font-serif text-gray-400 line-through">{convertPrice(apt.price)}</div>
+        </div>
+      ) : (
+        <div className="text-3xl font-serif font-bold text-teal mb-0">{convertPrice(apt.price)}</div>
+      )}
+      <div className="text-xs text-gray-600 -mt-1 mb-4">
+        {T.detail.pricePerNight}
+        {pricePerNightWithDiscount && (
+          <span className="ml-2 text-green-600 font-semibold">· -{activeDiscount!.discount_percentage}% {T.common.offerApplied}</span>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 gap-0 mb-0.5 border-b border-gray-200 dark:border-gray-700">
         <div className="flex flex-col mb-4 border-r border-gray-200 dark:border-gray-700 pr-2 min-w-0 w-full [&_.react-datepicker-wrapper]:w-full">

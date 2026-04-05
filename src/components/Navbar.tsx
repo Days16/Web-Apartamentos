@@ -90,7 +90,8 @@ export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBookin
 
   return (
     <nav
-      className={`sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 dark:border-b dark:border-slate-700 transition-[box-shadow] duration-300 ${scrolled ? 'shadow-[0_2px_20px_rgba(15,23,42,0.08)] dark:shadow-slate-900/50' : 'shadow-none'}`}
+      className={`sticky z-50 flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 dark:border-b dark:border-slate-700 transition-[box-shadow] duration-300 ${scrolled ? 'shadow-[0_2px_20px_rgba(15,23,42,0.08)] dark:shadow-slate-900/50' : 'shadow-none'}`}
+      style={{ top: 'var(--banner-height, 0px)' }}
       ref={navRef}
     >
       <Link to="/">
