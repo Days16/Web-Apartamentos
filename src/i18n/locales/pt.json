@@ -37,7 +37,10 @@
     "feature4Title": "Ribadeo, Galiza",
     "feature4Desc": "A 5 minutos da ponte internacional e das melhores praias da costa norte galega.",
     "bannerTitle": "Por que reservar<br /><em>diretamente connosco?</em>",
-    "bannerDesc": "Poupe entre 15 e 20% em relação ao Booking.com. O mesmo apartamento, o mesmo serviço, sem comissões."
+    "bannerDesc": "Poupe entre 15 e 20% em relação ao Booking.com. O mesmo apartamento, o mesmo serviço, sem comissões.",
+    "faqHeading": "Perguntas frequentes",
+    "faqTitle": "Tudo o que<br /><em>precisa de saber</em>",
+    "faqViewAll": "Ver todas as perguntas"
   },
   "apartments": {
     "eyebrow": "Coleção completa",

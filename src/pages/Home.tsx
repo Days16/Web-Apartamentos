@@ -7,35 +7,13 @@ import Footer from '../components/Footer';
 import BookingModal from '../components/BookingModal';
 import Ico, { paths } from '../components/Ico';
 import SEO from '../components/SEO';
-import { fetchApartments, fetchApartmentPhotos } from '../services/supabaseService';
+import { fetchApartments, fetchApartmentPhotos, fetchFaqs } from '../services/supabaseService';
 import { getReservations, getReviews } from '../services/dataService';
+import type { DbFaq, Lang } from '../types';
 import { strToDate, dateToStr, formatDateShort } from '../utils/format';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { safeHtml } from '../utils/sanitize';
 
-const STATIC_REVIEWS = [
-  {
-    name: 'María Gómez',
-    origin: 'Madrid',
-    text: 'El apartamento estaba impecable y las vistas a la ría son increíbles. Repetiremos seguro.',
-    stars: 5,
-    date: 'Octubre 2025',
-  },
-  {
-    name: 'David Ruiz',
-    origin: 'Barcelona',
-    text: 'Ubicación perfecta para descubrir Ribadeo y Asturias. Todo muy nuevo y cómodo.',
-    stars: 5,
-    date: 'Agosto 2025',
-  },
-  {
-    name: 'Laura F.',
-    origin: 'Bilbao',
-    text: 'La comunicación fue genial y el check-in automático súper cómodo. Muy recomendable.',
-    stars: 5,
-    date: 'Julio 2025',
-  },
-];
 
 import DatePicker from 'react-datepicker';
 import { useLang } from '../contexts/LangContext';
@@ -70,9 +48,13 @@ export default function Home() {
   const [featuredApts, setFeaturedApts] = useState<Array<DbApartment & { coverPhoto: string | null }>>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [reviews, setReviews] = useState<Array<{ name: string; text: string; stars: number; date: string | null; origin: string | null }>>([]);
+  const [faqs, setFaqs] = useState<DbFaq[]>([]);
+  const [faqOpen, setFaqOpen] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchFaqs(true).then(data => setFaqs(data.slice(0, 5))).catch(() => {});
+
     Promise.all([fetchApartments(), getReservations(), getReviews()]).then(
       async ([aptsData, resData, reviewsData]) => {
         setReservations(resData);
@@ -115,6 +97,21 @@ export default function Home() {
     }
     setSelectedApt(apt as unknown as Apartment);
     setBookingOpen(true);
+  };
+
+  const pickQ = (faq: DbFaq) => {
+    if (lang === 'EN') return faq.question_en?.trim() || faq.question;
+    if (lang === 'FR') return faq.question_fr?.trim() || faq.question_en?.trim() || faq.question;
+    if (lang === 'DE') return faq.question_de?.trim() || faq.question_en?.trim() || faq.question;
+    if (lang === 'PT') return faq.question_pt?.trim() || faq.question_en?.trim() || faq.question;
+    return faq.question;
+  };
+  const pickA = (faq: DbFaq) => {
+    if (lang === 'EN') return faq.answer_en?.trim() || faq.answer;
+    if (lang === 'FR') return faq.answer_fr?.trim() || faq.answer_en?.trim() || faq.answer;
+    if (lang === 'DE') return faq.answer_de?.trim() || faq.answer_en?.trim() || faq.answer;
+    if (lang === 'PT') return faq.answer_pt?.trim() || faq.answer_en?.trim() || faq.answer;
+    return faq.answer;
   };
 
   return (
@@ -422,23 +419,73 @@ export default function Home() {
             </h2>
             <div className="text-xl font-semibold text-navy">{T.home.verifiedReviews}</div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(reviews.length > 0 ? reviews : STATIC_REVIEWS).map((r, i) => (
-              <div key={i} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="text-[#D4A843] text-lg mb-2">{'★'.repeat(r.stars || 5)}</div>
-                <div className="text-gray-700 italic mb-3">"{r.text}"</div>
-                <div className="flex justify-between items-center">
-                  <div className="text-sm font-semibold text-navy">
-                    {r.name}
-                    {r.origin ? ` · ${r.origin}` : ''}
+          {reviews.length === 0 ? (
+            <div className="text-center py-12 text-gray-400 text-sm">
+              Aún no hay reseñas publicadas.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reviews.map((r, i) => (
+                <div key={i} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3">
+                  <div className="text-[#D4A843] text-lg">{'★'.repeat(r.stars || 5)}</div>
+                  <div className="text-gray-700 italic flex-1">"{r.text}"</div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm font-semibold text-navy">
+                      {r.name}
+                      {r.origin ? ` · ${r.origin}` : ''}
+                    </div>
+                    <div className="text-xs text-gray-400">{r.date}</div>
                   </div>
-                  <div className="text-xs text-gray-400">{r.date}</div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* FAQ */}
+      {faqs.length > 0 && (
+        <div className="py-20 md:py-28 px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-sm font-semibold text-teal uppercase tracking-widest mb-2">
+              {T.home.faqHeading}
+            </div>
+            <div className="flex justify-between items-end gap-6 mb-12 flex-col md:flex-row">
+              <h2
+                className="text-4xl md:text-5xl font-serif font-bold text-navy"
+                dangerouslySetInnerHTML={safeHtml(T.home.faqTitle)}
+              />
+              <button
+                className="border-2 border-navy text-navy hover:bg-navy hover:text-white px-5 py-3 rounded transition-all whitespace-nowrap"
+                onClick={() => navigate('/faq')}
+              >
+                {T.home.faqViewAll}
+              </button>
+            </div>
+            <div className="divide-y divide-gray-200 border-y border-gray-200">
+              {faqs.map(faq => (
+                <div key={faq.id}>
+                  <button
+                    className="w-full text-left flex justify-between items-center py-5 gap-4"
+                    onClick={() => setFaqOpen(faqOpen === faq.id ? null : faq.id)}
+                    aria-expanded={faqOpen === faq.id}
+                  >
+                    <span className="font-semibold text-navy">{pickQ(faq)}</span>
+                    <span
+                      className={`text-teal text-xl flex-shrink-0 transition-transform duration-200 ${faqOpen === faq.id ? 'rotate-45' : ''}`}
+                    >
+                      +
+                    </span>
+                  </button>
+                  {faqOpen === faq.id && (
+                    <div className="pb-5 text-gray-600 leading-relaxed text-sm">{pickA(faq)}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* BANNER RESERVA DIRECTA */}
       <div className="py-20 px-4 bg-gradient-to-r from-navy to-slate-900">

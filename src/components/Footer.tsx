@@ -154,9 +154,18 @@ export default function Footer() {
             <div
               className={`flex flex-col gap-3 pl-0 max-h-0 overflow-hidden transition-all duration-300 md:max-h-full md:overflow-visible ${expandedSection === 'book' ? 'max-h-64 mt-3' : 'md:mt-4'}`}
             >
-              <span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">
-                Booking.com ↗
-              </span>
+              {settings?.booking_com_url ? (
+                <a
+                  href={settings.booking_com_url as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-teal transition-colors text-sm"
+                >
+                  Booking.com ↗
+                </a>
+              ) : (
+                <span className="text-gray-300 text-sm cursor-default">Booking.com ↗</span>
+              )}
               {/*<span className="text-gray-300 hover:text-teal transition-colors text-sm cursor-default">Airbnb ↗</span>*/}
             </div>
           </div>

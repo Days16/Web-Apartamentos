@@ -56,7 +56,7 @@ export default function Calendario() {
       String(d.getDate()).padStart(2, '0')
     );
   });
-  const [daysToShow, setDaysToShow] = useState(25);
+  const [daysToShow, setDaysToShow] = useState(60);
 
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [blockForm, setBlockForm] = useState({

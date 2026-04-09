@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -6,16 +7,23 @@ export default function PreviewBanner() {
   const [active, setActive] = useState(false);
   const { user } = useAuth();
   const { settings } = useSettings();
+  const { pathname } = useLocation();
+
+  const isProtectedPath =
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/gestion') ||
+    pathname.startsWith('/login');
 
   useEffect(() => {
     const isMaintenanceOn = settings?.maintenance_mode === true;
     const isPreviewSession = sessionStorage.getItem('maintenance_preview') === 'true';
-    const isAdmin = !!user;
+    const role = user?.app_metadata?.role;
+    const isStaff = role === 'admin' || role === 'gestion';
 
-    setActive(isMaintenanceOn && (isPreviewSession || isAdmin));
+    setActive(isMaintenanceOn && (isPreviewSession || isStaff));
   }, [user, settings]);
 
-  if (!active) return null;
+  if (!active || isProtectedPath) return null;
 
   const handleExit = () => {
     sessionStorage.removeItem('maintenance_preview');

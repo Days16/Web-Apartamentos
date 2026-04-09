@@ -96,7 +96,9 @@ function MaintenanceGuard({ children }: { children: React.ReactNode }) {
     pathname.startsWith('/admin') ||
     pathname.startsWith('/gestion') ||
     pathname.startsWith('/login');
-  const isPreview = sessionStorage.getItem('maintenance_preview') === 'true' || !!user;
+  const userRole = user?.app_metadata?.role;
+  const isStaff = userRole === 'admin' || userRole === 'gestion';
+  const isPreview = sessionStorage.getItem('maintenance_preview') === 'true' || isStaff;
 
   if (loading) return null;
   if (!isProtectedPath && settings?.maintenance_mode === true && !isPreview) {

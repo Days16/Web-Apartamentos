@@ -37,7 +37,10 @@
     "feature4Title": "Ribadeo, Galice",
     "feature4Desc": "À 5 minutes du pont international et des meilleures plages de la côte nord galicienne.",
     "bannerTitle": "Pourquoi réserver<br /><em>directement avec nous?</em>",
-    "bannerDesc": "Économisez entre 15 et 20% par rapport à Booking.com. Le même appartement, le même service, sans commissions d'intermédiaires."
+    "bannerDesc": "Économisez entre 15 et 20% par rapport à Booking.com. Le même appartement, le même service, sans commissions d'intermédiaires.",
+    "faqHeading": "Questions fréquentes",
+    "faqTitle": "Tout ce que<br /><em>vous devez savoir</em>",
+    "faqViewAll": "Voir toutes les questions"
   },
   "apartments": {
     "eyebrow": "Collection complète",
