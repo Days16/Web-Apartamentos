@@ -84,6 +84,32 @@ function PageLoader() {
   );
 }
 
+class ChunkErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(error: Error) {
+    const isChunkError =
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Loading chunk') ||
+      error.name === 'ChunkLoadError';
+    return isChunkError ? { hasError: true } : null;
+  }
+
+  componentDidUpdate(_: unknown, prev: { hasError: boolean }) {
+    if (this.state.hasError && !prev.hasError) {
+      window.location.reload();
+    }
+  }
+
+  render() {
+    if (this.state.hasError) return <PageLoader />;
+    return this.props.children;
+  }
+}
+
 function MaintenanceGuard({ children }: { children: React.ReactNode }) {
   const { settings, loading: settingsLoading } = useSettings();
   const { user } = useAuth();
@@ -146,6 +172,7 @@ export default function App() {
                       <ScrollToTop />
                       <OffersBanner />
                       <MaintenanceGuard>
+                        <ChunkErrorBoundary>
                         <Suspense fallback={<PageLoader />}>
                           <Routes>
                             {/* ─── PUBLIC WEB ─────────────────────────────────── */}
@@ -209,6 +236,7 @@ export default function App() {
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </Suspense>
+                        </ChunkErrorBoundary>
                         <PreviewBanner />
                       </MaintenanceGuard>
                       <WhatsAppButton />
