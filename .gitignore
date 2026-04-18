@@ -32,7 +32,7 @@ docs
 .claude
 supabase/.temp
 supabase/migrations
-scripts/crear-reserva-prueba.js
+scripts/create-test-booking.js
 scripts/test-email.js
 scripts/test-monthly-report.js
 scripts/test-review-flow.js
@@ -40,6 +40,7 @@ scripts/test-checkin-reminder.js
 scripts/test-ical-sync.js
 scripts/test-checkin-info.js
 scripts/test-stripe-payment.js
+scripts/check-i18n.js
 illa-pancha-web-e549a08b5e61.json
 test-results
 playwright-report

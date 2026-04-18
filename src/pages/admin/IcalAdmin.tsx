@@ -1,9 +1,10 @@
-/* eslint-disable */
-// @ts-nocheck
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { supabase } from '../../lib/supabase';
 import { fetchAllApartments } from '../../services/supabaseService';
 import Ico, { paths } from '../../components/Ico';
+import { PanelPageHeader, PanelConfirm } from '../../components/panel';
+import { useToast } from '../../contexts/ToastContext';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -20,14 +21,16 @@ function timeAgo(iso: string) {
 }
 
 export default function IcalAdmin() {
-  const [sources, setSources] = useState([]);
-  const [apartments, setApartments] = useState([]);
+  const toast = useToast();
+  const [sources, setSources] = useState<Array<{ id: string; apartment_slug: string; url: string; active: boolean; last_sync: string | null; last_status: string | null; last_message?: string | null }>>([]);
+  const [apartments, setApartments] = useState<Array<{ slug: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState<string | null>(null); // id de la fuente en sync
+  const [syncing, setSyncing] = useState<string | null>(null); // id of source being synced
   const [syncingAll, setSyncingAll] = useState(false);
   const [form, setForm] = useState({ apartment_slug: '', url: '' });
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; slug: string } | null>(null);
 
   const load = async () => {
     const [{ data: src }, apts] = await Promise.all([
@@ -44,7 +47,7 @@ export default function IcalAdmin() {
   }, []);
 
   // ── Añadir fuente ─────────────────────────────────────────────────────────
-  const handleAdd = async e => {
+  const handleAdd = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form.apartment_slug || !form.url) {
       setError('Selecciona un apartamento e introduce la URL del calendario.');
@@ -69,23 +72,18 @@ export default function IcalAdmin() {
   };
 
   // ── Eliminar fuente ───────────────────────────────────────────────────────
-  const handleDelete = async (id: string, slug: string) => {
-    if (
-      !confirm(
-        '¿Eliminar esta fuente?\n\nLas reservas importadas de Booking.com para este apartamento también se eliminarán.'
-      )
-    )
-      return;
-
+  const handleDeleteConfirmed = async () => {
+    if (!confirmDelete) return;
+    const { id, slug } = confirmDelete;
+    setConfirmDelete(null);
     await supabase.from('ical_sources').delete().eq('id', id);
-    // Eliminar reservas importadas de esta fuente
+    // Delete reservations imported from this source
     await supabase
       .from('reservations')
       .delete()
       .eq('source', 'booking')
       .eq('apt_slug', slug)
       .like('ical_uid', `booking-${slug}-%`);
-
     await load();
   };
 
@@ -104,7 +102,7 @@ export default function IcalAdmin() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
     } catch (err: any) {
-      alert(`Error al sincronizar: ${err.message}`);
+      toast.error(`Error al sincronizar: ${err.message}`);
     }
     await load();
     setSyncing(null);
@@ -118,7 +116,7 @@ export default function IcalAdmin() {
       .eq('id', id);
 
     if (err) {
-      alert(`Error al cambiar estado: ${err.message}`);
+      toast.error(`Error al cambiar estado: ${err.message}`);
     } else {
       await load();
     }
@@ -157,42 +155,37 @@ export default function IcalAdmin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="panel-page-content flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      {/* Cabecera */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-serif font-semibold text-navy dark:text-white">
-            Sincronización Booking.com
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Importa las reservas de Booking.com vía iCal para evitar dobles reservas.
-          </p>
-        </div>
-        {sources.length > 0 && (
-          <button
-            onClick={handleSyncAll}
-            disabled={syncingAll}
-            className="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-          >
-            <Ico
-              d={syncingAll ? paths.sync : paths.sync}
-              size={15}
-              color="white"
-              className={syncingAll ? 'animate-spin' : ''}
-            />
-            {syncingAll ? 'Sincronizando…' : 'Sincronizar todo'}
-          </button>
-        )}
-      </div>
+    <div className="panel-page-content space-y-5">
+      <PanelPageHeader
+        title="Sincronización Booking.com"
+        subtitle="Importa las reservas de Booking.com vía iCal para evitar dobles reservas."
+        actions={
+          sources.length > 0 ? (
+            <button
+              onClick={handleSyncAll}
+              disabled={syncingAll}
+              className="panel-btn panel-btn-primary panel-btn-sm flex items-center gap-2"
+            >
+              <Ico
+                d={paths.sync}
+                size={14}
+                color="white"
+                className={syncingAll ? 'animate-spin' : ''}
+              />
+              {syncingAll ? 'Sincronizando…' : 'Sincronizar todo'}
+            </button>
+          ) : null
+        }
+      />
 
-      {/* Cómo obtener la URL de Booking.com */}
+      {/* How to get the Booking.com URL */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
         <div className="flex gap-3">
           <Ico d={paths.check} size={16} color="#3b82f6" className="shrink-0 mt-0.5" />
@@ -213,16 +206,14 @@ export default function IcalAdmin() {
         </div>
       </div>
 
-      {/* Añadir nueva fuente */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-        <h2 className="text-sm font-semibold text-navy dark:text-white mb-4">
-          Añadir calendario de Booking.com
-        </h2>
+      {/* Add new source */}
+      <div className="panel-card">
+        <h2 className="panel-h3 mb-4">Añadir calendario de Booking.com</h2>
         <form onSubmit={handleAdd} className="flex flex-wrap gap-3">
           <select
             value={form.apartment_slug}
             onChange={e => setForm(f => ({ ...f, apartment_slug: e.target.value }))}
-            className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-navy dark:text-white w-48"
+            className="panel-input w-48"
           >
             <option value="">Apartamento…</option>
             {apartments.map(a => (
@@ -236,12 +227,12 @@ export default function IcalAdmin() {
             placeholder="https://admin.booking.com/hotel/...ics"
             value={form.url}
             onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
-            className="flex-1 min-w-64 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-navy dark:text-white placeholder:text-gray-400"
+            className="panel-input flex-1 min-w-64 w-auto"
           />
           <button
             type="submit"
             disabled={adding}
-            className="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 panel-btn panel-btn-primary disabled:opacity-50"
           >
             <Ico d={paths.plus} size={14} color="white" />
             {adding ? 'Añadiendo…' : 'Añadir'}
@@ -250,7 +241,7 @@ export default function IcalAdmin() {
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
       </div>
 
-      {/* Lista de fuentes */}
+      {/* Sources list */}
       {sources.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <Ico d={paths.sync} size={32} color="#9ca3af" />
@@ -267,7 +258,7 @@ export default function IcalAdmin() {
             return (
               <div
                 key={src.id}
-                className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-opacity ${src.active === false ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                className={`panel-card transition-opacity ${src.active === false ? 'opacity-60 grayscale-[0.5]' : ''}`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   {/* Info principal */}
@@ -296,16 +287,30 @@ export default function IcalAdmin() {
                               ? 'Error'
                               : 'Sin sincronizar'}
                       </span>
-                      <span className="text-sm font-semibold text-navy dark:text-white">
+                      <span
+                        className="text-sm font-semibold panel-text-main"
+                      >
                         {apt?.name || src.apartment_slug}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 truncate max-w-xs md:max-w-md lg:max-w-lg mb-1">
-                      {src.url}
-                    </p>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <p className="text-xs text-gray-400 truncate max-w-xs md:max-w-md lg:max-w-lg">
+                        {src.url}
+                      </p>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(src.url);
+                          toast.success('URL copiada');
+                        }}
+                        title="Copiar URL"
+                        className="shrink-0 p-1 text-gray-300 hover:text-teal-600 transition-colors"
+                      >
+                        <Ico d={paths.copy} size={12} color="currentColor" />
+                      </button>
+                    </div>
                     <div className="flex flex-wrap gap-3 text-xs text-gray-400">
                       <span>
-                        Última sync: <strong>{timeAgo(src.last_sync)}</strong>
+                        Última sync: <strong>{timeAgo(src.last_sync ?? '')}</strong>
                       </span>
                       {src.last_message && (
                         <span className={statusErr ? 'text-red-500' : ''}>{src.last_message}</span>
@@ -324,8 +329,8 @@ export default function IcalAdmin() {
                       }
                       className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors border ${
                         src.active === false
-                          ? 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'
-                          : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                          ? 'border-[var(--panel-border)] opacity-60 hover:opacity-80'
+                          : 'border-[var(--panel-border)] hover:opacity-80'
                       }`}
                     >
                       <Ico
@@ -350,7 +355,7 @@ export default function IcalAdmin() {
                       {issyncing ? 'Sync…' : 'Sync'}
                     </button>
                     <button
-                      onClick={() => handleDelete(src.id, src.apartment_slug)}
+                      onClick={() => setConfirmDelete({ id: src.id, slug: src.apartment_slug })}
                       title="Eliminar"
                       className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
                     >
@@ -365,10 +370,8 @@ export default function IcalAdmin() {
       )}
 
       {/* Exportar calendarios propios */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-        <h2 className="text-sm font-semibold text-navy dark:text-white mb-1">
-          Exportar calendarios propios
-        </h2>
+      <div className="panel-card">
+        <h2 className="panel-h3 mb-1">Exportar calendarios propios</h2>
         <p className="text-xs text-gray-400 mb-4">
           Usa estas URLs en Booking.com para importar tus reservas directas y evitar huecos.
         </p>
@@ -401,6 +404,16 @@ export default function IcalAdmin() {
           ))}
         </div>
       </div>
+
+      <PanelConfirm
+        open={!!confirmDelete}
+        variant="destructive"
+        title="¿Eliminar esta fuente iCal?"
+        description="Las reservas importadas de Booking.com para este apartamento también se eliminarán."
+        confirmLabel="Eliminar"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

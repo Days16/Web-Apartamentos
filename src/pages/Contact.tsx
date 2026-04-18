@@ -1,6 +1,6 @@
-/* eslint-disable */
-// @ts-nocheck
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
+import type { DbApartment } from '../types';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import BookingModal from '../components/BookingModal';
@@ -19,7 +19,7 @@ export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', apt: '', msg: '' });
   const [sent, setSent] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [apartmentsList, setApartmentsList] = useState([]);
+  const [apartmentsList, setApartmentsList] = useState<DbApartment[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
 
@@ -27,7 +27,7 @@ export default function Contact() {
     fetchApartments().then(setApartmentsList);
   }, []);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!captchaToken) {
       alert('Por favor completa la verificación de seguridad.');
@@ -40,7 +40,7 @@ export default function Contact() {
       });
       if (error) throw error;
       setSent(true);
-      // Notificar al propietario (silencioso, no bloquea)
+      // Notify owner (silent, non-blocking)
       sendOwnerNotification({
         type: 'contact',
         guestName: form.name,
@@ -58,15 +58,17 @@ export default function Contact() {
     }
   };
 
-  const up = field => e => setForm(p => ({ ...p, [field]: e.target.value }));
+  const up = (field: string) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setForm(p => ({ ...p, [field]: e.target.value }));
 
   const { lang } = useLang();
   const T = useT(lang);
   const C = T.contact;
   const { settings } = useSettings();
-  const sitePhone = settings?.site_phone || '';
+  const sitePhone = (settings?.site_phone as string) || '';
   const waPhone = sitePhone.replace(/\D/g, '');
-  const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://www.apartamentosillapancha.com').replace(/\/$/, '');
+  const siteUrl = (
+    import.meta.env.VITE_SITE_URL || 'https://www.apartamentosillapancha.com'
+  ).replace(/\/$/, '');
 
   const localBusinessJsonLd = {
     '@context': 'https://schema.org',
@@ -110,9 +112,9 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* FORMULARIO + INFO */}
+      {/* FORM + INFO */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-20 px-4 max-w-6xl mx-auto">
-        {/* FORMULARIO */}
+        {/* FORM */}
         <div>
           {sent ? (
             <div className="text-center py-10">
@@ -209,7 +211,7 @@ export default function Contact() {
                       <option value="">{C.noPref}</option>
                       {apartmentsList.map(a => (
                         <option key={a.slug} value={a.slug}>
-                          {lang === 'EN' ? a.nameEn || a.name : a.name}
+                          {lang === 'EN' ? a.name_en || a.name : a.name}
                         </option>
                       ))}
                     </select>

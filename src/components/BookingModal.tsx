@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import Turnstile from './Turnstile';
-import DatePicker from 'react-datepicker';
 import Ico, { paths } from './Ico';
 import { supabase } from '../lib/supabase';
 import { createPaymentIntent, confirmPayment } from '../lib/stripe';
@@ -31,10 +30,11 @@ export default function BookingModal({
   initialCheckout?: string;
 }) {
   const navigate = useNavigate();
-  const { lang, t } = useLang();
+  const { lang } = useLang();
   const T = useT(lang);
   const { dark } = useTheme();
-  const apt = (apartment ?? { name: 'Apt. Cantábrico', price: 140 }) as Apartment;
+  if (!apartment) return null;
+  const apt = apartment;
   const stripe = useStripe();
   const elements = useElements();
 
@@ -59,7 +59,7 @@ export default function BookingModal({
 
   const DRAFT_KEY = `booking_draft_${apt.slug}`;
 
-  // Restaurar borrador guardado en sessionStorage tras error de pago
+  // Restore saved draft from sessionStorage after payment error
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(DRAFT_KEY);
@@ -75,24 +75,26 @@ export default function BookingModal({
         if (draft.checkout) setCheckoutDate(new Date(draft.checkout));
         if (draft.extras) setSelectedExtras(draft.extras);
       }
-    } catch { /* silent */ }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    } catch {
+      /* silent */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (step !== 2) setCaptchaToken('');
   }, [step]);
 
-  // Cargar extras desde Supabase
+  // Load extras from Supabase
   useEffect(() => {
     Promise.all([fetchExtras(), fetchSettings(), getReservations()])
       .then(([extras, settings, resData]) => {
         setAllExtras(extras);
         setGlobalSettings(settings);
 
-        // Calcular fechas ocupadas para este apartamento
+        // Calculate occupied dates for this apartment
         const relevantRes = resData.filter(
-          r => (r.aptSlug === apt.slug || r.apt === apt.slug) && r.status !== 'cancelled'
+          r => r.aptSlug === apt.slug && r.status !== 'cancelled'
         );
         const list: string[] = [];
         relevantRes.forEach(r => {
@@ -111,7 +113,7 @@ export default function BookingModal({
 
   const steps = T.booking.steps;
 
-  // Calcular noches dinámicamente
+  // Calculate nights dynamically
   const calculateNights = () => {
     if (!checkinDate || !checkoutDate) return 0;
     const diffTime = Math.abs(checkoutDate.getTime() - checkinDate.getTime());
@@ -122,7 +124,7 @@ export default function BookingModal({
   const { activeDiscount } = useDiscount();
   const nights = calculateNights();
 
-  // Estancia mínima: regla por fechas > mínimo del apartamento > 1
+  // Minimum stay: date-based rule > apartment minimum > 1
   const effectiveMinStay = (() => {
     if (!checkinDate) return apt.minStay || 1;
     const checkinStr = dateToStr(checkinDate);
@@ -133,7 +135,8 @@ export default function BookingModal({
   })();
   const belowMinStay = nights > 0 && nights < effectiveMinStay;
 
-  const taxPct = typeof globalSettings.tax_percentage === 'number' ? globalSettings.tax_percentage : 10;
+  const taxPct =
+    typeof globalSettings.tax_percentage === 'number' ? globalSettings.tax_percentage : 10;
   const subtotal = apt.price * nights;
 
   let discountAmount = 0;
@@ -153,14 +156,20 @@ export default function BookingModal({
   const taxes = Math.round(subtotalWithDiscountAndExtras * (taxPct / 100));
   const total = subtotalWithDiscountAndExtras + taxes;
 
-  // Preferencias globales > Apt > Default
+  // Global preferences > Apt > Default
   // Apt > Global > Default
-  const cancelDays = apt.cancellation_days ?? (typeof globalSettings.cancellation_days === 'number' ? globalSettings.cancellation_days : 14);
-  const depositPct = apt.deposit_percentage ?? (typeof globalSettings.payment_deposit_percentage === 'number' ? globalSettings.payment_deposit_percentage : 50);
+  const cancelDays =
+    apt.cancellation_days ??
+    (typeof globalSettings.cancellation_days === 'number' ? globalSettings.cancellation_days : 14);
+  const depositPct =
+    apt.deposit_percentage ??
+    (typeof globalSettings.payment_deposit_percentage === 'number'
+      ? globalSettings.payment_deposit_percentage
+      : 50);
 
   const deposit = Math.round(total * (depositPct / 100));
 
-  // Formatear fechas para mostrar
+  // Format dates for display
   const formatDate = (date: Date | null): string => {
     if (!date) return '';
     return new Intl.DateTimeFormat(lang === 'ES' ? 'es-ES' : 'en-US', {
@@ -173,7 +182,7 @@ export default function BookingModal({
   const checkin = formatDate(checkinDate);
   const checkout = formatDate(checkoutDate);
 
-  // Nueva validación de solapamiento
+  // Overlap validation
   const checkHasOverlap = () => {
     if (!checkinDate || !checkoutDate || !occupiedDates.length) return false;
     const dIn = new Date(checkinDate);
@@ -214,13 +223,13 @@ export default function BookingModal({
     setStripeError('');
 
     try {
-      // Verificación de disponibilidad en tiempo real antes del pago
+      // Real-time availability check before payment
       const checkinStr = dateToStr(checkinDate!);
       const checkoutStr = dateToStr(checkoutDate!);
       const { data: overlap } = await supabase
         .from('reservations')
         .select('id')
-        .eq('apt_slug', apartment?.slug || '')
+        .eq('apt_slug', apt.slug)
         .neq('status', 'cancelled')
         .lt('checkin', checkoutStr)
         .gt('checkout', checkinStr)
@@ -236,11 +245,11 @@ export default function BookingModal({
         return;
       }
 
-      // Crear ID de reserva (criptográficamente seguro)
+      // Create reservation ID (cryptographically secure)
       const reservationId =
         'IP-' + ((crypto.getRandomValues(new Uint32Array(1))[0] % 900000) + 100000);
 
-      // 1. Crear PaymentIntent en Edge Function
+      // 1. Create PaymentIntent in Edge Function
       const paymentData = await createPaymentIntent({
         amount: deposit,
         currency: 'eur',
@@ -251,14 +260,14 @@ export default function BookingModal({
         turnstileToken: captchaToken,
       });
 
-      // 2. Confirmar pago con Stripe Elements
+      // 2. Confirm payment with Stripe Elements
       const paymentResult = await confirmPayment(stripe, elements, paymentData.clientSecret);
 
       if (!paymentResult.success) {
         throw new Error('Error en confirmación de pago');
       }
 
-      // 3. Crear registro de reserva en Supabase
+      // 3. Create reservation record in Supabase
       const { error: insertError } = await supabase.from('reservations').insert([
         {
           id: reservationId,
@@ -281,7 +290,7 @@ export default function BookingModal({
 
       if (insertError) throw insertError;
 
-      // 4. Enviar email de confirmación con Resend
+      // 4. Send confirmation email with Resend
       try {
         await sendBookingConfirmation({
           guestEmail: form.email,
@@ -298,7 +307,7 @@ export default function BookingModal({
         console.warn('Email envío fallido pero reserva creada:', emailError);
       }
 
-      // 4b. Notificar al propietario (silencioso, no bloquea)
+      // 4b. Notify owner (silent, non-blocking)
       sendOwnerNotification({
         type: 'booking',
         reservationId,
@@ -312,7 +321,7 @@ export default function BookingModal({
         deposit,
       });
 
-      // 5. Generar PDF de factura
+      // 5. Generate invoice PDF
       try {
         const { default: generateInvoice } = await import('../utils/generateInvoice');
         generateInvoice({
@@ -320,6 +329,7 @@ export default function BookingModal({
           guest_name: form.name,
           guest_email: form.email,
           apartment_name: apartment?.name || 'Apt. Cantábrico',
+          apt_slug: apartment?.slug || '',
           checkin: checkin,
           checkout: checkout,
           nights: nights,
@@ -338,15 +348,20 @@ export default function BookingModal({
         navigate(`/reserva-confirmada/${reservationId}`);
       }, 1500);
     } catch (err: unknown) {
-      // Guardar borrador para que el usuario no pierda sus datos
+      // Save draft so user does not lose their data
       try {
-        sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
-          form,
-          checkin: checkinDate?.toISOString(),
-          checkout: checkoutDate?.toISOString(),
-          extras: selectedExtras,
-        }));
-      } catch { /* silent */ }
+        sessionStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({
+            form,
+            checkin: checkinDate?.toISOString(),
+            checkout: checkoutDate?.toISOString(),
+            extras: selectedExtras,
+          })
+        );
+      } catch {
+        /* silent */
+      }
       setStripeError((err as Error).message || T.booking.errorPayment);
       console.error('Payment error:', err);
     } finally {
@@ -368,9 +383,15 @@ export default function BookingModal({
     const handleTab = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
       if (e.shiftKey) {
-        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        }
       } else {
-        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
       }
     };
     panel.addEventListener('keydown', handleTab);
@@ -382,8 +403,11 @@ export default function BookingModal({
       className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div ref={panelRef} className="bg-white dark:bg-slate-900 dark:border dark:border-slate-700 rounded-lg overflow-hidden flex max-w-5xl w-full max-h-[90vh]">
-        {/* PANEL IZQUIERDO */}
+      <div
+        ref={panelRef}
+        className="bg-white dark:bg-slate-900 dark:border dark:border-slate-700 rounded-lg overflow-hidden flex max-w-5xl w-full max-h-[90vh]"
+      >
+        {/* LEFT PANEL */}
         <div className="bg-gradient-to-br from-slate-900 to-slate-900 text-white flex-1 p-8 flex flex-col justify-between">
           <div className="flex flex-col gap-3 mb-12 pb-8 border-b border-white/20">
             {steps.map((s, i) => (
@@ -497,7 +521,7 @@ export default function BookingModal({
           )}
         </div>
 
-        {/* PANEL DERECHO */}
+        {/* RIGHT PANEL */}
         <div className="flex-1 p-8 overflow-y-auto bg-white relative">
           <button
             onClick={onClose}
@@ -506,7 +530,7 @@ export default function BookingModal({
             <Ico d={paths.close} size={20} />
           </button>
 
-          {/* PASO 0: DATOS (antiguo paso 1) */}
+          {/* STEP 0: DATA (formerly step 1) */}
           {step === 0 && (
             <>
               <div className="font-serif text-2xl font-light text-slate-900 mb-8">
@@ -643,7 +667,7 @@ export default function BookingModal({
             </>
           )}
 
-          {/* PASO 1: EXTRAS */}
+          {/* STEP 1: EXTRAS */}
           {step === 1 && (
             <>
               <div className="font-serif text-2xl font-light text-slate-900 mb-2">
@@ -664,8 +688,12 @@ export default function BookingModal({
                         onClick={() => toggleExtra(extra.id)}
                       >
                         <div className="flex-1">
-                          <div className="font-semibold text-slate-900">{extra[`name_${lang}`] || extra.name}</div>
-                          <div className="text-xs text-gray-600 mt-1">{extra[`description_${lang}`] || extra.description}</div>
+                          <div className="font-semibold text-slate-900">
+                            {extra[`name_${lang}`] || extra.name}
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">
+                            {extra[`description_${lang}`] || extra.description}
+                          </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span
@@ -715,7 +743,7 @@ export default function BookingModal({
             </>
           )}
 
-          {/* PASO 2: PAGO */}
+          {/* STEP 2: PAYMENT */}
           {step === 2 && (
             <>
               <div className="font-serif text-2xl font-light text-slate-900 mb-2">
@@ -726,7 +754,7 @@ export default function BookingModal({
                 {T.booking.secureProcessed}
               </div>
 
-              {/* Información de pago */}
+              {/* Payment information */}
               <div className="bg-gray-100 p-4 rounded-lg mb-6 border border-gray-300">
                 <div className="text-xs font-semibold text-slate-900 mb-3">
                   💳 {T.booking.cardNow} del {depositPct}%
@@ -798,7 +826,7 @@ export default function BookingModal({
             </>
           )}
 
-          {/* PASO 3: CONFIRMADO */}
+          {/* STEP 3: CONFIRMED */}
           {step === 3 && (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">

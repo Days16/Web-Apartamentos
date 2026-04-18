@@ -114,7 +114,7 @@ export default function generateCalendarPdf(opts: {
         doc.text(
           `${reservations.length} reservas activas · ${apartments.length} alojamientos`,
           margin,
-          y + 10,
+          y + 10
         );
         y += titleBlockH;
       } else if (firstPageOfChunk) {
@@ -124,7 +124,7 @@ export default function generateCalendarPdf(opts: {
         doc.text(
           `Período: ${chunk[0].toLocaleDateString('es-ES')} → ${chunk[chunk.length - 1].toLocaleDateString('es-ES')}`,
           margin,
-          y + 5,
+          y + 5
         );
         y += 10;
       }
@@ -142,7 +142,7 @@ export default function generateCalendarPdf(opts: {
         `${chunk[0].toLocaleDateString('es-ES')} → ${chunk[chunk.length - 1].toLocaleDateString('es-ES')}`,
         pageW - margin,
         Math.max(y, margin) + 2,
-        { align: 'right' },
+        { align: 'right' }
       );
 
       doc.setDrawColor(200, 200, 200);
@@ -199,7 +199,7 @@ export default function generateCalendarPdf(opts: {
       doc.text(
         'Leyenda colores: verde Web · azul Booking · amarillo Pendiente · morado Otros · rojo Bloqueado',
         margin,
-        pageH - margin - 2,
+        pageH - margin - 2
       );
     }
   }

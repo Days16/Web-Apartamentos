@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLang } from '../contexts/LangContext';
 import { useT } from '../i18n/translations';
@@ -37,12 +37,12 @@ export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBookin
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Cerrar menú al cambiar de ruta
+  // Close menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
 
-  // Cerrar menú al hacer clic fuera
+  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (mobileOpen && navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -60,7 +60,7 @@ export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBookin
     return () => document.removeEventListener('click', handleClickOutside);
   }, [mobileOpen, langOpen, currencyOpen]);
 
-  // Prevenir scroll cuando el menú está abierto
+  // Prevent scroll when menu is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
@@ -96,12 +96,12 @@ export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBookin
     >
       <Link to="/">
         <picture>
-            <source srcSet="/logo_lineas.webp" type="image/webp" />
-            <img src="/logo_lineas.png" alt="Illa Pancha" className="h-10 w-auto" />
-          </picture>
+          <source srcSet="/logo_lineas.webp" type="image/webp" />
+          <img src="/logo_lineas.png" alt="Illa Pancha" className="h-10 w-auto" />
+        </picture>
       </Link>
 
-      {/* Links - escritorio y menú móvil */}
+      {/* Links - desktop and mobile menu */}
       <div
         className={`flex flex-col md:flex-row md:items-center md:gap-8 absolute top-16 md:top-1/2 md:-translate-y-1/2 left-0 md:left-1/2 md:-translate-x-1/2 right-0 md:right-auto w-full md:w-auto bg-white dark:bg-slate-900 dark:border-slate-700 md:bg-transparent md:dark:bg-transparent px-6 md:px-0 py-4 md:py-0 border-b md:border-0 transition-all duration-300 ${mobileOpen ? 'max-h-64 opacity-100' : 'md:max-h-full md:opacity-100 max-h-0 opacity-0 overflow-hidden md:overflow-visible'}`}
       >
@@ -142,7 +142,7 @@ export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBookin
           {T.nav.contact}
         </Link>
 
-        {/* Botón reservar visible solo en el menú móvil */}
+        {/* Book button visible only in mobile menu */}
         <button
           className="md:hidden bg-teal text-white px-5 py-3 rounded hover:bg-teal-600 transition-all font-semibold mt-2 w-full"
           onClick={handleBook}
@@ -281,7 +281,7 @@ export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBookin
           {T.nav.book}
         </button>
 
-        {/* Hamburger - solo visible en móvil */}
+        {/* Hamburger - mobile only */}
         <button
           className="md:hidden flex flex-col gap-1.5 ml-4"
           onClick={() => setMobileOpen(o => !o)}
@@ -292,7 +292,9 @@ export default function Navbar({ onOpenBooking: _onOpenBooking }: { onOpenBookin
           <span
             className={`w-6 h-0.5 bg-navy dark:bg-white transition-all transform origin-center ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`}
           />
-          <span className={`w-6 h-0.5 bg-navy dark:bg-white transition-all ${mobileOpen ? 'opacity-0' : ''}`} />
+          <span
+            className={`w-6 h-0.5 bg-navy dark:bg-white transition-all ${mobileOpen ? 'opacity-0' : ''}`}
+          />
           <span
             className={`w-6 h-0.5 bg-navy dark:bg-white transition-all transform origin-center ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`}
           />

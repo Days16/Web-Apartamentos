@@ -37,5 +37,14 @@ export function calculateBookingPrice(input: PricingInput): PricingResult {
   const total = subtotalWithExtras + taxes;
   const deposit = Math.round(total * (depositPct / 100));
 
-  return { subtotal, discountAmount, subtotalWithDiscount, extra, subtotalWithExtras, taxes, total, deposit };
+  return {
+    subtotal,
+    discountAmount,
+    subtotalWithDiscount,
+    extra,
+    subtotalWithExtras,
+    taxes,
+    total,
+    deposit,
+  };
 }

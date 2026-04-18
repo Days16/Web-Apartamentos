@@ -1,11 +1,11 @@
 /**
- * Capa de datos — usa Supabase si está configurado, fallback a mockData
- * Para activar Supabase: asegúrate de tener las tablas creadas (SQL en supabase.js)
+ * Data layer — uses Supabase if configured, fallback to mockData
+ * To enable Supabase: ensure tables are created (SQL in supabase.js)
  */
 import { supabase } from '../lib/supabase';
 import type { Apartment, Reservation } from '../types';
 
-// ─── APARTAMENTOS ─────────────────────────────────────────────────────────────
+// ─── APARTMENTS ─────────────────────────────────────────────────────────────
 export async function getApartments(): Promise<Apartment[]> {
   try {
     const { data, error } = await supabase
@@ -41,7 +41,7 @@ export async function deleteApartment(slug: string): Promise<boolean> {
   return true;
 }
 
-// ─── RESERVAS ─────────────────────────────────────────────────────────────────
+// ─── RESERVATIONS ─────────────────────────────────────────────────────────────────
 export async function getReservations(): Promise<Reservation[]> {
   try {
     const { data, error } = await supabase
@@ -177,7 +177,7 @@ export async function deleteExtra(id: string): Promise<boolean> {
   return true;
 }
 
-// ─── RESEÑAS ─────────────────────────────────────────────────────────────────
+// ─── REVIEWS ─────────────────────────────────────────────────────────────────
 export async function getReviews(aptSlug: string | null = null) {
   try {
     let query = supabase.from('reviews').select('*').order('created_at', { ascending: false });
@@ -192,7 +192,7 @@ export async function getReviews(aptSlug: string | null = null) {
   }
 }
 
-// ─── NORMALIZACIÓN DE CAMPOS (snake_case Supabase → camelCase React) ─────────
+// ─── FIELD NORMALIZATION (snake_case Supabase → camelCase React) ─────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeApartment(d: any): Apartment {
   return {

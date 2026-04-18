@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 interface Discount {
   discount_percentage: number;
   code?: string;
+  type?: 'percent' | 'fixed';
+  rawValue?: number;
   [key: string]: unknown;
 }
 

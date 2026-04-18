@@ -1,5 +1,5 @@
 /* ============================================================
-   1. IMPORTS — Tailwind layers + terceros
+   1. IMPORTS — Tailwind layers + third-party
    ============================================================ */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
@@ -7,11 +7,34 @@
 @import 'react-datepicker/dist/react-datepicker.css';
 
 /* ============================================================
-   2. BASE — Reset y elementos HTML globales
+   2. BASE — Reset and global HTML elements
    ============================================================ */
 @layer base {
   :root {
     --banner-height: 0px;
+
+    /* ── Internal panel: design tokens ──────────────────────── */
+    --panel-bg: #f8fafc;
+    --panel-sidebar-bg: #0f172a;
+    --panel-sidebar-width: 260px;
+    --panel-topbar-h: 56px;
+    --panel-accent: #1a5f6e;
+    --panel-accent-hover: #155060;
+    --panel-accent-gold: #d4a843;
+    --panel-surface: #ffffff;
+    --panel-surface-2: #f1f5f9;
+    --panel-surface-3: #e8eef4;
+    --panel-border: #e2e8f0;
+    --panel-border-focus: #1a5f6e;
+    --panel-text: #0f172a;
+    --panel-text-muted: #64748b;
+    --panel-text-subtle: #94a3b8;
+    --panel-radius: 10px;
+    --panel-radius-lg: 14px;
+    --panel-radius-sm: 6px;
+    --panel-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --panel-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --panel-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.14);
   }
 
   html {
@@ -37,7 +60,7 @@
     min-height: 100px;
   }
 
-  /* Evitar zoom en iOS al enfocar inputs */
+  /* Prevent iOS zoom on input focus */
   input[type='text'],
   input[type='email'],
   input[type='password'],
@@ -51,7 +74,7 @@
     font-size: 16px;
   }
 
-  /* Select con caret personalizado */
+  /* Select with custom caret */
   select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%230f172a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
     background-size: 1.5em 1.5em;
@@ -67,7 +90,7 @@
 }
 
 /* ============================================================
-   3. COMPONENTES — Utilidades reutilizables
+   3. COMPONENTS — Reusable utilities
    ============================================================ */
 @layer components {
   .touch-spacing {
@@ -98,7 +121,7 @@
 }
 
 /* ============================================================
-   4. UTILIDADES — Animaciones y clases helpers
+   4. UTILITIES — Animations and helper classes
    ============================================================ */
 @layer utilities {
   @keyframes fadeIn {
@@ -128,7 +151,7 @@
     animation: slideUp 0.3s ease-out;
   }
 
-  /* Texto responsivo con fluid clamp */
+  /* Responsive text with fluid clamp */
   .text-responsive-lg {
     font-size: clamp(20px, 5vw, 32px);
   }
@@ -139,7 +162,7 @@
     font-size: clamp(12px, 3vw, 16px);
   }
 
-  /* Visibilidad por breakpoint */
+  /* Visibility by breakpoint */
   .show-mobile {
     @apply hidden;
   }
@@ -158,7 +181,7 @@
 }
 
 /* ============================================================
-   5. PÁGINAS LEGALES — Contenido de política/términos
+   5. LEGAL PAGES — Policy/terms content
    ============================================================ */
 .policy-content p {
   @apply text-gray-700 leading-relaxed mb-4;
@@ -192,7 +215,7 @@
     color: #f1f5f9;
   }
 
-  /* ── Fondos ── */
+  /* ── Backgrounds ── */
   .dark .bg-white {
     background-color: #1e293b;
   }
@@ -212,7 +235,7 @@
     background-color: #0f172a;
   }
 
-  /* ── Texto ── */
+  /* ── Text ── */
   .dark .text-navy {
     color: #f1f5f9;
   }
@@ -244,7 +267,7 @@
     color: #94a3b8;
   }
 
-  /* ── Bordes ── */
+  /* ── Borders ── */
   .dark .border-gray-100 {
     border-color: #1e293b;
   }
@@ -258,7 +281,7 @@
     border-color: #334155;
   }
 
-  /* ── Inputs y formularios ── */
+  /* ── Inputs and forms ── */
   .dark input,
   .dark textarea,
   .dark select {
@@ -281,7 +304,7 @@
     border-color: #334155;
   }
 
-  /* ── Páginas legales ── */
+  /* ── Legal pages ── */
   .dark .policy-content p {
     color: #cbd5e1;
   }
@@ -294,6 +317,20 @@
   }
   .dark .policy-content strong {
     color: #f1f5f9;
+  }
+
+  /* ── Panel tokens (dark mode) ── */
+  .dark {
+    --panel-bg: #0f172a;
+    --panel-sidebar-bg: #020617;
+    --panel-surface: #1e293b;
+    --panel-surface-2: #0f172a;
+    --panel-surface-3: #152035;
+    --panel-border: #334155;
+    --panel-border-focus: #2e9db5;
+    --panel-text: #f1f5f9;
+    --panel-text-muted: #94a3b8;
+    --panel-text-subtle: #64748b;
   }
 
   /* ── react-datepicker ── */
@@ -349,7 +386,7 @@
 }
 
 /* ============================================================
-   8. PRINT — Calendario de gestión
+   8. PRINT — Management calendar
    ============================================================ */
 @media print {
   .print\:hidden {
@@ -371,10 +408,10 @@
 }
 
 /* ============================================================
-   9. DARK MODE — Panel admin / gestión (admin-content)
+   9. DARK MODE — Admin / management panel (admin-content)
    ============================================================ */
 
-/* Tarjetas y superficies blancas */
+/* White cards and surfaces */
 .dark .admin-content .bg-white {
   background-color: rgb(30 41 59) !important; /* slate-800 */
 }
@@ -387,7 +424,7 @@
   background-color: rgb(51 65 85) !important; /* slate-700 */
 }
 
-/* Textos */
+/* Text */
 .dark .admin-content .text-slate-900,
 .dark .admin-content .text-gray-900 {
   color: rgb(241 245 249) !important; /* slate-100 */
@@ -409,7 +446,7 @@
   color: rgb(100 116 139) !important; /* slate-500 */
 }
 
-/* Bordes */
+/* Borders */
 .dark .admin-content .border-slate-200,
 .dark .admin-content .border-gray-200 {
   border-color: rgb(51 65 85) !important; /* slate-700 */
@@ -424,7 +461,7 @@
 }
 
 /* Inputs, textareas, selects */
-.dark .admin-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.dark .admin-content input:not([type='checkbox']):not([type='radio']):not([type='range']),
 .dark .admin-content textarea,
 .dark .admin-content select {
   background-color: rgb(51 65 85) !important; /* slate-700 */
@@ -436,7 +473,7 @@
   color: rgb(100 116 139) !important; /* slate-500 */
 }
 
-/* Hover en filas de tabla y listas */
+/* Hover on table rows and lists */
 .dark .admin-content .hover\:bg-gray-50:hover,
 .dark .admin-content .hover\:bg-slate-50:hover {
   background-color: rgb(51 65 85 / 0.5) !important;
@@ -446,37 +483,1388 @@
   background-color: rgb(51 65 85) !important;
 }
 
-/* Cajas de color (info, éxito, aviso, error) dentro de admin */
-.dark .admin-content .bg-blue-50   { background-color: rgb(30 58 138 / 0.2) !important; }
-.dark .admin-content .bg-blue-100  { background-color: rgb(30 58 138 / 0.3) !important; }
-.dark .admin-content .bg-green-50  { background-color: rgb(20 83 45 / 0.2) !important; }
-.dark .admin-content .bg-green-100 { background-color: rgb(20 83 45 / 0.3) !important; }
-.dark .admin-content .bg-yellow-50  { background-color: rgb(113 63 18 / 0.2) !important; }
-.dark .admin-content .bg-yellow-100 { background-color: rgb(113 63 18 / 0.3) !important; }
-.dark .admin-content .bg-red-50   { background-color: rgb(127 29 29 / 0.2) !important; }
-.dark .admin-content .bg-red-100  { background-color: rgb(127 29 29 / 0.3) !important; }
-.dark .admin-content .bg-amber-50  { background-color: rgb(120 53 15 / 0.2) !important; }
-.dark .admin-content .bg-amber-100 { background-color: rgb(120 53 15 / 0.3) !important; }
+/* Color boxes (info, success, warning, error) inside admin */
+.dark .admin-content .bg-blue-50 {
+  background-color: rgb(30 58 138 / 0.2) !important;
+}
+.dark .admin-content .bg-blue-100 {
+  background-color: rgb(30 58 138 / 0.3) !important;
+}
+.dark .admin-content .bg-green-50 {
+  background-color: rgb(20 83 45 / 0.2) !important;
+}
+.dark .admin-content .bg-green-100 {
+  background-color: rgb(20 83 45 / 0.3) !important;
+}
+.dark .admin-content .bg-yellow-50 {
+  background-color: rgb(113 63 18 / 0.2) !important;
+}
+.dark .admin-content .bg-yellow-100 {
+  background-color: rgb(113 63 18 / 0.3) !important;
+}
+.dark .admin-content .bg-red-50 {
+  background-color: rgb(127 29 29 / 0.2) !important;
+}
+.dark .admin-content .bg-red-100 {
+  background-color: rgb(127 29 29 / 0.3) !important;
+}
+.dark .admin-content .bg-amber-50 {
+  background-color: rgb(120 53 15 / 0.2) !important;
+}
+.dark .admin-content .bg-amber-100 {
+  background-color: rgb(120 53 15 / 0.3) !important;
+}
 
-/* Textos de colores de estado */
+/* Status color text */
 .dark .admin-content .text-blue-800,
-.dark .admin-content .text-blue-700  { color: rgb(147 197 253) !important; }
+.dark .admin-content .text-blue-700 {
+  color: rgb(147 197 253) !important;
+}
 .dark .admin-content .text-green-800,
-.dark .admin-content .text-green-700 { color: rgb(134 239 172) !important; }
+.dark .admin-content .text-green-700 {
+  color: rgb(134 239 172) !important;
+}
 .dark .admin-content .text-yellow-800,
-.dark .admin-content .text-yellow-700 { color: rgb(253 224 71) !important; }
+.dark .admin-content .text-yellow-700 {
+  color: rgb(253 224 71) !important;
+}
 .dark .admin-content .text-red-800,
-.dark .admin-content .text-red-700   { color: rgb(252 165 165) !important; }
+.dark .admin-content .text-red-700 {
+  color: rgb(252 165 165) !important;
+}
 .dark .admin-content .text-amber-800,
-.dark .admin-content .text-amber-700 { color: rgb(252 211 77) !important; }
+.dark .admin-content .text-amber-700 {
+  color: rgb(252 211 77) !important;
+}
 
-/* Texto navy dentro de admin */
-.dark .admin-content .text-navy { color: rgb(226 232 240) !important; }
+/* Navy text inside admin */
+.dark .admin-content .text-navy {
+  color: rgb(226 232 240) !important;
+}
+
+/* ============================================================
+   10. PANEL DESIGN SYSTEM — Admin & Management
+   ============================================================ */
+
+/* ── 10.1 Typography ── */
+.panel-h1 {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--panel-text);
+}
+.panel-h2 {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--panel-text);
+}
+.panel-h3 {
+  font-family: 'Jost', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--panel-text);
+}
+.panel-text-accent {
+  color: var(--panel-accent);
+}
+.panel-label {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--panel-text-muted);
+}
+.panel-caption {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--panel-text-muted);
+}
+
+/* ── 10.2 Card ── */
+.panel-card {
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  padding: 1.5rem;
+}
+.panel-card-padded {
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  padding: 1.5rem;
+}
+
+/* ── 10.3 Input ── */
+.panel-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: var(--panel-surface);
+  color: var(--panel-text);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius-sm);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  appearance: none;
+}
+.panel-input:focus {
+  outline: none;
+  border-color: var(--panel-border-focus);
+  box-shadow: 0 0 0 3px rgba(26, 95, 110, 0.15);
+}
+.panel-input::placeholder {
+  color: var(--panel-text-subtle);
+}
+.panel-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.panel-input--error {
+  border-color: #dc2626;
+}
+.panel-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* ── 10.4 Buttons ── */
+.panel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--panel-radius-sm);
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 44px;
+}
+.panel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.panel-btn-primary {
+  background: var(--panel-accent);
+  color: #fff;
+}
+.panel-btn-primary:hover:not(:disabled) {
+  background: var(--panel-accent-hover);
+}
+.panel-btn-primary:focus-visible {
+  outline: 2px solid var(--panel-accent);
+  outline-offset: 2px;
+}
+.panel-btn-secondary {
+  background: var(--panel-surface-2);
+  color: var(--panel-text);
+  border: 1px solid var(--panel-border);
+}
+.panel-btn-secondary:hover:not(:disabled) {
+  background: var(--panel-surface-3);
+}
+.panel-btn-ghost {
+  background: transparent;
+  color: var(--panel-text-muted);
+}
+.panel-btn-ghost:hover:not(:disabled) {
+  background: var(--panel-surface-2);
+  color: var(--panel-text);
+}
+.panel-btn-danger {
+  background: #dc2626;
+  color: #fff;
+}
+.panel-btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+.panel-btn-ghost:focus-visible {
+  outline: 2px solid var(--panel-accent);
+  outline-offset: 2px;
+}
+.panel-btn-danger:focus-visible {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+}
+.panel-btn-secondary:focus-visible {
+  outline: 2px solid var(--panel-accent);
+  outline-offset: 2px;
+}
+.panel-btn-sm {
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.875rem;
+  min-height: 34px;
+}
+.panel-btn-icon {
+  padding: 0.5rem;
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--panel-radius-sm);
+}
+
+/* ── 10.5 Status badges ── */
+.panel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.625rem;
+  border-radius: 99px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.panel-badge-success {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+.panel-badge-warning {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+}
+.panel-badge-error {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+.panel-badge-info {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+.panel-badge-neutral {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+.panel-badge-pending {
+  background: rgba(212, 168, 67, 0.15);
+  color: #92650a;
+}
+
+.dark .panel-badge-success {
+  background: rgba(22, 163, 74, 0.18);
+  color: #86efac;
+}
+.dark .panel-badge-warning {
+  background: rgba(217, 119, 6, 0.18);
+  color: #fcd34d;
+}
+.dark .panel-badge-error {
+  background: rgba(220, 38, 38, 0.18);
+  color: #fca5a5;
+}
+.dark .panel-badge-info {
+  background: rgba(37, 99, 235, 0.18);
+  color: #93c5fd;
+}
+.dark .panel-badge-neutral {
+  background: rgba(100, 116, 139, 0.18);
+  color: #94a3b8;
+}
+.dark .panel-badge-pending {
+  background: rgba(212, 168, 67, 0.18);
+  color: #fcd34d;
+}
+
+/* ── 10.6 Sidebar nav items ── */
+.panel-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--panel-radius-sm);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  position: relative;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+.panel-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+}
+.panel-nav-item.active {
+  background: rgba(26, 95, 110, 0.2);
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--panel-accent);
+}
+.panel-nav-item.active svg {
+  color: var(--panel-accent);
+}
+.panel-nav-item:focus-visible {
+  outline: 2px solid var(--panel-accent);
+  outline-offset: -2px;
+}
+
+/* Fullscreen modal on mobile */
+@media (max-width: 639px) {
+  .panel-modal-inner {
+    border-radius: 16px 16px 0 0;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+
+/* ── 10.7 KPI card ── */
+.panel-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+.panel-kpi-card {
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.panel-kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(26, 95, 110, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--panel-accent);
+  flex-shrink: 0;
+}
+.panel-kpi-value {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: var(--panel-text);
+  line-height: 1.1;
+}
+.panel-kpi-label {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--panel-text-muted);
+}
+.panel-kpi-trend {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.panel-kpi-trend--up {
+  color: #16a34a;
+}
+.panel-kpi-trend--down {
+  color: #dc2626;
+}
+
+/* ── 10.8 Panel table ── */
+.panel-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  background: var(--panel-surface);
+  position: relative;
+}
+.panel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+}
+.panel-table thead th {
+  background: var(--panel-surface-2);
+  color: var(--panel-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--panel-border);
+  white-space: nowrap;
+  text-align: left;
+}
+.panel-table tbody td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--panel-border);
+  color: var(--panel-text);
+  vertical-align: middle;
+}
+.panel-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.panel-table tbody tr {
+  transition: background 0.12s;
+}
+.panel-table tbody tr:hover {
+  background: var(--panel-surface-2);
+}
+.panel-table-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--panel-text-muted);
+  font-family: 'Jost', sans-serif;
+}
+.panel-table-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 100%;
+  background: linear-gradient(to right, transparent, var(--panel-surface));
+  pointer-events: none;
+  border-radius: 0 var(--panel-radius) var(--panel-radius) 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.panel-table-wrap.has-scroll::after {
+  opacity: 1;
+}
+
+/* ── 10.9 Page content wrapper ── */
+.panel-page-content {
+  padding: 2rem;
+  max-width: 1600px;
+}
+@media (max-width: 768px) {
+  .panel-page-content {
+    padding: 1.25rem 1rem;
+  }
+}
+
+/* ── 10.9b Page header ── */
+.panel-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.panel-page-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.panel-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ── 10.10 Form helpers ── */
+.panel-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.panel-form-field-label {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--panel-text);
+}
+.panel-form-field-label .required {
+  color: #dc2626;
+  margin-left: 0.2rem;
+}
+.panel-form-field-error {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+.panel-form-field-hint {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8125rem;
+  color: var(--panel-text-muted);
+}
+.panel-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.panel-form-section-title {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--panel-text);
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--panel-border);
+  margin-bottom: 0.25rem;
+}
+.panel-form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+.panel-form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+/* Cabecera de sección con botón de acción a la derecha */
+.panel-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--panel-border);
+  margin-bottom: 1rem;
+}
+.panel-section-header-title {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--panel-text);
+}
+.panel-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--panel-surface);
+  border-top: 1px solid var(--panel-border);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* ── 10.11 Panel tabs — underline style (EmailConfig) ── */
+.panel-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+.panel-tab {
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--panel-text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.panel-tab:hover {
+  color: var(--panel-text);
+}
+.panel-tab--active {
+  color: var(--panel-accent);
+  border-bottom-color: var(--panel-accent);
+  font-weight: 600;
+}
+
+/* ── 10.12 Panel tabs — pill style (GeneralSettings) ── */
+.panel-tabs-pills {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  background: var(--panel-surface-2);
+  border: 1px solid var(--panel-border);
+}
+.panel-tab-pill {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--panel-text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.panel-tab-pill--active {
+  background: var(--panel-surface);
+  color: var(--panel-accent);
+  font-weight: 600;
+  box-shadow: var(--panel-shadow);
+}
+
+/* ── 10.13 Panel toggle switch ── */
+.panel-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.panel-toggle-track {
+  display: block;
+  width: 44px;
+  height: 24px;
+  border-radius: 9999px;
+  background: var(--panel-border);
+  transition: background 0.2s;
+}
+.panel-toggle--on .panel-toggle-track {
+  background: var(--panel-accent);
+}
+.panel-toggle-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: left 0.2s;
+}
+.panel-toggle--on .panel-toggle-thumb {
+  left: 24px;
+}
+/* Divider row above/below a toggle */
+.panel-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+.panel-toggle-row:last-child {
+  border-bottom: none;
+}
+
+/* ── 10.14 Sticky footer for settings pages ── */
+.panel-sticky-footer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 40;
+  border-top: 1px solid var(--panel-border);
+  background: var(--panel-surface);
+}
+@media (min-width: 1024px) {
+  .panel-sticky-footer {
+    left: var(--panel-sidebar-width);
+  }
+}
+
+/* ── 10.15 Utility classes for panel CSS variables ── */
+.panel-text-main {
+  color: var(--panel-text);
+}
+.panel-text-muted {
+  color: var(--panel-text-muted);
+}
+.panel-text-subtle {
+  color: var(--panel-text-subtle);
+}
+.panel-text-accent {
+  color: var(--panel-accent);
+}
+.panel-border-color {
+  border-color: var(--panel-border);
+}
+.panel-surface-2-bg {
+  background: var(--panel-surface-2);
+}
+.panel-bg-color {
+  background: var(--panel-bg);
+}
+.panel-btn-gold {
+  background: #d4a843;
+  color: #fff;
+  border: none;
+}
+.panel-btn-gold:hover {
+  background: #c49830;
+}
+.panel-info-box {
+  background: var(--panel-surface-2);
+  border: 1px solid var(--panel-border);
+  color: var(--panel-text-muted);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+/* ── 10.16 ApartmentsAdmin edit layout ── */
+.apt-admin-edit-body {
+  padding: 24px 24px 100px;
+  background: var(--panel-bg);
+  min-height: calc(100vh - 120px);
+}
+.apt-admin-edit-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  max-width: 1600px;
+}
+.apt-admin-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* tab nav (left sidebar) */
+.apt-admin-tab-nav {
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.apt-admin-tab-btn {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  border-bottom: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--panel-text);
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: 'Jost', sans-serif;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.apt-admin-tab-btn:last-child {
+  border-bottom: none;
+}
+.apt-admin-tab-btn--active {
+  background: var(--panel-accent);
+  color: #fff;
+}
+.apt-admin-tab-btn:not(.apt-admin-tab-btn--active):hover {
+  background: var(--panel-surface-2);
+}
+
+/* photo preview card (left col) */
+.apt-admin-preview-card {
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  padding: 0.75rem;
+}
+.apt-admin-preview-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--panel-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+}
+.apt-admin-preview-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+.apt-admin-preview-caption {
+  margin-top: 0.625rem;
+  font-size: 0.6875rem;
+  color: var(--panel-text-muted);
+}
+
+/* tab content panels */
+.apt-admin-panel {
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+}
+.apt-admin-panel-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--panel-accent);
+  margin-bottom: 1.5rem;
+  font-family: 'Jost', sans-serif;
+}
+.apt-admin-panel-subtitle {
+  font-size: 0.8125rem;
+  color: var(--panel-text-muted);
+  margin-bottom: 1.5rem;
+  margin-top: -1rem;
+}
+
+/* form fields inside panels */
+.apt-admin-field {
+  margin-bottom: 1.25rem;
+}
+.apt-admin-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--panel-text);
+  margin-bottom: 0.5rem;
+  font-family: 'Jost', sans-serif;
+}
+.apt-admin-field-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+.apt-admin-hint {
+  font-size: 0.6875rem;
+  color: var(--panel-text-muted);
+  margin-top: 0.25rem;
+}
+.apt-admin-color-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.apt-admin-color-swatch {
+  width: 50px;
+  height: 40px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* photo upload */
+.apt-admin-upload-zone {
+  background: var(--panel-bg);
+  border: 2px dashed var(--panel-accent);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.apt-admin-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--panel-accent);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.apt-admin-upload-label--busy {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.apt-admin-url-zone {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+.apt-admin-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+.apt-admin-photo-item {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+}
+.apt-admin-photo-item--main {
+  border: 3px solid #d4a843;
+}
+.apt-admin-photo-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+.apt-admin-photo-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #d4a843;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.apt-admin-photo-badge--storage {
+  right: auto;
+  left: 4px;
+  background: #16a34a;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+}
+.apt-admin-photo-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+.apt-admin-photo-btn-main {
+  flex: 1;
+  background: #d4a843;
+  border: none;
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+}
+.apt-admin-photo-btn-del {
+  flex: 1;
+  background: #dc2626;
+  border: none;
+  color: #fff;
+  padding: 5px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+}
+
+/* seasons */
+.apt-admin-season-form {
+  background: var(--panel-bg);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.apt-admin-season-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.apt-admin-season-table {
+  border: 1px solid var(--panel-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.apt-admin-season-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr 1.5fr 80px;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--panel-accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.apt-admin-season-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr 1.5fr 80px;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+.apt-admin-season-row:last-child {
+  border-bottom: none;
+}
+.apt-admin-season-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* rules */
+.apt-admin-rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.apt-admin-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--panel-surface-2);
+  border-radius: 0.5rem;
+  border: 1px solid var(--panel-border);
+}
+.apt-admin-rule-num {
+  font-size: 0.875rem;
+  color: var(--panel-accent);
+  font-weight: 600;
+  min-width: 20px;
+}
+.apt-admin-rule-del {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 1.125rem;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+/* amenities */
+.apt-admin-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 40px;
+}
+.apt-admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--panel-accent);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.apt-admin-chip-del {
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0;
+  line-height: 1;
+}
+.apt-admin-chip-add {
+  background: var(--panel-surface-2);
+  border: 1px dashed var(--panel-border);
+  color: var(--panel-text-muted);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Jost', sans-serif;
+  transition: background 0.15s;
+}
+.apt-admin-chip-add:hover {
+  background: var(--panel-surface);
+}
+
+/* maps */
+.apt-admin-maps-preview {
+  background: #f0faf9;
+  border: 1px solid #b2ddd8;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+.apt-admin-maps-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border: 1px solid var(--panel-border);
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: var(--panel-text);
+}
+.apt-admin-maps-empty {
+  background: var(--panel-surface-2);
+  border: 1px dashed var(--panel-border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--panel-text-muted);
+  font-size: 0.8125rem;
+}
+
+/* state tab */
+.apt-admin-state-box {
+  background: var(--panel-bg);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+.apt-admin-active-label {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+.apt-admin-meta {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--panel-border);
+  font-size: 0.75rem;
+  color: var(--panel-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* section sublabel */
+.apt-admin-sublabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--panel-text);
+  margin-bottom: 0.625rem;
+}
+
+/* ── 10.17 AdminLayout structural classes ── */
+.admin-sidebar {
+  width: var(--panel-sidebar-width);
+  background: var(--panel-sidebar-bg);
+}
+.admin-sidebar-footer {
+  background: rgba(0, 0, 0, 0.2);
+}
+.admin-panel-badge {
+  background: rgba(26, 95, 110, 0.22);
+  color: #5dcfdf;
+}
+.admin-mobile-overlay {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+.admin-mobile-drawer {
+  width: 280px;
+  background: var(--panel-sidebar-bg);
+}
+.admin-topbar {
+  height: var(--panel-topbar-h);
+  background: var(--panel-surface);
+  border-color: var(--panel-border);
+}
+.admin-search-btn {
+  background: var(--panel-surface-2);
+  color: var(--panel-text-muted);
+  border: 1px solid var(--panel-border);
+  min-height: 34px;
+}
+.admin-kbd {
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-border);
+}
+.admin-preview-btn {
+  background: var(--panel-surface-2);
+  color: var(--panel-text-muted);
+  border: 1px solid var(--panel-border);
+  min-height: 34px;
+}
+.admin-preview-btn--active {
+  background: var(--panel-accent);
+  color: #fff;
+}
+.admin-dropdown {
+  background: var(--panel-surface);
+  border-color: var(--panel-border);
+  box-shadow: var(--panel-shadow-md);
+}
+.admin-preview-panel {
+  width: 50%;
+  background: var(--panel-surface);
+  border-color: var(--panel-border);
+}
+.admin-preview-header {
+  border-color: var(--panel-border);
+  background: var(--panel-surface-2);
+}
+
+/* ── 10.18 Panel animations ── */
+@keyframes panel-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes panel-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes panel-badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+.panel-animate-in {
+  animation: panel-fade-in 0.2s ease-out;
+}
+.panel-animate-slide-r {
+  animation: panel-slide-in-right 0.22s ease-out;
+}
+.panel-badge-pulse {
+  animation: panel-badge-pulse 1.8s ease-in-out infinite;
+}
+
+/* ── 10.12 Skeleton loader ── */
+.panel-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--panel-surface-2) 25%,
+    var(--panel-surface-3) 50%,
+    var(--panel-surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: panel-skeleton-shimmer 1.4s infinite;
+  border-radius: var(--panel-radius-sm);
+}
+@keyframes panel-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── 10.13 Responsive panel ── */
+@media (max-width: 1024px) {
+  .panel-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .panel-form-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .panel-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .panel-kpi-card {
+    padding: 1rem;
+  }
+  .panel-kpi-value {
+    font-size: 1.375rem;
+  }
+  .panel-form-grid-2,
+  .panel-form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .panel-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.875rem;
+  }
+  .panel-form-actions {
+    padding: 0.875rem 1rem;
+  }
+}
+@media (max-width: 480px) {
+  .panel-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .panel-page-header-actions {
+    width: 100%;
+  }
+  .panel-page-header-actions .panel-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ── 10.14 Toast panel ── */
+.panel-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  padding: 0.75rem 1.125rem;
+  border-radius: var(--panel-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: var(--panel-shadow-lg);
+  animation: panel-fade-in 0.2s ease-out;
+  max-width: 320px;
+  pointer-events: none;
+}
+.panel-toast-success {
+  background: #16a34a;
+}
+.panel-toast-error {
+  background: #dc2626;
+}
 
 /* ── ExtrasAdmin responsive ─────────────────────────────────────── */
-.extras-list-header { padding: 2rem 2rem 1.5rem; }
-.extras-form-header { padding: 2rem 2rem 1.5rem; }
-.extras-form-content { padding: 2rem; padding-bottom: 7rem; }
+.extras-list-header {
+  padding: 2rem 2rem 1.5rem;
+}
+.extras-form-header {
+  padding: 2rem 2rem 1.5rem;
+}
+.extras-form-content {
+  padding: 2rem;
+  padding-bottom: 7rem;
+}
 
 .extras-table-header,
 .extras-table-row {
@@ -486,7 +1874,9 @@
   align-items: center;
   gap: 1rem;
 }
-.extras-table-row { padding: 1rem 1.25rem; }
+.extras-table-row {
+  padding: 1rem 1.25rem;
+}
 
 .extras-form-footer {
   padding: 1rem 2rem;
@@ -496,11 +1886,21 @@
 }
 
 @media (max-width: 768px) {
-  .extras-list-header { padding: 1rem 1rem 0.875rem; }
-  .extras-form-header { padding: 1rem 1rem 0.875rem; gap: 0.75rem; }
-  .extras-form-content { padding: 1rem; padding-bottom: 5.5rem; }
+  .extras-list-header {
+    padding: 1rem 1rem 0.875rem;
+  }
+  .extras-form-header {
+    padding: 1rem 1rem 0.875rem;
+    gap: 0.75rem;
+  }
+  .extras-form-content {
+    padding: 1rem;
+    padding-bottom: 5.5rem;
+  }
 
-  .extras-table-header { display: none; }
+  .extras-table-header {
+    display: none;
+  }
 
   .extras-table-row {
     display: grid;
@@ -509,49 +1909,87 @@
     gap: 0.5rem 0.75rem;
     padding: 0.875rem 1rem;
   }
-  .extras-row-name   { grid-column: 1; grid-row: 1; }
-  .extras-row-price  { grid-column: 1; grid-row: 2; }
-  .extras-row-date   { display: none; }
-  .extras-row-status { grid-column: 2; grid-row: 1; justify-content: flex-end; }
-  .extras-row-actions { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+  .extras-row-name {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .extras-row-price {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .extras-row-date {
+    display: none;
+  }
+  .extras-row-status {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+  .extras-row-actions {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-end;
+  }
 
   .extras-form-footer {
     padding: 0.75rem 1rem;
     justify-content: flex-end;
   }
-  .extras-footer-note { display: none; }
+  .extras-footer-note {
+    display: none;
+  }
 
-  /* ── ApartamentosAdmin — lista ──────────────────────────────── */
+  /* ── ApartmentsAdmin — list ────────────────────────────────── */
   .apt-admin-page-header {
     padding: 1rem 1rem 0.875rem !important;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
 
-  /* Ocultar cabecera de tabla en móvil */
-  .apt-admin-list-header { display: none !important; }
+  /* Hide table header on mobile */
+  .apt-admin-list-header {
+    display: none !important;
+  }
 
-  /* Cada fila pasa a tarjeta de 2 columnas: [color] [info] y [estado] [acciones] */
+  /* Each row becomes a 2-column card: [color] [info] and [status] [actions] */
   .apt-admin-list-row {
     grid-template-columns: 36px 1fr auto !important;
     grid-template-rows: auto auto !important;
     gap: 0.4rem 0.75rem !important;
     padding: 0.875rem 1rem !important;
   }
-  /* Col1 fila1: color (span 2 filas) */
-  .apt-admin-list-row > *:nth-child(1) { grid-column: 1; grid-row: 1 / 3; align-self: center; }
-  /* Col2 fila1: nombre + info */
-  .apt-admin-list-row > *:nth-child(2) { grid-column: 2; grid-row: 1; }
-  /* precio, estancia, rating: ocultos */
+  /* Col1 row1: color (span 2 rows) */
+  .apt-admin-list-row > *:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+  /* Col2 row1: name + info */
+  .apt-admin-list-row > *:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  /* price, stay, rating: hidden */
   .apt-admin-list-row > *:nth-child(3),
   .apt-admin-list-row > *:nth-child(4),
-  .apt-admin-list-row > *:nth-child(5) { display: none !important; }
-  /* estado */
-  .apt-admin-list-row > *:nth-child(6) { grid-column: 2; grid-row: 2; justify-content: flex-start; }
-  /* acciones */
-  .apt-admin-list-row > *:nth-child(7) { grid-column: 3; grid-row: 1 / 3; align-self: center; justify-content: flex-end; }
+  .apt-admin-list-row > *:nth-child(5) {
+    display: none !important;
+  }
+  /* status */
+  .apt-admin-list-row > *:nth-child(6) {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+  /* actions */
+  .apt-admin-list-row > *:nth-child(7) {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    align-self: center;
+    justify-content: flex-end;
+  }
 
-  /* ── ApartamentosAdmin — edición ────────────────────────────── */
+  /* ── ApartmentsAdmin — edit ─────────────────────────────────── */
   .apt-admin-edit-header {
     padding: 1rem 1rem 0.875rem !important;
     flex-wrap: wrap;
@@ -563,12 +2001,12 @@
     padding: 1rem 0.75rem 5rem 0.75rem !important;
   }
 
-  /* Grid izq/dcha pasa a 1 columna */
+  /* Left/right grid collapses to 1 column */
   .apt-admin-edit-grid {
     grid-template-columns: 1fr !important;
   }
 
-  /* Tabs horizontales en móvil */
+  /* Horizontal tabs on mobile */
   .apt-admin-edit-grid > div:first-child > div:first-child {
     display: flex !important;
     flex-wrap: wrap !important;
@@ -584,27 +2022,473 @@
     font-size: 11px !important;
   }
 
-  /* Formulario nueva temporada: 2 columnas en lugar de 4 */
+  /* New season form: 2 columns instead of 4 */
   .apt-admin-season-form-grid {
     grid-template-columns: 1fr 1fr !important;
   }
 
-  /* Tabla temporadas existentes */
-  .apt-admin-season-table-header { display: none !important; }
+  /* Existing seasons table */
+  .apt-admin-season-table-header {
+    display: none !important;
+  }
 
   .apt-admin-season-row {
     grid-template-columns: 1fr 1fr !important;
     grid-template-rows: auto auto !important;
     gap: 0.5rem !important;
   }
-  .apt-admin-season-row > *:nth-child(1) { grid-column: 1; grid-row: 1; }
-  .apt-admin-season-row > *:nth-child(2) { grid-column: 2; grid-row: 1; }
-  .apt-admin-season-row > *:nth-child(3) { grid-column: 1; grid-row: 2; }
-  .apt-admin-season-row > *:nth-child(4) { grid-column: 2; grid-row: 2; }
+  .apt-admin-season-row > *:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .apt-admin-season-row > *:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .apt-admin-season-row > *:nth-child(3) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .apt-admin-season-row > *:nth-child(4) {
+    grid-column: 2;
+    grid-row: 2;
+  }
   .apt-admin-season-row > *:nth-child(5) {
     grid-column: 1 / 3;
     grid-row: 3;
     display: flex;
     justify-content: flex-end;
   }
+}
+
+/* ============================================================
+   11. RESPONSIVE MÓVIL — Panel admin / gestión
+   ============================================================ */
+
+/* ── 11.1 Messages split pane ────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Override inline display:grid — flex column stacks list + detail */
+  .messages-split-pane {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .messages-list-panel {
+    max-height: 60vh !important;
+    min-height: 200px;
+  }
+  /* When a message is selected, hide the list on mobile */
+  .messages-split-pane.has-selected .messages-list-panel {
+    display: none !important;
+  }
+  /* Show detail full height when selected */
+  .messages-split-pane.has-selected .messages-detail-panel {
+    max-height: none !important;
+    flex: 1;
+  }
+  /* Hide the resize handle on mobile */
+  .messages-resize-handle {
+    display: none !important;
+  }
+}
+
+/* ── 11.2 Dashboard check-ins row ───────────────────────────── */
+@media (max-width: 640px) {
+  .dashboard-checkin-row {
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 0.25rem 0.5rem !important;
+  }
+  /* Guest info: row 1, col 1 */
+  .dashboard-checkin-row > div:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  /* Dates: hidden on very small screens */
+  .dashboard-checkin-row > div:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 11px;
+  }
+  /* Badge: col 2, spans both rows */
+  .dashboard-checkin-row > *:last-child {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+}
+
+/* ── 11.3 Analytics action bar ──────────────────────────────── */
+@media (max-width: 640px) {
+  .panel-page-header-actions > div {
+    flex-wrap: wrap;
+    gap: 0.375rem !important;
+  }
+}
+
+/* ── 11.4 IcalAdmin — tabla de fuentes ──────────────────────── */
+@media (max-width: 768px) {
+  .ical-row-grid {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 0.375rem 0.5rem;
+    padding: 0.875rem 1rem !important;
+  }
+  .ical-row-apt {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .ical-row-url {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+  }
+  .ical-row-status {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+  .ical-row-actions {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-end;
+  }
+  .ical-row-sync {
+    display: none !important;
+  }
+}
+
+/* ── 11.5 Reservations — filtros avanzados ──────────────────── */
+@media (max-width: 640px) {
+  /* Date filter labels stack their input below */
+  .reservations-date-label {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100%;
+  }
+  .reservations-date-label input {
+    width: 100% !important;
+  }
+}
+
+/* ── 11.6 PanelTable — scroll hint en móvil ─────────────────── */
+@media (max-width: 768px) {
+  .panel-table thead th {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.7rem;
+  }
+  .panel-table tbody td {
+    padding: 0.75rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* ── 11.7 Panel cards padding móvil ─────────────────────────── */
+@media (max-width: 480px) {
+  .panel-card,
+  .panel-card-padded {
+    border-radius: 0.5rem;
+  }
+  .panel-page-content {
+    padding: 0.875rem 0.75rem;
+  }
+}
+
+/* ── 11.8 SlideOver footer en móvil ─────────────────────────── */
+@media (max-width: 640px) {
+  .panel-slideover-footer {
+    flex-direction: column !important;
+  }
+  .panel-slideover-footer .panel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── 11.9 Kanban — scroll horizontal ────────────────────────── */
+@media (max-width: 768px) {
+  .reservation-kanban {
+    overflow-x: auto;
+    gap: 0.75rem !important;
+    padding-bottom: 1rem;
+  }
+  .reservation-kanban > * {
+    min-width: 260px;
+    flex-shrink: 0;
+  }
+}
+
+/* ── 11.10 Calendar toolbar en móvil ────────────────────────── */
+@media (max-width: 640px) {
+  .calendar-legend {
+    display: none !important;
+  }
+  .calendar-toolbar-days {
+    margin-left: 0 !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   PDF EDITOR ADMIN
+   ═══════════════════════════════════════════════════════ */
+
+.pdf-editor-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-width: 100%;
+}
+
+/* ── Layout 3 columnas ── */
+.pdf-editor-layout {
+  display: grid;
+  grid-template-columns: 210px 1fr 248px;
+  gap: 14px;
+  align-items: start;
+  padding-bottom: 40px;
+}
+
+/* ── Sidebar izquierda ── */
+.pdf-editor-sidebar {
+  position: sticky;
+  top: 72px;
+}
+.pdf-editor-sidebar-card {
+  padding: 0 !important;
+  overflow: hidden;
+}
+.pdf-editor-sidebar-section {
+  padding: 12px 14px;
+}
+.pdf-editor-divider {
+  height: 1px;
+  background: var(--panel-border);
+}
+.pdf-editor-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--panel-text-subtle);
+  margin-bottom: 8px;
+}
+.pdf-editor-add-btn {
+  width: 100% !important;
+  margin-bottom: 6px;
+  justify-content: center;
+}
+.pdf-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: calc(100vh - 380px);
+  overflow-y: auto;
+}
+.pdf-editor-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.1s;
+}
+.pdf-editor-item:hover { background: var(--panel-hover); }
+.pdf-editor-item--active {
+  background: rgba(26,95,110,0.09);
+  border-color: rgba(26,95,110,0.25);
+}
+.pdf-editor-item-label {
+  flex: 1;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--panel-text);
+}
+.pdf-editor-item-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--panel-text-subtle);
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0;
+  transition: opacity 0.1s, color 0.1s;
+}
+.pdf-editor-item:hover .pdf-editor-item-del { opacity: 1; }
+.pdf-editor-item-del:hover { color: #ef4444; }
+
+.pdf-editor-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+.pdf-editor-badge--dynamic {
+  background: rgba(26,95,110,0.12);
+  color: #1a5f6e;
+}
+.pdf-editor-badge--static {
+  background: rgba(212,168,67,0.15);
+  color: #8a6318;
+}
+
+/* ── Canvas central ── */
+.pdf-editor-canvas-scroll {
+  overflow-x: auto;
+  background: #4a4a4a;
+  border-radius: 10px;
+  padding: 20px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.pdf-editor-canvas-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.pdf-editor-canvas-loader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ccc;
+  font-size: 13px;
+  font-family: 'Jost', sans-serif;
+  padding: 8px 0;
+}
+.pdf-editor-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: pdfSpinner 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes pdfSpinner {
+  to { transform: rotate(360deg); }
+}
+.pdf-editor-canvas {
+  position: relative;
+  box-shadow: 0 6px 40px rgba(0,0,0,0.6);
+  background: #fff;
+  cursor: default;
+  flex-shrink: 0;
+}
+.pdf-editor-field {
+  position: absolute;
+  cursor: grab;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1;
+  padding: 1px 2px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  transition: border-color 0.1s, background 0.1s;
+}
+.pdf-editor-field:hover {
+  border-color: rgba(26,95,110,0.45);
+  background: rgba(26,95,110,0.06);
+}
+.pdf-editor-field--sel {
+  border-color: #1a5f6e !important;
+  background: rgba(26,95,110,0.1) !important;
+  cursor: grabbing;
+  z-index: 20;
+  outline: 1px dashed rgba(26,95,110,0.5);
+  outline-offset: 2px;
+}
+
+/* ── Panel propiedades ── */
+.pdf-editor-props {
+  position: sticky;
+  top: 72px;
+}
+.pdf-editor-props-card {
+  padding: 14px !important;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+.pdf-editor-props-empty {
+  padding: 14px !important;
+}
+
+/* Variables chip list */
+.pdf-editor-vars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.pdf-editor-var-btn {
+  background: rgba(26,95,110,0.07);
+  color: #1a5f6e;
+  border: 1px solid rgba(26,95,110,0.18);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-family: monospace;
+  cursor: pointer;
+  line-height: 1.6;
+  transition: background 0.1s;
+}
+.pdf-editor-var-btn:hover { background: rgba(26,95,110,0.16); }
+
+/* ── Dark mode ── */
+.dark .pdf-editor-canvas-scroll { background: #1e1e1e; }
+.dark .pdf-editor-badge--static { color: #D4A843; }
+.dark .pdf-editor-var-btn {
+  background: rgba(26,95,110,0.2);
+  color: #5bb8cb;
+  border-color: rgba(91,184,203,0.22);
+}
+.dark .pdf-editor-var-btn:hover { background: rgba(26,95,110,0.35); }
+
+/* ── Guías de alineación ── */
+.pdf-guide-center-h,
+.pdf-guide-center-v,
+.pdf-guide-snap-h,
+.pdf-guide-snap-v {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+}
+/* Centro horizontal (línea horizontal) */
+.pdf-guide-center-h {
+  left: 0; right: 0; height: 1px;
+  background: rgba(26, 95, 110, 0.12);
+  border-top: 1px dashed rgba(26, 95, 110, 0.2);
+}
+/* Centro vertical (línea vertical) */
+.pdf-guide-center-v {
+  top: 0; bottom: 0; width: 1px;
+  background: rgba(26, 95, 110, 0.12);
+  border-left: 1px dashed rgba(26, 95, 110, 0.2);
+}
+/* Snap horizontal (activa, más visible) */
+.pdf-guide-snap-h {
+  left: 0; right: 0; height: 1px;
+  background: #1a5f6e;
+  box-shadow: 0 0 4px rgba(26, 95, 110, 0.6);
+}
+/* Snap vertical (activa) */
+.pdf-guide-snap-v {
+  top: 0; bottom: 0; width: 1px;
+  background: #1a5f6e;
+  box-shadow: 0 0 4px rgba(26, 95, 110, 0.6);
 }

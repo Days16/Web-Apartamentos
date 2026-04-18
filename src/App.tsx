@@ -6,58 +6,62 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import './index.css';
 import Maintenance from './pages/Maintenance';
 
-// Páginas principales — importación estática (LCP crítico)
+// Main pages — static import (critical LCP)
 import Home from './pages/Home';
 import Apartments from './pages/Apartments';
 import ApartmentDetail from './pages/ApartmentDetail';
 
-// Páginas secundarias — lazy (no son landing de tráfico principal)
+// Secondary pages — lazy (not primary traffic landing pages)
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Cookies = lazy(() => import('./pages/Cookies'));
-const Terminos = lazy(() => import('./pages/Terminos'));
-const ProteccionDatos = lazy(() => import('./pages/ProteccionDatos'));
-const ReservaConfirmada = lazy(() => import('./pages/ReservaConfirmada'));
-const PortalReserva = lazy(() => import('./pages/PortalReserva'));
-const Reservar = lazy(() => import('./pages/Reservar'));
+const Terms = lazy(() => import('./pages/Terms'));
+const DataProtection = lazy(() => import('./pages/DataProtection'));
+const BookingConfirmed = lazy(() => import('./pages/BookingConfirmed'));
+const BookingPortal = lazy(() => import('./pages/BookingPortal'));
+const Book = lazy(() => import('./pages/Book'));
 const Faq = lazy(() => import('./pages/Faq'));
-const ComoLlegar = lazy(() => import('./pages/ComoLlegar'));
+const Directions = lazy(() => import('./pages/Directions'));
 const LeaveReview = lazy(() => import('./pages/LeaveReview'));
 
-// Auth — lazy (raramente visitadas)
+// Auth — lazy (rarely visited)
 const Login = lazy(() => import('./pages/Login'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Panel de gestión — lazy
-const GestionLayout = lazy(() => import('./pages/gestion/GestionLayout'));
-const Dashboard = lazy(() => import('./pages/gestion/Dashboard'));
-const Reservas = lazy(() => import('./pages/gestion/Reservas'));
-const Calendario = lazy(() => import('./pages/gestion/Calendario'));
-const Mensajes = lazy(() => import('./pages/gestion/Mensajes'));
+// Management panel — lazy
+const ManagementLayout = lazy(() => import('./pages/management/ManagementLayout'));
+const Dashboard = lazy(() => import('./pages/management/Dashboard'));
+const Reservations = lazy(() => import('./pages/management/Reservations'));
+const Calendar = lazy(() => import('./pages/management/Calendar'));
+const Messages = lazy(() => import('./pages/management/Messages'));
+const Tasks = lazy(() => import('./pages/management/Tasks'));
 
-// Panel de administración — lazy
+// Admin panel — lazy
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
-const ApartamentosAdmin = lazy(() => import('./pages/admin/ApartamentosAdmin'));
-const Precios = lazy(() => import('./pages/admin/Precios'));
-const ConfiguracionGeneral = lazy(() => import('./pages/admin/ConfiguracionGeneral'));
-const Usuarios = lazy(() => import('./pages/admin/Usuarios'));
-const ReglasReserva = lazy(() => import('./pages/admin/ReglasReserva'));
-const Cancelacion = lazy(() => import('./pages/admin/Cancelacion'));
+const ApartmentsAdmin = lazy(() => import('./pages/admin/ApartmentsAdmin'));
+const Pricing = lazy(() => import('./pages/admin/Pricing'));
+const GeneralSettings = lazy(() => import('./pages/admin/GeneralSettings'));
+const Users = lazy(() => import('./pages/admin/Users'));
+const BookingRules = lazy(() => import('./pages/admin/BookingRules'));
+const Cancellation = lazy(() => import('./pages/admin/Cancellation'));
 const Changelog = lazy(() => import('./pages/admin/Changelog'));
-const WebTextos = lazy(() => import('./pages/admin/WebTextos'));
+const WebContent = lazy(() => import('./pages/admin/WebContent'));
 const ExtrasAdmin = lazy(() => import('./pages/admin/ExtrasAdmin'));
-const ResenasAdmin = lazy(() => import('./pages/admin/ResenasAdmin'));
-const OfertasAdmin = lazy(() => import('./pages/admin/OfertasAdmin'));
-const Pagos = lazy(() => import('./pages/admin/Pagos'));
+const ReviewsAdmin = lazy(() => import('./pages/admin/ReviewsAdmin'));
+const OffersAdmin = lazy(() => import('./pages/admin/OffersAdmin'));
 const FaqAdmin = lazy(() => import('./pages/admin/FaqAdmin'));
 const Analytics = lazy(() => import('./pages/admin/Analytics'));
 const IcalAdmin = lazy(() => import('./pages/admin/IcalAdmin'));
-const RegistroAdmin = lazy(() => import('./pages/admin/RegistroAdmin'));
+const CheckInAdmin = lazy(() => import('./pages/admin/CheckInAdmin'));
+const EmailConfig = lazy(() => import('./pages/admin/EmailConfig'));
+const DiscountCodes = lazy(() => import('./pages/admin/DiscountCodes'));
+const AuditLog = lazy(() => import('./pages/admin/AuditLog'));
+const PdfEditorAdmin = lazy(() => import('./pages/admin/PdfEditorAdmin'));
 
-// Componentes
+// Components
 import CookieBanner from './components/CookieBanner';
 import WhatsAppButton from './components/WhatsAppButton';
 import { LangProvider } from './contexts/LangContext';
@@ -67,7 +71,8 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { DiscountProvider } from './contexts/DiscountContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
-import { ToastProvider } from './contexts/ToastContext';
+import { ToastProvider, useToast } from './contexts/ToastContext';
+import { registerPanelToast } from './utils/panelAction';
 import OffersBanner from './components/OffersBanner';
 import PreviewBanner from './components/PreviewBanner';
 
@@ -91,7 +96,7 @@ function MaintenanceGuard({ children }: { children: React.ReactNode }) {
     }
   }, [settingsLoading]);
 
-  // Solo chequear mantenimiento si NO estamos en admin o gestión
+  // Only check maintenance if NOT on admin or management paths
   const isProtectedPath =
     pathname.startsWith('/admin') ||
     pathname.startsWith('/gestion') ||
@@ -115,6 +120,17 @@ function ScrollToTop() {
   return null;
 }
 
+function ToastBridge() {
+  const toast = useToast();
+  useEffect(() => {
+    registerPanelToast((msg, type) => {
+      if (type === 'success') toast.success(msg);
+      else toast.error(msg);
+    });
+  }, [toast]);
+  return null;
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -125,13 +141,14 @@ export default function App() {
               <DiscountProvider>
                 <CurrencyProvider>
                   <ToastProvider>
+                    <ToastBridge />
                     <BrowserRouter>
                       <ScrollToTop />
                       <OffersBanner />
                       <MaintenanceGuard>
                         <Suspense fallback={<PageLoader />}>
                           <Routes>
-                            {/* ─── WEB PÚBLICA ─────────────────────────────────── */}
+                            {/* ─── PUBLIC WEB ─────────────────────────────────── */}
                             <Route path="/" element={<Home />} />
                             <Route path="/apartamentos" element={<Apartments />} />
                             <Route path="/apartamentos/:slug" element={<ApartmentDetail />} />
@@ -139,48 +156,52 @@ export default function App() {
                             <Route path="/contacto" element={<Contact />} />
                             <Route path="/privacidad" element={<Privacy />} />
                             <Route path="/cookies" element={<Cookies />} />
-                            <Route path="/terminos" element={<Terminos />} />
-                            <Route path="/proteccion-datos" element={<ProteccionDatos />} />
-                            <Route path="/reserva-confirmada/:id" element={<ReservaConfirmada />} />
-                            <Route path="/mi-reserva" element={<PortalReserva />} />
-                            <Route path="/reservar" element={<Reservar />} />
+                            <Route path="/terminos" element={<Terms />} />
+                            <Route path="/proteccion-datos" element={<DataProtection />} />
+                            <Route path="/reserva-confirmada/:id" element={<BookingConfirmed />} />
+                            <Route path="/mi-reserva" element={<BookingPortal />} />
+                            <Route path="/reservar" element={<Book />} />
                             <Route path="/faq" element={<Faq />} />
-                            <Route path="/como-llegar" element={<ComoLlegar />} />
+                            <Route path="/como-llegar" element={<Directions />} />
                             <Route path="/dejar-resena" element={<LeaveReview />} />
 
                             <Route path="/login" element={<Login />} />
                             <Route path="/reset-password" element={<ResetPassword />} />
                             <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                            {/* ─── PANEL GESTIÓN (PROTEGIDO) ────────────────────── */}
+                            {/* ─── MANAGEMENT PANEL (PROTECTED) ────────────────── */}
                             <Route element={<ProtectedRoute requiredRole="gestion" />}>
-                              <Route path="/gestion" element={<GestionLayout />}>
+                              <Route path="/gestion" element={<ManagementLayout />}>
                                 <Route index element={<Dashboard />} />
-                                <Route path="reservas" element={<Reservas />} />
-                                <Route path="calendario" element={<Calendario />} />
-                                <Route path="mensajes" element={<Mensajes />} />
+                                <Route path="reservas" element={<Reservations />} />
+                                <Route path="calendario" element={<Calendar />} />
+                                <Route path="mensajes" element={<Messages />} />
+                                <Route path="tareas" element={<Tasks />} />
                               </Route>
                             </Route>
 
-                            {/* ─── PANEL ADMIN (PROTEGIDO) ──────────────────────── */}
+                            {/* ─── ADMIN PANEL (PROTECTED) ──────────────────────── */}
                             <Route element={<ProtectedRoute requiredRole="admin" />}>
                               <Route path="/admin" element={<AdminLayout />}>
-                                <Route index element={<ApartamentosAdmin />} />
-                                <Route path="precios" element={<Precios />} />
-                                <Route path="configuracion" element={<ConfiguracionGeneral />} />
-                                <Route path="usuarios" element={<Usuarios />} />
-                                <Route path="ofertas" element={<OfertasAdmin />} />
+                                <Route index element={<ApartmentsAdmin />} />
+                                <Route path="precios" element={<Pricing />} />
+                                <Route path="configuracion" element={<GeneralSettings />} />
+                                <Route path="usuarios" element={<Users />} />
+                                <Route path="ofertas" element={<OffersAdmin />} />
                                 <Route path="extras" element={<ExtrasAdmin />} />
-                                <Route path="reglas" element={<ReglasReserva />} />
-                                <Route path="resenas" element={<ResenasAdmin />} />
-                                <Route path="cancelacion" element={<Cancelacion />} />
+                                <Route path="reglas" element={<BookingRules />} />
+                                <Route path="resenas" element={<ReviewsAdmin />} />
+                                <Route path="cancelacion" element={<Cancellation />} />
                                 <Route path="changelog" element={<Changelog />} />
-                                <Route path="pagos" element={<Pagos />} />
-                                <Route path="web" element={<WebTextos />} />
+                                <Route path="web" element={<WebContent />} />
                                 <Route path="faq" element={<FaqAdmin />} />
                                 <Route path="analytics" element={<Analytics />} />
                                 <Route path="ical" element={<IcalAdmin />} />
-                                <Route path="registro" element={<RegistroAdmin />} />
+                                <Route path="registro" element={<CheckInAdmin />} />
+                                <Route path="emails" element={<EmailConfig />} />
+                                <Route path="descuentos" element={<DiscountCodes />} />
+                                <Route path="auditoria" element={<AuditLog />} />
+                                <Route path="pdf-editor" element={<PdfEditorAdmin />} />
                               </Route>
                             </Route>
 

@@ -1,4 +1,4 @@
-import ExcelJS from 'exceljs';
+﻿import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { fetchExtras } from '../services/supabaseService';
 import { formatGuestDisplay, formatReservationReference } from './format';
@@ -29,12 +29,12 @@ export async function exportAnalytics({
   wb.creator = 'Illa Pancha';
   wb.created = new Date();
 
-  // Función de ayuda para añadir hojas y darles formato a las cabeceras
+  // Helper function to add sheets and format headers
   const addSheet = (data: any[], name: string, columnWidths: number[] = []) => {
     if (!data || !data.length) return;
     const ws = wb.addWorksheet(name);
 
-    // Obtener las claves (cabeceras) de la primera fila
+    // Get keys (headers) from first row
     const headers = Object.keys(data[0]);
 
     // Insertar las cabeceras
@@ -108,7 +108,7 @@ export async function exportAnalytics({
   addSheet(sourceData, 'Por canal', [25, 15, 15, 15]);
   addSheet(statusData, 'Por estado', [20, 15]);
 
-  // Generar y descargar el archivo final en el navegador
+  // Generate and download final file in browser
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -231,7 +231,7 @@ export default async function exportReservationsExcel(
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
   });
 
-  // Generar Archivo
+  // Generate file
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

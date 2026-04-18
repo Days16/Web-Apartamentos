@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
@@ -31,7 +31,7 @@ export default function LeaveReview() {
       return;
     }
 
-    // Buscar la reserva por token
+    // Find reservation by token
     supabase
       .from('reservations')
       .select('id, guest, apt, apt_slug, checkout')
@@ -66,7 +66,7 @@ export default function LeaveReview() {
 
       if (insertError) throw insertError;
 
-      // Notificar al propietario por email
+      // Notify owner by email
       try {
         await sendOwnerNotification({
           type: 'review',

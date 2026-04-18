@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { trackEvent, EVENTS } from '../utils/analytics';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
@@ -23,7 +23,9 @@ export default function Apartments() {
   const { convertPrice } = useCurrency();
   const A = T.apartments;
 
-  const [apartments, setApartments] = useState<Array<Apartment & { coverPhoto: string | null; dateAvailable?: boolean }>>([]);
+  const [apartments, setApartments] = useState<
+    Array<Apartment & { coverPhoto: string | null; dateAvailable?: boolean }>
+  >([]);
   const [loadingApts, setLoadingApts] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -33,7 +35,7 @@ export default function Apartments() {
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 2);
   const [searched, setSearched] = useState(!!searchParams.get('checkin'));
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [selectedApt, setSelectedApt] = useState<Apartment | null>(null);
+  const [selectedApt, _setSelectedApt] = useState<Apartment | null>(null);
   const [priceRange, setPriceRange] = useState(searchParams.get('price') || 'all');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'default');
   const [amenityFilters, setAmenityFilters] = useState<string[]>(
@@ -41,7 +43,7 @@ export default function Apartments() {
   );
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
-  // Cargar apartamentos y reservas desde la capa de servicios unificada
+  // Load apartments and reservations from the unified service layer
   useEffect(() => {
     Promise.all([getApartments(), import('../services/dataService').then(m => m.getReservations())])
       .then(async ([data, resData]) => {
@@ -232,7 +234,10 @@ export default function Apartments() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label htmlFor="apts-guests" className="text-xs font-bold text-navy uppercase tracking-wider">
+              <label
+                htmlFor="apts-guests"
+                className="text-xs font-bold text-navy uppercase tracking-wider"
+              >
                 {T.booking.guests}
               </label>
               <select
@@ -550,7 +555,9 @@ export default function Apartments() {
       </div>
 
       <Footer />
-      {bookingOpen && <BookingModal apartment={selectedApt ?? undefined} onClose={() => setBookingOpen(false)} />}
+      {bookingOpen && (
+        <BookingModal apartment={selectedApt ?? undefined} onClose={() => setBookingOpen(false)} />
+      )}
     </>
   );
 }

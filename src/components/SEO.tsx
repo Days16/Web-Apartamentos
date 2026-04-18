@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { assets } from '../constants/assets';
 import { useLang } from '../contexts/LangContext';
 
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://www.apartamentosillapancha.com').replace(
-  /\/$/,
-  ''
-);
+const SITE_URL = (
+  import.meta.env.VITE_SITE_URL || 'https://www.apartamentosillapancha.com'
+).replace(/\/$/, '');
 
 const LOCALE_MAP: Record<string, string> = {
   ES: 'es_ES',
@@ -61,7 +60,7 @@ function setHreflangLinks(canonicalUrl: string) {
     el.setAttribute('href', canonicalUrl);
     document.head.appendChild(el);
   });
-  // x-default apunta siempre a ES (versión principal)
+  // x-default always points to ES (main version)
   const xDefault = document.createElement('link');
   xDefault.setAttribute('rel', 'alternate');
   xDefault.setAttribute('hreflang', 'x-default');

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchChangelog } from '../../services/supabaseService';
-import Ico, { paths } from '../../components/Ico';
 import pkg from '../../../package.json';
+import { PanelPageHeader } from '../../components/panel';
 
 interface ChangelogEntry {
   id: string;
@@ -45,19 +45,16 @@ export default function Changelog() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 bg-[#82c8bd] rounded-xl flex items-center justify-center text-white shadow-sm">
-          <Ico d={paths.msg} size={24} color="currentColor" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Changelog</h1>
-          <p className="text-gray-500 text-sm">Novedades y actualizaciones del sistema</p>
-        </div>
-        <span className="ml-auto bg-slate-100 text-slate-600 text-xs font-mono font-semibold px-3 py-1.5 rounded-full border border-slate-200">
-          v{pkg.version}
-        </span>
-      </div>
+    <div className="panel-page-content">
+      <PanelPageHeader
+        title="Changelog"
+        subtitle="Novedades y actualizaciones del sistema"
+        actions={
+          <span className="panel-badge font-mono text-xs">
+            v{pkg.version}
+          </span>
+        }
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
@@ -73,7 +70,7 @@ export default function Changelog() {
                   {/* Dot */}
                   <div className="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-white border-4 border-[#82c8bd]"></div>
 
-                  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="panel-card hover:shadow-md transition-shadow">
                     <div className="flex flex-wrap items-center gap-3 mb-4">
                       <span className="text-sm font-bold text-[#82c8bd] font-mono">
                         {entry.version}

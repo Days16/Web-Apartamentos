@@ -1,10 +1,10 @@
-// ─── RESEND — EMAIL TRANSACCIONAL ───────────────────────────────────────────
+﻿// ─── RESEND — EMAIL TRANSACCIONAL ───────────────────────────────────────────
 //
 // Resend es un servicio de email SERVER-SIDE.
 // La clave API nunca debe estar en el frontend.
 // Usa este archivo como referencia para las Supabase Edge Functions.
 //
-// Documentación: https://resend.com/docs
+// Documentation: https://resend.com/docs
 // Panel: https://resend.com/dashboard
 //
 // ─── INSTALACIÓN (en Supabase Edge Functions) ────────────────────────────────

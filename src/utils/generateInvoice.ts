@@ -1,257 +1,207 @@
 /* eslint-disable */
 // @ts-nocheck
-import jsPDF from 'jspdf';
-import { fetchAllApartments, fetchAllExtras, fetchSettings } from '../services/supabaseService';
-import { formatGuestDisplay, formatReservationReference } from './format';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { fetchSettings, fetchApartmentBySlug } from '../services/supabaseService';
+import { formatReservationReference } from './format';
+import { DEFAULT_PDF_ELEMENTS } from '../pages/admin/PdfEditorAdmin';
+import type { PdfElement } from '../pages/admin/PdfEditorAdmin';
 
-export default async function generateInvoice(reservation) {
+const PDF_W = 595;
+
+function formatLongDate(iso: string): string {
+  if (!iso) return '';
+  const datePart = iso.split('T')[0];
+  const [y, m, d] = datePart.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  const date = new Date(y, m - 1, d);
+  const wd = date.toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase();
+  const mo = date.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase();
+  return `${wd} ${d} DE ${mo} DE ${y}`;
+}
+
+function wrapText(text: string, font: any, size: number, maxW: number): string[] {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let cur = '';
+  for (const word of words) {
+    const test = cur ? `${cur} ${word}` : word;
+    let w = maxW + 1;
+    try { w = font.widthOfTextAtSize(test, size); } catch {}
+    if (w > maxW && cur) { lines.push(cur); cur = word; }
+    else { cur = test; }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function hexToRgb(hex: string) {
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.slice(0, 2), 16) / 255;
+  const g = parseInt(clean.slice(2, 4), 16) / 255;
+  const b = parseInt(clean.slice(4, 6), 16) / 255;
+  return rgb(
+    isNaN(r) ? 0 : r,
+    isNaN(g) ? 0 : g,
+    isNaN(b) ? 0 : b,
+  );
+}
+
+function resolveVars(content: string, vars: Record<string, string>): string {
+  return content.replace(/\{\{([\w_]+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
+}
+
+export default async function generateInvoice(reservation: any) {
   const refDisplay = formatReservationReference(reservation.id, reservation.source);
+  const slugKey = reservation.apt_slug || reservation.aptSlug || '';
 
-  const [apartments, extras, settings] = await Promise.all([
-    fetchAllApartments(),
-    fetchAllExtras(),
-    fetchSettings(),
+  const [settings, aptData] = await Promise.all([
+    fetchSettings().catch(() => null),
+    slugKey ? fetchApartmentBySlug(slugKey).catch(() => null) : Promise.resolve(null),
   ]);
 
-  const siteSettings = {
-    cleaningFee: settings?.cleaning_fee ?? 0,
-    site_address: 'Ribadeo, Lugo, Galicia',
-    site_email: settings?.site_email || 'info@apartamentosillapancha.com',
-    site_phone: settings?.site_phone || '+34 982 XX XX XX',
-    cancelDays: settings?.cancellation_free_days || 14,
-    depositPct: settings?.payment_deposit_percentage || 50,
-    taxPct: settings?.tax_percentage || 10,
-  };
-
-  const doc = new jsPDF();
-  const margin = 20;
-  let y = margin;
-
-  // Colores (gris, azul, amarillo)
-  const darkGray = [58, 58, 58];
-  const blue = [26, 95, 110];
-  const lightBlue = [194, 217, 232];
-  const yellow = [212, 168, 67];
-  const lightGray = [232, 232, 232];
-
-  // ── CABECERA ──────────────────────────────────────────────────
-  doc.setFillColor(...blue);
-  doc.rect(0, 0, 210, 40, 'F');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(245, 245, 245);
-  doc.text('Illa Pancha Ribadeo', margin, 16);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(194, 217, 232);
-  doc.text(
-    siteSettings?.site_address ||
-      'Ribadeo, Lugo, Galicia' +
-        '  ·  ' +
-        (siteSettings?.site_email || 'info@apartamentosillapancha.com') +
-        '  ·  ' +
-        (siteSettings?.site_phone || '+34 982 XX XX XX'),
-    margin,
-    24
-  );
-
-  doc.setFontSize(11);
-  doc.setTextColor(245, 245, 245);
-  doc.text('RESGUARDO DE RESERVA', margin, 34);
-
-  y = 50;
-
-  // ── NÚMERO Y FECHA ─────────────────────────────────────────────
-  doc.setFillColor(...lightGray);
-  doc.rect(margin, y, 170, 20, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(...darkGray);
-  doc.text('Ref. ' + refDisplay, margin + 6, y + 8);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(138, 138, 138);
-  doc.text(
-    'Emitida: ' +
-      new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
-    margin + 6,
-    y + 15
-  );
-
-  y += 28;
-
-  // ── DOS COLUMNAS: DATOS CLIENTE / DATOS RESERVA ────────────────
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(138, 138, 138);
-  doc.text('CLIENTE', margin, y);
-  doc.text('RESERVA', 120, y);
-  y += 5;
-
-  doc.setDrawColor(...lightGray);
-  doc.line(margin, y, 100, y);
-  doc.line(120, y, 190, y);
-  y += 6;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(...darkGray);
-
-  const rawGuest = reservation.guest || reservation.guest_name || '';
-  const guestLine =
-    reservation.source === 'booking'
-      ? formatGuestDisplay(rawGuest, 'booking')
-      : rawGuest || 'Huésped';
-  const clientLines = [
-    guestLine,
-    reservation.email || reservation.guest_email || '',
-    reservation.phone || reservation.guest_phone || '',
-  ].filter(Boolean);
-
-  const reservaLines = [
-    reservation.apt || reservation.apartment_name || 'Apartamento',
-    'Entrada: ' + (reservation.checkin || '—'),
-    'Salida: ' + (reservation.checkout || '—'),
-    (reservation.nights || '—') + ' noches',
-  ];
-
-  const maxLines = Math.max(clientLines.length, reservaLines.length);
-  for (let i = 0; i < maxLines; i++) {
-    if (clientLines[i]) doc.text(clientLines[i], margin, y);
-    if (reservaLines[i]) doc.text(reservaLines[i], 120, y);
-    y += 7;
-  }
-
-  y += 8;
-
-  // ── TABLA DE CONCEPTOS ─────────────────────────────────────────
-  doc.setFillColor(...darkGray);
-  doc.rect(margin, y, 170, 8, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(245, 245, 245);
-  doc.text('CONCEPTO', margin + 4, y + 5.5);
-  doc.text('IMPORTE', 175, y + 5.5, { align: 'right' });
-  y += 11;
-
-  const apt = apartments?.find(a => a.slug === reservation.aptSlug) || apartments?.[0];
-  const nightPrice = reservation.nightPrice || (apt ? apt.price : 120);
-
-  const lineItems = [
-    [
-      `${reservation.nights || 7} noches × ${nightPrice}€/noche`,
-      nightPrice * (reservation.nights || 7),
-    ],
-  ];
-  if (siteSettings.cleaningFee > 0) {
-    lineItems.push(['Limpieza final', siteSettings.cleaningFee]);
-  }
-
-  if (reservation.extras && reservation.extras.length > 0) {
-    reservation.extras.forEach(extraId => {
-      const extra = extras?.find(e => e.id === extraId);
-      if (extra) {
-        lineItems.push([extra.name + (extra.price === 0 ? ' (incluido)' : ''), extra.price]);
+  // Layout: from settings or default
+  let elements: PdfElement[] = DEFAULT_PDF_ELEMENTS;
+  const rawLayout = (settings as any)?.pdf_layout;
+  if (rawLayout) {
+    try {
+      const stored = JSON.parse(rawLayout);
+      // Formato v2: { _v: 2, elements: [...] } — respeta lo guardado sin migrar
+      // Formato v1 (legacy): array directo — migrar si faltan campos
+      if (stored && typeof stored === 'object' && !Array.isArray(stored) && stored._v >= 2) {
+        if (Array.isArray(stored.elements) && stored.elements.length > 0) elements = stored.elements;
+      } else if (Array.isArray(stored) && stored.length > 0) {
+        elements = stored;
+        // Migración v1: añadir desc/amen si faltan
+        const hasDesc = elements.some(el => el.content.includes('{{apt_descripcion}}'));
+        const hasAmen = elements.some(el => el.content.includes('{{apt_amenidades}}'));
+        if (!hasDesc || !hasAmen) {
+          const aptIdx = elements.findIndex(el => el.id === 'apt');
+          const toAdd: PdfElement[] = [];
+          if (!hasDesc) toAdd.push({ id: 'desc', label: 'Descripción apt.', type: 'dynamic', content: '{{apt_descripcion}}', x: 135, y: 358, fontSize: 8, bold: false, color: '#444444' });
+          if (!hasAmen) toAdd.push({ id: 'amen', label: 'Amenidades',       type: 'dynamic', content: '{{apt_amenidades}}',  x: 155, y: 410, fontSize: 8, bold: false, color: '#1a5f6e' });
+          elements = aptIdx >= 0
+            ? [...elements.slice(0, aptIdx + 1), ...toAdd, ...elements.slice(aptIdx + 1)]
+            : [...elements, ...toAdd];
+        }
       }
-    });
+    } catch {}
   }
+  // Deduplicar por ID
+  { const seen = new Set<string>(); elements = elements.filter(el => seen.has(el.id) ? false : (seen.add(el.id), true)); }
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(...darkGray);
+  const depositPct = settings?.payment_deposit_percentage || 50;
+  const total      = reservation.total || 0;
+  const deposit    = reservation.deposit ?? Math.round(total * (depositPct / 100));
+  const pending    = total - deposit;
+  const nights     = reservation.nights || 1;
 
-  lineItems.forEach((item, i) => {
-    if (i % 2 === 0) {
-      doc.setFillColor(248, 248, 248);
-      doc.rect(margin, y - 4, 170, 9, 'F');
+  const capacity = aptData?.capacity || null;
+  const aptName = (() => {
+    const name = reservation.apartment_name || aptData?.name || reservation.apt || 'Apartamento';
+    return capacity ? `${name} (hasta ${capacity} personas)` : name;
+  })();
+
+  const sourceLabel = (() => {
+    switch (reservation.source) {
+      case 'booking': return 'Booking.com';
+      case 'airbnb':  return 'Airbnb';
+      default:        return 'Reserva directa';
     }
-    doc.text(item[0], margin + 4, y + 2);
-    doc.text(item[1] === 0 ? 'Gratis' : item[1] + ' EUR', 175, y + 2, { align: 'right' });
-    y += 9;
+  })();
+
+  const today = new Date().toLocaleDateString('es-ES', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
   });
 
-  y += 4;
+  const varMap: Record<string, string> = {
+    ref:             refDisplay,
+    fecha:           today,
+    apt_nombre:      aptName,
+    checkin_fecha:   formatLongDate(reservation.checkin),
+    checkout_fecha:  formatLongDate(reservation.checkout),
+    noches_num:      String(nights),
+    fuente_canal:    sourceLabel,
+    deposit_eur:     deposit > 0 ? `${deposit}\u20AC` : '\u2014',
+    pending_eur:     pending > 0 ? `${pending}\u20AC` : `0\u20AC \u2713`,
+    total_eur:       `${total}\u20AC`,
+    nombre_huesped:  reservation.guest || reservation.guest_name || '',
+    ...(() => {
+      const raw = aptData?.description || '';
+      const clean = (l: string) => l.replace(/\*\*/g, '').replace(/\*/g, '').replace(/^[\u2728\u{1F3E1}\u{1F31F}\u{1F4AB}✨🏡🌟💫]\s*/u, '').trim();
+      const allLines = raw.split(/\r?\n/).map(clean).filter(Boolean);
+      // Línea 0 es el título (ya en apt_nombre) → saltar
+      const lines = allLines.slice(1);
+      // ✔️ (U+2714 + variante) → amenidades
+      const listItems = lines.filter(l => /^✔/.test(l)).map(l => l.replace(/^✔️?\s*/, '').trim());
+      // Resto → párrafos (descripción y cierre)
+      const paragraphs = lines.filter(l => !/^✔/.test(l)).map(l => l.replace(/^[🏡✨🌟💫]\s*/u, '').trim()).filter(Boolean);
+      return {
+        apt_descripcion: paragraphs[0] || '',
+        apt_amenidades:  listItems.length > 0 ? listItems.join('\n') : (aptData?.amenities || []).join('\n'),
+        apt_tagline:     paragraphs.slice(1).join(' ') || (aptData?.tagline || ''),
+      };
+    })(),
+  };
 
-  // ── TOTAL ──────────────────────────────────────────────────────
-  doc.setFillColor(...blue);
-  doc.rect(margin, y, 170, 12, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.setTextColor(245, 245, 245);
-  doc.text('TOTAL', margin + 4, y + 8.5);
-  doc.text((reservation.total || 840) + ' EUR', 175, y + 8.5, { align: 'right' });
-  y += 18;
+  // Load template + fonts
+  const [templateBytes, josefinBoldBytes, josefinBytes] = await Promise.all([
+    fetch('/reserva-template.pdf').then(r => r.arrayBuffer()),
+    fetch('/josefin-sans-bold.ttf').then(r => r.arrayBuffer()).catch(() => null),
+    fetch('/josefin-sans.ttf').then(r => r.arrayBuffer()).catch(() => null),
+  ]);
 
-  // ── DESGLOSE PAGO ─────────────────────────────────────────────
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(138, 138, 138);
-  doc.text('DESGLOSE DE PAGO', margin, y);
-  y += 5;
-  doc.setDrawColor(...lightGray);
-  doc.line(margin, y, 190, y);
-  y += 6;
+  const pdfDoc = await PDFDocument.load(templateBytes);
+  const page   = pdfDoc.getPages()[0];
+  const { height } = page.getSize();
 
-  const depositPct = siteSettings.depositPct;
-  const deposit =
-    reservation.deposit || Math.round((reservation.total || 840) * (depositPct / 100));
+  let fontBold: any, fontNormal: any;
+  try {
+    fontBold   = josefinBoldBytes ? await pdfDoc.embedFont(josefinBoldBytes) : await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    fontNormal = josefinBytes     ? await pdfDoc.embedFont(josefinBytes)     : await pdfDoc.embedFont(StandardFonts.Helvetica);
+  } catch {
+    fontBold   = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    fontNormal = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  }
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(...darkGray);
-  doc.text(`Deposito con tarjeta (${depositPct}%) — Cobrado al reservar:`, margin, y);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...blue);
-  doc.text(deposit + ' EUR  ✓ Pagado', 175, y, { align: 'right' });
-  y += 8;
+  function draw(text: string, x: number, yFromTop: number, font: any, size: number, color: any) {
+    if (!text) return;
+    try {
+      page.drawText(String(text), { x, y: height - yFromTop, size, font, color });
+    } catch {}
+  }
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...darkGray);
-  doc.text(`Resto en efectivo (${100 - depositPct}%) — A pagar al llegar:`, margin, y);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(138, 138, 138);
-  doc.text(reservation.total - deposit + ' EUR  ⏳ Pendiente', 175, y, { align: 'right' });
-  y += 16;
+  // Draw each element
+  for (const el of elements) {
+    const resolved = resolveVars(el.content, varMap);
+    if (!resolved) continue;
 
-  // ── NOTA CANCELACIÓN ──────────────────────────────────────────
-  doc.setFillColor(212, 168, 67, 0.15);
-  doc.rect(margin, y, 170, 16, 'F');
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  doc.setTextColor(139, 94, 10);
-  doc.text(
-    `Cancelación gratuita hasta ${siteSettings.cancelDays} días antes del check-in.`,
-    margin + 4,
-    y + 6
-  );
-  doc.text(
-    'Pasado ese plazo se aplicará la política de cancelación indicada en los Términos y Condiciones.',
-    margin + 4,
-    y + 12
-  );
-  y += 24;
+    const font  = el.bold ? fontBold : fontNormal;
+    const color = hexToRgb(el.color || '#0e0e0e');
+    const size  = el.fontSize || 9;
 
-  // ── PIE ────────────────────────────────────────────────────────
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(138, 138, 138);
-  doc.text(
-    'Illa Pancha Ribadeo S.L.  ·  Ribadeo, Lugo, Galicia, España  ·  info@apartamentosillapancha.com',
-    105,
-    285,
-    { align: 'center' }
-  );
-  doc.text(
-    'Este documento sirve como resguardo de reserva. No tiene validez como factura fiscal hasta la emisión definitiva.',
-    105,
-    290,
-    { align: 'center' }
-  );
+    // Descripción y tagline: multi-línea con wrap
+    if (el.content.includes('{{apt_descripcion}}') || el.content.includes('{{apt_tagline}}')) {
+      const maxW = PDF_W - el.x - 30;
+      const lineH = size + 4;
+      const lines = wrapText(resolved, fontNormal, size, maxW > 100 ? maxW : 400);
+      lines.slice(0, 3).forEach((line, i) => {
+        draw(line, el.x, el.y + i * lineH, fontNormal, size, color);
+      });
+    // Amenidades: una línea por amenidad con bullet •
+    } else if (el.content.includes('{{apt_amenidades}}') && resolved) {
+      const BULLET = '\u2022';
+      const lineH = size + 5;
+      resolved.split('\n').forEach((amenity, i) => {
+        if (!amenity.trim()) return;
+        draw(BULLET, el.x - 10, el.y + i * lineH, fontNormal, size, hexToRgb(el.color || '#1a5f6e'));
+        draw(amenity.trim(), el.x, el.y + i * lineH, fontNormal, size, color);
+      });
+    } else {
+      draw(resolved, el.x, el.y, font, size, color);
+    }
+  }
 
-  doc.save(
-    'resguardo-reserva-' + refDisplay.replace(/[^a-zA-Z0-9-]/g, '_') + '.pdf',
-  );
+  const pdfBytes = await pdfDoc.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  window.open(URL.createObjectURL(blob), '_blank');
 }

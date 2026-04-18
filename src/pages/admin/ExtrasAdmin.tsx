@@ -1,19 +1,27 @@
-/* eslint-disable */
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { getExtras, upsertExtra, deleteExtra } from '../../services/dataService';
 import { formatPrice } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
+import {
+  PanelPageHeader,
+  PanelConfirm,
+  PanelCard,
+  FormSection,
+  FormField,
+  FormActions,
+} from '../../components/panel';
 
 export default function ExtrasAdmin() {
   const toast = useToast();
-  const [extras, setExtras] = useState([]);
+  const [extras, setExtras] = useState<Extra[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [formData, setFormData] = useState({});
+  const [editing, setEditing] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Partial<Extra>>({});
   const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [translating, setTranslating] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     loadExtras();
@@ -31,13 +39,13 @@ export default function ExtrasAdmin() {
     }
   };
 
-  const startEdit = extra => {
+  const startEdit = (extra: Extra) => {
     setEditing(extra.id);
     setFormData({ ...extra });
     setFormError(null);
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -55,7 +63,12 @@ export default function ExtrasAdmin() {
           `https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
         );
         const json = await res.json();
-        return json?.[0]?.map(chunk => chunk?.[0]).filter(Boolean).join('') || text;
+        return (
+          json?.[0]
+            ?.map(chunk => chunk?.[0])
+            .filter(Boolean)
+            .join('') || text
+        );
       };
       const langs = ['en', 'fr', 'de', 'pt'];
       const updates = {};
@@ -109,8 +122,10 @@ export default function ExtrasAdmin() {
     }
   };
 
-  const handleDelete = async id => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este extra?')) return;
+  const handleDeleteConfirmed = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
+    if (!id) return;
     try {
       await deleteExtra(id);
       toast.success('Extra eliminado');
@@ -133,36 +148,33 @@ export default function ExtrasAdmin() {
   if (editing) {
     const isNew = editing === 'new';
     return (
-      <div className="bg-gray-50 min-h-screen">
-        {/* Header */}
-        <div className="extras-form-header border-b border-[#1a5f6e]/30 mb-0 flex items-center gap-4 bg-white">
-          <button
-            onClick={() => {
-              setEditing(null);
-              setFormData({});
-              setFormError(null);
-            }}
-            className="px-3.5 py-2 border border-[#1a5f6e] text-[#1a5f6e] rounded font-semibold text-sm hover:bg-[#1a5f6e] hover:text-white transition-colors"
-          >
-            ← Volver
-          </button>
-          <div>
-            <div className="text-2xl font-bold text-slate-900">
-              {isNew ? 'Nuevo extra' : `Editando: ${formData.name}`}
-            </div>
-            <div className="text-sm text-gray-400 mt-0.5">Los cambios se guardarán en Supabase</div>
-          </div>
-        </div>
+      <div className="panel-page-content">
+        <PanelPageHeader
+          title={isNew ? 'Nuevo extra' : `Editando: ${formData.name}`}
+          subtitle="Los cambios se guardarán en Supabase"
+          actions={
+            <button
+              onClick={() => {
+                setEditing(null);
+                setFormData({});
+                setFormError(null);
+              }}
+              className="panel-btn panel-btn-ghost panel-btn-sm"
+            >
+              ← Volver
+            </button>
+          }
+        />
 
-        <div className="extras-form-content">
-          <div className="max-w-2xl bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
-              <div className="text-base font-semibold text-[#1a5f6e]">Información del extra</div>
+        <div className="max-w-[700px]">
+          <PanelCard
+            title="Información del extra"
+            actions={
               <button
                 type="button"
                 onClick={handleAutoTranslate}
                 disabled={translating || !formData.name?.trim()}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a5f6e]/10 text-[#1a5f6e] border border-[#1a5f6e]/30 rounded text-xs font-semibold hover:bg-[#1a5f6e]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="panel-btn panel-btn-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {translating ? (
                   <>
@@ -170,160 +182,197 @@ export default function ExtrasAdmin() {
                     Traduciendo…
                   </>
                 ) : (
-                  <>🌐 Traducir desde ES</>
+                  '🌐 Traducir desde ES'
                 )}
               </button>
-            </div>
-
+            }
+          >
             {formError && (
               <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
                 {formError}
               </div>
             )}
 
-            {/* Nombres */}
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Nombres</div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Español (ES) *</label>
-                <input type="text" value={formData.name || ''} onChange={e => handleInputChange('name', e.target.value)} placeholder="Ej: Pack bienvenida" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">English (EN)</label>
-                <input type="text" value={formData.name_en || ''} onChange={e => handleInputChange('name_en', e.target.value)} placeholder="Ej: Welcome pack" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20" />
-              </div>
+            <div className="panel-section-header">
+              <span className="panel-section-header-title">Nombres</span>
             </div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Français (FR)</label>
-                <input type="text" value={formData.name_fr || ''} onChange={e => handleInputChange('name_fr', e.target.value)} placeholder="Ej: Pack de bienvenue" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Deutsch (DE)</label>
-                <input type="text" value={formData.name_de || ''} onChange={e => handleInputChange('name_de', e.target.value)} placeholder="Ej: Willkommenspaket" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20" />
-              </div>
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Português (PT)</label>
-              <input type="text" value={formData.name_pt || ''} onChange={e => handleInputChange('name_pt', e.target.value)} placeholder="Ej: Pack de boas-vindas" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20" />
-            </div>
-
-            {/* Descripciones */}
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4">Descripciones</div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Español (ES)</label>
-                <textarea value={formData.description || ''} onChange={e => handleInputChange('description', e.target.value)} placeholder="Descripción breve del servicio" rows={2} className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20 resize-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">English (EN)</label>
-                <textarea value={formData.description_en || ''} onChange={e => handleInputChange('description_en', e.target.value)} placeholder="Brief service description" rows={2} className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20 resize-none" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Français (FR)</label>
-                <textarea value={formData.description_fr || ''} onChange={e => handleInputChange('description_fr', e.target.value)} placeholder="Brève description du service" rows={2} className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20 resize-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Deutsch (DE)</label>
-                <textarea value={formData.description_de || ''} onChange={e => handleInputChange('description_de', e.target.value)} placeholder="Kurze Servicebeschreibung" rows={2} className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20 resize-none" />
-              </div>
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Português (PT)</label>
-              <textarea value={formData.description_pt || ''} onChange={e => handleInputChange('description_pt', e.target.value)} placeholder="Breve descrição do serviço" rows={2} className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20 resize-none" />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                Precio (€)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price ?? 0}
-                onChange={e => handleInputChange('price', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#1a5f6e] focus:ring-2 focus:ring-[#1a5f6e]/20"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 py-4 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => handleInputChange('active', !formData.active)}
-                className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${formData.active !== false ? 'bg-[#1a5f6e]' : 'bg-gray-300'}`}
-              >
-                <span
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${formData.active !== false ? 'left-6' : 'left-1'}`}
+            <FormSection columns={2}>
+              <FormField label="Español (ES)" required>
+                <input
+                  type="text"
+                  value={formData.name || ''}
+                  onChange={e => handleInputChange('name', e.target.value)}
+                  placeholder="Ej: Pack bienvenida"
+                  className="panel-input"
                 />
-              </button>
+              </FormField>
+              <FormField label="English (EN)">
+                <input
+                  type="text"
+                  value={formData.name_en || ''}
+                  onChange={e => handleInputChange('name_en', e.target.value)}
+                  placeholder="Ej: Welcome pack"
+                  className="panel-input"
+                />
+              </FormField>
+              <FormField label="Français (FR)">
+                <input
+                  type="text"
+                  value={formData.name_fr || ''}
+                  onChange={e => handleInputChange('name_fr', e.target.value)}
+                  placeholder="Ej: Pack de bienvenue"
+                  className="panel-input"
+                />
+              </FormField>
+              <FormField label="Deutsch (DE)">
+                <input
+                  type="text"
+                  value={formData.name_de || ''}
+                  onChange={e => handleInputChange('name_de', e.target.value)}
+                  placeholder="Ej: Willkommenspaket"
+                  className="panel-input"
+                />
+              </FormField>
+            </FormSection>
+            <FormSection>
+              <FormField label="Português (PT)">
+                <input
+                  type="text"
+                  value={formData.name_pt || ''}
+                  onChange={e => handleInputChange('name_pt', e.target.value)}
+                  placeholder="Ej: Pack de boas-vindas"
+                  className="panel-input"
+                />
+              </FormField>
+            </FormSection>
+
+            <div className="panel-section-header mt-2">
+              <span className="panel-section-header-title">Descripciones</span>
+            </div>
+            <FormSection columns={2}>
+              <FormField label="Español (ES)">
+                <textarea
+                  value={formData.description || ''}
+                  onChange={e => handleInputChange('description', e.target.value)}
+                  placeholder="Descripción breve del servicio"
+                  rows={2}
+                  className="panel-input resize-none"
+                />
+              </FormField>
+              <FormField label="English (EN)">
+                <textarea
+                  value={formData.description_en || ''}
+                  onChange={e => handleInputChange('description_en', e.target.value)}
+                  placeholder="Brief service description"
+                  rows={2}
+                  className="panel-input resize-none"
+                />
+              </FormField>
+              <FormField label="Français (FR)">
+                <textarea
+                  value={formData.description_fr || ''}
+                  onChange={e => handleInputChange('description_fr', e.target.value)}
+                  placeholder="Brève description du service"
+                  rows={2}
+                  className="panel-input resize-none"
+                />
+              </FormField>
+              <FormField label="Deutsch (DE)">
+                <textarea
+                  value={formData.description_de || ''}
+                  onChange={e => handleInputChange('description_de', e.target.value)}
+                  placeholder="Kurze Servicebeschreibung"
+                  rows={2}
+                  className="panel-input resize-none"
+                />
+              </FormField>
+            </FormSection>
+            <FormSection>
+              <FormField label="Português (PT)">
+                <textarea
+                  value={formData.description_pt || ''}
+                  onChange={e => handleInputChange('description_pt', e.target.value)}
+                  placeholder="Breve descrição do serviço"
+                  rows={2}
+                  className="panel-input resize-none"
+                />
+              </FormField>
+            </FormSection>
+
+            <div className="panel-section-header mt-2">
+              <span className="panel-section-header-title">Configuración</span>
+            </div>
+            <FormSection columns={2}>
+              <FormField label="Precio (€)">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price ?? 0}
+                  onChange={e => handleInputChange('price', e.target.value)}
+                  className="panel-input"
+                />
+              </FormField>
+            </FormSection>
+
+            <div className="panel-toggle-row mt-2">
               <div>
-                <div className="text-sm font-medium text-slate-700">Estado del extra</div>
-                <div className="text-xs text-gray-400">
+                <div className="text-sm font-medium panel-text-main">Estado del extra</div>
+                <div className="text-xs panel-text-muted mt-0.5">
                   {formData.active !== false
                     ? 'Activo — visible para los huéspedes'
                     : 'Inactivo — no se muestra'}
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => handleInputChange('active', !formData.active)}
+                className={`panel-toggle${formData.active !== false ? ' panel-toggle--on' : ''}`}
+                aria-label="Estado del extra"
+                role="switch"
+                aria-checked={formData.active !== false}
+              >
+                <span className="panel-toggle-track" />
+                <span className="panel-toggle-thumb" />
+              </button>
             </div>
-          </div>
+          </PanelCard>
         </div>
 
-        {/* Barra fija */}
-        <div className="extras-form-footer fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-          <span className="extras-footer-note text-xs text-gray-400">Los cambios se guardarán en Supabase</span>
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                setEditing(null);
-                setFormData({});
-                setFormError(null);
-              }}
-              className="px-4 py-2 border border-gray-300 text-slate-700 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-5 py-2 bg-[#1a5f6e] text-white rounded text-sm font-semibold hover:bg-opacity-90 transition-colors disabled:opacity-60 flex items-center gap-2"
-            >
-              {saving && (
-                <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              )}
-              {saving ? 'Guardando…' : isNew ? 'Crear extra' : 'Guardar cambios'}
-            </button>
-          </div>
-        </div>
+        <FormActions
+          saving={saving}
+          submitLabel={isNew ? 'Crear extra' : 'Guardar cambios'}
+          onCancel={() => {
+            setEditing(null);
+            setFormData({});
+            setFormError(null);
+          }}
+          onSubmit={handleSave}
+        />
       </div>
     );
   }
 
   // ─── LISTADO ────────────────────────────────────────────────────────────
   return (
-    <div className="bg-white">
-      {/* Header */}
-      <div className="extras-list-header border-b border-gray-200 flex justify-between items-center bg-slate-50">
-        <div>
-          <div className="text-2xl font-bold text-slate-900">Extras y servicios</div>
-          <div className="text-sm text-gray-400 mt-0.5">
-            {extras.length} extras · {extras.filter(e => e.active).length} activos
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            setFormData({ name: '', description: '', price: 0, active: true });
-            setEditing('new');
-          }}
-          className="bg-[#D4A843] text-white px-4 py-2 rounded font-semibold text-sm hover:bg-opacity-90 transition-colors"
-        >
-          + Nuevo extra
-        </button>
-      </div>
+    <div className="panel-page-content">
+      <PanelPageHeader
+        title="Extras y servicios"
+        subtitle={`${extras.length} extras · ${extras.filter(e => e.active).length} activos`}
+        actions={
+          <button
+            onClick={() => {
+              setFormData({ name: '', description: '', price: 0, active: true });
+              setEditing('new');
+            }}
+            className="panel-btn panel-btn-primary panel-btn-sm"
+          >
+            + Nuevo extra
+          </button>
+        }
+      />
 
-      <div className="p-6">
+      <div>
         {loading ? (
           <div className="text-center py-16 text-gray-400 text-sm">Cargando extras...</div>
         ) : extras.length === 0 ? (
@@ -331,7 +380,7 @@ export default function ExtrasAdmin() {
             No hay extras disponibles. Crea uno nuevo para comenzar.
           </div>
         ) : (
-          <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+          <div className="panel-card overflow-hidden !p-0">
             {/* Cabecera tabla */}
             <div className="extras-table-header bg-slate-50 border-b-2 border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
               <div>Servicio</div>
@@ -346,7 +395,7 @@ export default function ExtrasAdmin() {
                 key={extra.id}
                 className={`extras-table-row hover:bg-gray-50 transition-colors ${index < extras.length - 1 ? 'border-b border-gray-100' : ''}`}
               >
-                {/* Nombre y descripción */}
+                {/* Name and description */}
                 <div className="extras-row-name">
                   <div className="text-sm font-semibold text-slate-800">{extra.name}</div>
                   {extra.description && (
@@ -384,12 +433,12 @@ export default function ExtrasAdmin() {
                 <div className="extras-row-actions flex gap-2 justify-end">
                   <button
                     onClick={() => startEdit(extra)}
-                    className="px-3 py-1.5 bg-[#1a5f6e] text-white rounded text-xs font-semibold hover:bg-opacity-90 transition-colors"
+                    className="panel-btn panel-btn-primary panel-btn-sm"
                   >
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDelete(extra.id)}
+                    onClick={() => setConfirmDeleteId(extra.id)}
                     className="px-3 py-1.5 border border-red-400 text-red-600 rounded text-xs font-semibold hover:bg-red-50 transition-colors"
                   >
                     Eliminar
@@ -400,6 +449,16 @@ export default function ExtrasAdmin() {
           </div>
         )}
       </div>
+
+      <PanelConfirm
+        open={!!confirmDeleteId}
+        variant="destructive"
+        title="¿Eliminar este extra?"
+        description="Esta acción es permanente y no se puede deshacer."
+        confirmLabel="Eliminar"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

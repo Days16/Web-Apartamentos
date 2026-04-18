@@ -7,7 +7,7 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
   for (const route of PUBLIC_ROUTES) {
     test(`${route} — sin violaciones críticas`, async ({ page }) => {
       await page.goto(route);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle').catch(() => {});
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa'])

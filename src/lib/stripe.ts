@@ -1,4 +1,4 @@
-import { loadStripe } from '@stripe/stripe-js';
+﻿import { loadStripe } from '@stripe/stripe-js';
 import { supabase } from './supabase';
 
 // Configura esta variable en tu archivo .env
@@ -30,7 +30,7 @@ interface PaymentData {
 
 export async function createPaymentIntent(paymentData: PaymentData) {
   try {
-    // Validar Supabase y que la función existe
+    // Validate Supabase and function exists
     if (!supabase) {
       throw new Error(
         'Supabase no está inicializado. Revisa VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env'
@@ -44,7 +44,7 @@ export async function createPaymentIntent(paymentData: PaymentData) {
 
     const { data, error } = await supabase.functions.invoke('process-payment', {
       body: {
-        amount: Math.round(paymentData.amount * 100), // Convertir a céntimos
+        amount: Math.round(paymentData.amount * 100), // Convert to cents
         currency: paymentData.currency || 'eur',
         customerEmail: paymentData.customerEmail,
         customerName: paymentData.customerName,

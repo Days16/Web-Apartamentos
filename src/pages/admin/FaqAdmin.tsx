@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   fetchFaqs,
   createFaq,
@@ -8,6 +8,8 @@ import {
 } from '../../services/supabaseService';
 import { useToast } from '../../contexts/ToastContext';
 import type { DbFaq } from '../../types';
+import { PanelPageHeader, PanelConfirm } from '../../components/panel';
+import { usePanelData } from '../../hooks/usePanelData';
 
 type FaqForm = {
   question: string;
@@ -93,29 +95,21 @@ async function applyAutoTranslations(f: FaqForm, force = false): Promise<FaqForm
 
 export default function FaqAdmin() {
   const toast = useToast();
-  const [faqs, setFaqs] = useState<DbFaq[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: faqsData,
+    loading,
+    reload: reloadFaqs,
+  } = usePanelData<DbFaq[]>({ fetcher: () => fetchFaqs(false) });
+  const faqs = faqsData ?? [];
   const [editing, setEditing] = useState<string | null>(null);
   const [form, setForm] = useState<FaqForm>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [translationsDirty, setTranslationsDirty] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  async function load() {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchFaqs(false);
-      setFaqs(data);
-    } catch (err) {
-      setError('Error cargando FAQs: ' + (err instanceof Error ? err.message : String(err)));
-    } finally {
-      setLoading(false);
-    }
+  function load() {
+    reloadFaqs();
   }
 
   const startNew = () => {
@@ -227,11 +221,13 @@ export default function FaqAdmin() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('¿Eliminar esta FAQ?')) return;
+  const handleDeleteConfirmed = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
+    if (!id) return;
     try {
       await deleteFaq(id);
-      setFaqs(prev => prev.filter(f => f.id !== id));
+      reloadFaqs();
     } catch (err) {
       toast.error('Error eliminando: ' + (err instanceof Error ? err.message : String(err)));
     }
@@ -239,7 +235,7 @@ export default function FaqAdmin() {
 
   const handleToggleActive = async (faq: DbFaq) => {
     await updateFaq(faq.id, { active: !faq.active });
-    setFaqs(prev => prev.map(f => (f.id === faq.id ? { ...f, active: !f.active } : f)));
+    reloadFaqs();
   };
 
   const f =
@@ -259,29 +255,25 @@ export default function FaqAdmin() {
       }
     };
 
-  const inputCls =
-    'w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] leading-snug text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1a5f6e]/30 focus:border-[#1a5f6e]';
-  const labelCls =
-    'block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2';
-  const hintCls = 'text-xs text-slate-500 mt-1.5 leading-relaxed';
+  const inputCls = 'panel-input';
+  const labelCls = 'panel-label mb-2';
+  const hintCls = 'text-xs panel-text-muted mt-1.5 leading-relaxed';
 
   return (
-    <div className="p-6 max-w-3xl lg:max-w-4xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Preguntas frecuentes (FAQ)</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Visible en <code className="text-xs bg-slate-100 px-1 rounded">/faq</code> · JSON-LD para SEO
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={startNew}
-          className="shrink-0 bg-[#1a5f6e] text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#164e5a]"
-        >
-          + Nueva FAQ
-        </button>
-      </div>
+    <div className="panel-page-content">
+      <PanelPageHeader
+        title="Preguntas frecuentes (FAQ)"
+        subtitle="Visible en /faq · JSON-LD para SEO"
+        actions={
+          <button
+            type="button"
+            onClick={startNew}
+            className="panel-btn panel-btn-primary panel-btn-sm"
+          >
+            + Nueva FAQ
+          </button>
+        }
+      />
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg px-4 py-3 mb-5">
@@ -290,29 +282,32 @@ export default function FaqAdmin() {
       )}
 
       {editing && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
+        <div className="panel-card mb-6">
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
               {editing === 'new' ? 'Nueva FAQ' : 'Editar FAQ'}
             </h2>
-            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 leading-relaxed space-y-2">
+            <div className="mt-4 panel-info-box text-sm leading-relaxed space-y-2">
               <p className="font-medium text-slate-800">Cómo usar este formulario</p>
               <ol className="list-decimal list-inside space-y-1.5 text-[13px]">
                 <li>
-                  Escribe solo en <strong>español</strong> en el primer bloque (con buena ortografía:
-                  tildes, ¿?).
+                  Escribe solo en <strong>español</strong> en el primer bloque (con buena
+                  ortografía: tildes, ¿?).
                 </li>
                 <li>
                   En inglés, francés, alemán y portugués: <strong>déjalos vacíos</strong> y pulsa{' '}
-                  <em>Guardar</em> o <em>Traducir campos vacíos</em> para generar texto en ese idioma.
-                  No pegues español ahí.
+                  <em>Guardar</em> o <em>Traducir campos vacíos</em> para generar texto en ese
+                  idioma. No pegues español ahí.
                 </li>
                 <li>
-                  Tras traducir, revisa el resultado; el servicio gratuito puede equivocarse en matices.
+                  Tras traducir, revisa el resultado; el servicio gratuito puede equivocarse en
+                  matices.
                 </li>
               </ol>
               <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-200/80 mt-2">
-                Motor gratuito: MyMemory (límite diario). Con <code className="text-[11px] bg-white px-1 rounded border">DEEPL_API_KEY</code> en Supabase se usa DeepL.
+                Motor gratuito: MyMemory (límite diario). Con{' '}
+                <code className="text-[11px] bg-white px-1 rounded border">DEEPL_API_KEY</code> en
+                Supabase se usa DeepL.
               </p>
             </div>
           </div>
@@ -326,8 +321,8 @@ export default function FaqAdmin() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-                Es lo que verán los visitantes con el idioma <strong>ES</strong> en la web. A partir de
-                este texto se generan las demás lenguas si las dejas en blanco.
+                Es lo que verán los visitantes con el idioma <strong>ES</strong> en la web. A partir
+                de este texto se generan las demás lenguas si las dejas en blanco.
               </p>
               <div className="space-y-6">
                 <div>
@@ -342,7 +337,9 @@ export default function FaqAdmin() {
                     placeholder="¿A qué hora es la entrada al apartamento?"
                     autoComplete="off"
                   />
-                  <p className={hintCls}>Una sola frase, con interrogación inicial si es pregunta.</p>
+                  <p className={hintCls}>
+                    Una sola frase, con interrogación inicial si es pregunta.
+                  </p>
                 </div>
                 <div>
                   <label className={labelCls} htmlFor="faq-a-es">
@@ -365,10 +362,12 @@ export default function FaqAdmin() {
             </section>
 
             <div>
-              <h3 className="text-sm font-semibold text-slate-800 mb-1">Traducciones para otros idiomas</h3>
+              <h3 className="text-sm font-semibold text-slate-800 mb-1">
+                Traducciones para otros idiomas
+              </h3>
               <p className="text-xs text-slate-500 mb-5 max-w-2xl">
-                Cada bloque es solo para texto en <strong>ese</strong> idioma. Vacío = se rellena desde el
-                español al guardar o con el botón de traducir.
+                Cada bloque es solo para texto en <strong>ese</strong> idioma. Vacío = se rellena
+                desde el español al guardar o con el botón de traducir.
               </p>
             </div>
 
@@ -506,7 +505,12 @@ export default function FaqAdmin() {
                 ].filter(Boolean).length > 0 && (
                   <p className="text-xs text-slate-400 mt-1">
                     Traducciones:{' '}
-                    {[faq.question_en && 'EN', faq.question_fr && 'FR', faq.question_de && 'DE', faq.question_pt && 'PT']
+                    {[
+                      faq.question_en && 'EN',
+                      faq.question_fr && 'FR',
+                      faq.question_de && 'DE',
+                      faq.question_pt && 'PT',
+                    ]
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
@@ -534,7 +538,7 @@ export default function FaqAdmin() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleDelete(faq.id)}
+                  onClick={() => setConfirmDeleteId(faq.id)}
                   className="text-xs px-3 py-1.5 border border-red-200 rounded-lg text-red-700 hover:bg-red-50"
                 >
                   Eliminar
@@ -544,6 +548,16 @@ export default function FaqAdmin() {
           ))}
         </ul>
       )}
+
+      <PanelConfirm
+        open={!!confirmDeleteId}
+        variant="destructive"
+        title="¿Eliminar esta FAQ?"
+        description="Esta acción es permanente y no se puede deshacer."
+        confirmLabel="Eliminar"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

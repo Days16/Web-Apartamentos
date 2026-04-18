@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// TIPOS DE BASE DE DATOS (snake_case — lo que devuelve Supabase directamente)
+// DATABASE TYPES (snake_case — raw Supabase response)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface DbApartment {
@@ -147,7 +147,7 @@ export interface DbAuditLog {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TIPOS NORMALIZADOS PARA REACT (camelCase — resultado de dataService.js)
+// NORMALIZED TYPES FOR REACT (camelCase — from dataService.ts)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Apartment {
@@ -158,7 +158,7 @@ export interface Apartment {
   taglineEn: string | null;
   description: string | null;
   descriptionEn: string | null;
-  /** capacity en DB */
+  /** capacity field in DB */
   cap: number;
   bedrooms: number;
   baths: number;
@@ -178,13 +178,13 @@ export interface Apartment {
   rules: string[];
   nearby: string[];
   occupiedDays: string[];
-  /** Fechas ISO derivadas de reservas activas, generadas en ApartmentDetail */
+  /** ISO dates derived from active reservations, generated in ApartmentDetail */
   internalName: string | null;
   coverPhotoUrl: string | null;
   occupiedDatesList?: string[];
-  /** Reservas crudas del apartamento, usadas en BookingWidget */
+  /** Raw apartment reservations, used by BookingWidget */
   rawReservations?: Reservation[];
-  /** Reglas de estancia mínima del apartamento */
+  /** Apartment minimum stay rules */
   minStayRules?: DbMinStayRule[];
 }
 
@@ -214,6 +214,16 @@ export interface Extra {
   description: string | null;
   price: number;
   active: boolean;
+  name_ES?: string;
+  name_EN?: string;
+  name_FR?: string;
+  name_DE?: string;
+  name_PT?: string;
+  description_ES?: string;
+  description_EN?: string;
+  description_FR?: string;
+  description_DE?: string;
+  description_PT?: string;
 }
 
 export interface ApartmentPhoto {
@@ -250,14 +260,14 @@ export interface Message {
 export interface SiteSettings {
   tax_percentage: number;
   payment_deposit_percentage: number;
-  cancellation_free_days: number;
+  cancellation_days: number;
   booking_mode: 'modal' | 'redirect';
   maintenance_mode: boolean;
   [key: string]: unknown;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TIPOS DE UTILIDAD
+// UTILITY TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type Lang = 'ES' | 'EN' | 'FR' | 'DE' | 'PT';
@@ -266,7 +276,7 @@ export type BookingStatus = Reservation['status'];
 export type ReservationSource = Reservation['source'];
 export type MessageStatus = Message['status'];
 
-/** Datos del formulario de contacto del paso 2 del BookingModal */
+/** Contact form data from BookingModal step 2 */
 export interface BookingFormData {
   name: string;
   email: string;
@@ -274,7 +284,7 @@ export interface BookingFormData {
   phonePrefix: string;
 }
 
-/** Desglose de precios calculado en BookingWidget / BookingModal */
+/** Price breakdown computed in BookingWidget / BookingModal */
 export interface PriceBreakdown {
   nights: number;
   subtotal: number;

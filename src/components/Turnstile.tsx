@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
@@ -80,7 +80,7 @@ export default function Turnstile({ onVerify, onExpire, theme = 'auto' }: Turnst
       }
     };
 
-    // Usar IntersectionObserver para cargar solo cuando sea visible
+    // Use IntersectionObserver to load only when visible
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
@@ -89,7 +89,7 @@ export default function Turnstile({ onVerify, onExpire, theme = 'auto' }: Turnst
         }
       },
       { rootMargin: '150px' }
-    ); // Cargar un poco antes de que aparezca
+    ); // Load slightly before it appears
 
     if (containerRef.current) {
       observer.observe(containerRef.current);
@@ -109,12 +109,12 @@ export default function Turnstile({ onVerify, onExpire, theme = 'auto' }: Turnst
     };
   }, [theme]);
 
-  // Si ocurre un cambio de tema después del primer render, necesitamos manejarlo
+  // If theme change occurs after first render, we need to handle it
   useEffect(() => {
     if (widgetId.current !== null && window.turnstile) {
       window.turnstile.remove(widgetId.current);
       widgetId.current = null;
-      // Re-inicializamos si ya somos visibles o si el script ya está
+      // Re-initialize if already visible or if script is already loaded
       if (window.turnstile) {
         const render = () => {
           if (!containerRef.current || widgetId.current !== null) return;

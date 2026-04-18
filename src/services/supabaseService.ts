@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+﻿import { supabase } from '../lib/supabase';
 import type {
   DbApartment,
   DbApartmentPhoto,
@@ -150,7 +150,7 @@ export async function deletePhoto(id: string, storagePath: string | null = null)
 
   if (error) throw error;
 
-  // Eliminar también del Storage si tiene ruta
+  // Also delete from Storage if it has a path
   if (storagePath) await deletePhotoFromStorage(storagePath);
 
   return data;

@@ -114,7 +114,10 @@ function isBookingGuestPlaceholder(name: string): boolean {
   const lower = n.toLowerCase();
   if (lower.includes('not available')) return true;
   if (lower.includes('no disponible')) return true;
-  if (/\bclosed\b/i.test(n) && (/\bhuésped\b/i.test(n) || /\bhuesped\b/i.test(n) || /\bguest\b/i.test(n))) {
+  if (
+    /\bclosed\b/i.test(n) &&
+    (/\bhuésped\b/i.test(n) || /\bhuesped\b/i.test(n) || /\bguest\b/i.test(n))
+  ) {
     return true;
   }
   if (/^closed\b/i.test(n)) return true;
@@ -125,7 +128,7 @@ function isBookingGuestPlaceholder(name: string): boolean {
 /** Nombre a mostrar: en Booking oculta placeholders del iCal (p. ej. CLOSED - Not available). */
 export function formatGuestDisplay(
   guest: string | null | undefined,
-  source: string | null | undefined,
+  source: string | null | undefined
 ): string {
   const g = (guest ?? '').trim();
   if (source !== 'booking') return g || 'Sin nombre';
@@ -134,8 +137,7 @@ export function formatGuestDisplay(
 }
 
 const WEB_REF_REGEX = /^IP-\d{6}$/;
-const UUID_REF_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_REF_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function uuidToWebStyleRef(uuid: string): string {
   const clean = uuid.replace(/-/g, '');
@@ -154,7 +156,7 @@ function uuidToWebStyleRef(uuid: string): string {
  */
 export function formatReservationReference(
   id: string | null | undefined,
-  source: string | null | undefined,
+  source: string | null | undefined
 ): string {
   const raw = (id ?? '').trim();
   if (!raw) return '';

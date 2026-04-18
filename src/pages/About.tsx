@@ -40,9 +40,9 @@ export default function About() {
       {/* VALORES */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-20 px-4 max-w-6xl mx-auto">
         {[
-          { icon: paths.cash,  title: A.value1Title, desc: A.value1Desc },
+          { icon: paths.cash, title: A.value1Title, desc: A.value1Desc },
           { icon: paths.check, title: A.value2Title, desc: A.value2Desc },
-          { icon: paths.leaf,  title: A.value3Title, desc: A.value3Desc },
+          { icon: paths.leaf, title: A.value3Title, desc: A.value3Desc },
         ].map((v, i) => (
           <div key={i} className="flex flex-col items-center text-center">
             <div className="mb-4 p-4 bg-teal/10 dark:bg-teal/5 rounded-lg">

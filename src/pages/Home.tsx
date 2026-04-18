@@ -9,11 +9,10 @@ import Ico, { paths } from '../components/Ico';
 import SEO from '../components/SEO';
 import { fetchApartments, fetchApartmentPhotos, fetchFaqs } from '../services/supabaseService';
 import { getReservations, getReviews } from '../services/dataService';
-import type { DbFaq, Lang } from '../types';
+import type { DbFaq } from '../types';
 import { strToDate, dateToStr, formatDateShort } from '../utils/format';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { safeHtml } from '../utils/sanitize';
-
 
 import DatePicker from 'react-datepicker';
 import { useLang } from '../contexts/LangContext';
@@ -28,8 +27,12 @@ export default function Home() {
   const { settings } = useSettings();
   const T = useT(lang);
 
-  const cancelDays = typeof settings?.cancellation_free_days === 'number' ? settings.cancellation_free_days : 14;
-  const depositPct = typeof settings?.payment_deposit_percentage === 'number' ? settings.payment_deposit_percentage : 50;
+  const cancelDays =
+    typeof settings?.cancellation_free_days === 'number' ? settings.cancellation_free_days : 14;
+  const depositPct =
+    typeof settings?.payment_deposit_percentage === 'number'
+      ? settings.payment_deposit_percentage
+      : 50;
 
   const today = new Date();
   const defaultCheckin = new Date(today);
@@ -45,15 +48,21 @@ export default function Home() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedApt, setSelectedApt] = useState<Apartment | null>(null);
 
-  const [featuredApts, setFeaturedApts] = useState<Array<DbApartment & { coverPhoto: string | null }>>([]);
+  const [featuredApts, setFeaturedApts] = useState<
+    Array<DbApartment & { coverPhoto: string | null }>
+  >([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [reviews, setReviews] = useState<Array<{ name: string; text: string; stars: number; date: string | null; origin: string | null }>>([]);
+  const [reviews, setReviews] = useState<
+    Array<{ name: string; text: string; stars: number; date: string | null; origin: string | null }>
+  >([]);
   const [faqs, setFaqs] = useState<DbFaq[]>([]);
   const [faqOpen, setFaqOpen] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchFaqs(true).then(data => setFaqs(data.slice(0, 5))).catch(() => {});
+    fetchFaqs(true)
+      .then(data => setFaqs(data.slice(0, 5)))
+      .catch(() => {});
 
     Promise.all([fetchApartments(), getReservations(), getReviews()]).then(
       async ([aptsData, resData, reviewsData]) => {
@@ -88,15 +97,6 @@ export default function Home() {
     }
     setSearched(true);
     document.getElementById('apartments-section')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleBook = (apt: DbApartment & { coverPhoto: string | null }) => {
-    if (settings?.booking_mode === 'redirect') {
-      navigate('/reservar');
-      return;
-    }
-    setSelectedApt(apt as unknown as Apartment);
-    setBookingOpen(true);
   };
 
   const pickQ = (faq: DbFaq) => {
@@ -210,7 +210,10 @@ export default function Home() {
                   )
                 }
                 minDate={new Date()}
-                maxDate={(() => { const co = strToDate(checkout); return co ? new Date(co.getTime() - 86400000) : undefined; })()}
+                maxDate={(() => {
+                  const co = strToDate(checkout);
+                  return co ? new Date(co.getTime() - 86400000) : undefined;
+                })()}
                 dateFormat={lang === 'ES' ? 'dd/MM/yyyy' : 'MM/dd/yyyy'}
                 placeholderText={lang === 'ES' ? 'dd/mm/aaaa' : 'mm/dd/yyyy'}
                 className="w-full h-[42px] px-3 py-2 border border-gray-300 rounded text-sm text-navy focus:outline-none focus:border-[#82c8bd] focus:ring-2 focus:ring-[#82c8bd]/20 transition-all"
@@ -228,7 +231,10 @@ export default function Home() {
                     dateToStr(new Date(date.getFullYear(), date.getMonth(), date.getDate()))
                   )
                 }
-                minDate={(() => { const ci = strToDate(checkin); return ci ? new Date(ci.getTime() + 86400000) : new Date(); })()}
+                minDate={(() => {
+                  const ci = strToDate(checkin);
+                  return ci ? new Date(ci.getTime() + 86400000) : new Date();
+                })()}
                 dateFormat={lang === 'ES' ? 'dd/MM/yyyy' : 'MM/dd/yyyy'}
                 placeholderText={lang === 'ES' ? 'dd/mm/aaaa' : 'mm/dd/yyyy'}
                 className="w-full h-[42px] px-3 py-2 border border-gray-300 rounded text-sm text-navy focus:outline-none focus:border-[#82c8bd] focus:ring-2 focus:ring-[#82c8bd]/20 transition-all"
@@ -352,7 +358,7 @@ export default function Home() {
                   if (!a.available && b.available) return 1;
                   return 0;
                 })
-                .map((apt, i) => (
+                .map((apt, _i) => (
                   <div
                     key={apt.slug}
                     className={`group relative flex flex-col rounded-lg overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all h-full min-h-[300px] ${searched && !apt.available ? 'opacity-70' : ''}`}
@@ -369,7 +375,11 @@ export default function Home() {
                       ) : (
                         <div
                           className="absolute inset-0 flex items-center justify-center"
-                          style={{ background: apt.color ? `linear-gradient(135deg, ${apt.color}cc, ${apt.color}88)` : 'linear-gradient(135deg, #1a5f6e, #2C4A5E)' }}
+                          style={{
+                            background: apt.color
+                              ? `linear-gradient(135deg, ${apt.color}cc, ${apt.color}88)`
+                              : 'linear-gradient(135deg, #1a5f6e, #2C4A5E)',
+                          }}
                         >
                           <Ico d={paths.photo} size={40} color="rgba(255,255,255,0.12)" />
                         </div>
@@ -426,7 +436,10 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {reviews.map((r, i) => (
-                <div key={i} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3">
+                <div
+                  key={i}
+                  className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3"
+                >
                   <div className="text-[#D4A843] text-lg">{'★'.repeat(r.stars || 5)}</div>
                   <div className="text-gray-700 italic flex-1">"{r.text}"</div>
                   <div className="flex justify-between items-center">
