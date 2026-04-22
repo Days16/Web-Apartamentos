@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import Turnstile from './Turnstile';
 import Ico, { paths } from './Ico';
@@ -71,8 +71,12 @@ export default function BookingModal({
           extras?: string[];
         };
         if (draft.form) setForm(draft.form);
-        if (draft.checkin) setCheckinDate(new Date(draft.checkin));
-        if (draft.checkout) setCheckoutDate(new Date(draft.checkout));
+        if (draft.checkin && !isNaN(new Date(draft.checkin).getTime())) {
+          setCheckinDate(new Date(draft.checkin));
+        }
+        if (draft.checkout && !isNaN(new Date(draft.checkout).getTime())) {
+          setCheckoutDate(new Date(draft.checkout));
+        }
         if (draft.extras) setSelectedExtras(draft.extras);
       }
     } catch {
