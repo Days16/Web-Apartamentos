@@ -1,4 +1,4 @@
-﻿import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { supabase } from './supabase';
 
 // Configura esta variable en tu archivo .env
@@ -59,11 +59,14 @@ export async function createPaymentIntent(paymentData: PaymentData) {
 
     if (error) {
       console.error('Supabase error response:', error);
-      const bodyErr =
-        data && typeof data === 'object' && 'error' in data
-          ? String((data as { error: string }).error)
-          : '';
-      throw new Error(bodyErr || error.message || 'Error creando PaymentIntent en Supabase');
+      
+      // Si el error viene de la Edge Function, el mensaje real suele estar en el cuerpo de la respuesta
+      let errorMessage = error.message;
+      if (data && typeof data === 'object' && 'error' in data) {
+        errorMessage = String((data as { error: string }).error);
+      }
+      
+      throw new Error(errorMessage || 'Error creando PaymentIntent en Supabase');
     }
 
     if (!data || !data.clientSecret) {

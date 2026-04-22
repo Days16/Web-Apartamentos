@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@12.0.0?target=deno";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@14.25.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") as string, {
     apiVersion: "2022-11-15",
@@ -110,8 +110,12 @@ serve(async (req) => {
             }
         );
     } catch (error) {
+        console.error("Payment error detail:", error);
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ 
+                error: error.message,
+                detail: error.stack
+            }),
             {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
                 status: 400,
